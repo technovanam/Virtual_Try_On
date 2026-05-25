@@ -18,3 +18,5 @@ Update: fix typo in components at 2026-05-23T05:06:25 by Sasikiran
 Update: cleanup console logs at 2026-05-23T07:06:25 by Sanjana
 
 Update: improve UI spacing at 2026-05-24T20:06:25 by Sanjana
+
+Update: update README at 2026-05-25T12:06:25 by Sasikiran
