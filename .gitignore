@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Claude / IDEs
+.claude/
+.vscode/
+
+# Ignore PDF docs (optional, if you don't want them tracked)
+*.pdf
