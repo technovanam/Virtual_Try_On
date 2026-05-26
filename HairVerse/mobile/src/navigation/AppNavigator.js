@@ -1,7 +1,9 @@
 import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 
 import SplashScreen from '../screens/SplashScreen';
@@ -33,21 +35,60 @@ const Tab = createBottomTabNavigator();
 function BottomTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.card,
-          borderTopColor: COLORS.border,
-          height: 60,
-          paddingBottom: 8,
+          backgroundColor: 'rgba(18, 18, 26, 0.95)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0, 212, 255, 0.15)',
+          height: 68,
+          position: 'absolute',
+          bottom: 16,
+          left: 16,
+          right: 16,
+          borderRadius: 20,
+          paddingBottom: 10,
+          paddingTop: 8,
+          shadowColor: COLORS.secondary,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          elevation: 8,
+          borderWidth: 1,
+          borderColor: 'rgba(0, 212, 255, 0.08)',
         },
         tabBarActiveTintColor: COLORS.secondary,
-        tabBarInactiveTintColor: COLORS.textSecondary,
-      }}
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.35)',
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: 'bold',
+          marginTop: 2,
+        },
+        tabBarIcon: ({ focused, color }) => {
+          let iconName;
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Search') {
+            iconName = focused ? 'search' : 'search-outline';
+          } else if (route.name === 'Try-On') {
+            iconName = focused ? 'sparkles' : 'sparkles-outline'; // Sparks are more AI-aligned than standard body
+          } else if (route.name === 'Saved') {
+            iconName = focused ? 'bookmark' : 'bookmark-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
+          }
+
+          return (
+            <View style={focused ? tabStyles.activeIconWrapper : tabStyles.iconWrapper}>
+              <Ionicons name={iconName} size={focused ? 22 : 18} color={color} />
+            </View>
+          );
+        },
+      })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Scan" component={AIAnalysisScreen} />
+      <Tab.Screen name="Try-On" component={VirtualTryOnScreen} />
       <Tab.Screen name="Saved" component={SavedCollectionsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
@@ -91,3 +132,27 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const tabStyles = StyleSheet.create({
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  activeIconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 212, 255, 0.08)',
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 255, 0.22)',
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+});

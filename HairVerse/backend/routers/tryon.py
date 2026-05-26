@@ -44,3 +44,24 @@ async def generate_tryon(request: TryOnRequest):
 @router.post("/compare")
 async def generate_comparison(request: dict):
     return {"status": "success", "comparison_url": "https://example.com/mock_compare.png"}
+
+@router.get("/history")
+async def get_tryon_history(uid: Optional[str] = None):
+    return [
+        {
+            "id": "curly_03",
+            "name": "Textured Curly Crop",
+            "color": "Silver",
+            "beard": "Stubble Beard",
+            "time": "2 hours ago",
+            "imageUrl": "https://images.unsplash.com/photo-1605497746444-ac9dbd39f4a5?w=200&h=200&fit=crop"
+        },
+        {
+            "id": "fade_01",
+            "name": "Classic Fade",
+            "color": "Dark Brown",
+            "beard": "Clean Shave",
+            "time": "1 day ago",
+            "imageUrl": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=200&h=200&fit=crop"
+        }
+    ]

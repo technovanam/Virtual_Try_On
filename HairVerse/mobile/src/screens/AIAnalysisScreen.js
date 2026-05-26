@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image, Ale
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../constants/theme';
 import { useAnalysisStore } from '../store/analysisStore';
+import { useProfileStore } from '../store/profileStore';
 
 export default function AIAnalysisScreen({ navigation }) {
   const [imageUri, setImageUri] = useState(null);
@@ -58,7 +59,11 @@ export default function AIAnalysisScreen({ navigation }) {
     }
     
     // Call analysisStore
-    await submitImage(base64Image);
+    const result = await submitImage(base64Image);
+    
+    // Bind results directly to the active saved face profile
+    useProfileStore.getState().updateActiveSelfie(base64Image, result);
+    
     navigation.navigate('Recommendation');
   };
 
