@@ -10,3 +10,5 @@ __pycache__/
 
 # Ignore PDF docs (optional, if you don't want them tracked)
 *.pdf
+
+backend/firebase-service-account.json   
