@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading, error } = useAuthStore();
+
+  // Show Firebase error alerts
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Login Failed', error);
+      useAuthStore.setState({ error: null });
+    }
+  }, [error]);
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    const success = await login(email, password);
-    if (success) {
-      navigation.replace('Main');
+
+    const result = await login(email, password);
+    if (result.success) {
+      // Conditional rendering in AppNavigator switches to MainStack automatically
+      // when isAuthenticated changes to true. No manual navigation needed.
     }
   };
 
@@ -31,16 +43,33 @@ export default function LoginScreen({ navigation }) {
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor={COLORS.textSecondary}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { paddingRight: 44 }]}
+          placeholder="Password"
+          placeholderTextColor={COLORS.textSecondary}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+        />
+        <TouchableOpacity
+          style={styles.eyeBtn}
+          onPress={() => setShowPassword(!showPassword)}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color={COLORS.textSecondary}
+          />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleLogin} disabled={isLoading}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color={COLORS.textPrimary} />
+        ) : (
+          <Text style={styles.buttonText}>Sign In</Text>
+        )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
         <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
@@ -79,6 +108,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 16,
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   buttonText: {
     color: COLORS.textPrimary,
     fontWeight: 'bold',
@@ -88,5 +120,17 @@ const styles = StyleSheet.create({
     color: COLORS.secondary,
     textAlign: 'center',
     marginTop: 24,
+  },
+  passwordContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
 });

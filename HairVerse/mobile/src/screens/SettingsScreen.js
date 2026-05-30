@@ -12,9 +12,11 @@ import {
   Alert,
   Platform,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
+import { useAuthStore } from '../store/authStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -286,6 +288,10 @@ export default function SettingsScreen({ navigation }) {
   // ── Language ──────────────────────────────────────────────────────────────
   const [language, setLanguage] = useState('en');
 
+  // ── Logout state ───────────────────────────────────────────────────────────
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const logout = useAuthStore((state) => state.logout);
+
   // ── Modals ─────────────────────────────────────────────────────────────────
   const [showDeleteSelfiesConfirm, setShowDeleteSelfiesConfirm] = useState(false);
   const [showClearAiConfirm, setShowClearAiConfirm] = useState(false);
@@ -309,6 +315,14 @@ export default function SettingsScreen({ navigation }) {
   const glowOpacity = headerGlow.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.75] });
   const selectedLang = LANGUAGES.find(l => l.code === language);
   const selectedAiMode = AI_MODES.find(m => m.key === aiMode);
+
+  // ── Logout handler ────────────────────────────────────────────────────────
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    // Conditional rendering in AppNavigator switches to AuthStack automatically
+    // when isAuthenticated changes to false. No manual navigation needed.
+  };
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -801,13 +815,23 @@ export default function SettingsScreen({ navigation }) {
       <ConfirmModal
         visible={showLogoutConfirm}
         onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={() => Alert.alert('Logged Out', 'You have been signed out successfully.')}
+        onConfirm={handleLogout}
         icon="log-out-outline"
         title="Sign Out?"
         body="You'll be returned to the login screen. Your profile data will remain saved in Cyber-Cloud."
         confirmLabel="Sign Out"
         confirmColor={COLORS.secondary}
       />
+
+      {/* Logout Loading Overlay */}
+      <Modal visible={isLoggingOut} transparent animationType="none">
+        <View style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={styles.logoutLoader}>
+            <ActivityIndicator size="large" color={COLORS.secondary} />
+            <Text style={styles.logoutLoaderText}>Signing out...</Text>
+          </View>
+        </View>
+      </Modal>
 
       {/* Delete Account */}
       <ConfirmModal
@@ -1223,6 +1247,23 @@ const styles = StyleSheet.create({
   dangerCard: {
     borderColor: 'rgba(255,82,82,0.12)',
     backgroundColor: 'rgba(255,82,82,0.02)',
+  },
+
+  // ── Logout Loader ─────────────────────────────────────────────────────────
+  logoutLoader: {
+    backgroundColor: '#14141E',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    padding: 32,
+    alignItems: 'center',
+    gap: 16,
+  },
+  logoutLoaderText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 
   // ── Footer ─────────────────────────────────────────────────────────────────

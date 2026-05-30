@@ -4,26 +4,32 @@ import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
 export default function SplashScreen({ navigation }) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isInitializing, authChecked } = useAuthStore();
 
   useEffect(() => {
+    // Wait for the auth state check to complete before navigating
+    if (!authChecked) return;
+
+    // Small delay for smooth splash animation before navigating
     const timer = setTimeout(() => {
       if (isAuthenticated) {
         navigation.replace('Main');
       } else {
         navigation.replace('Login');
       }
-    }, 2000); // 2 seconds splash delay
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated]);
+  }, [authChecked, isAuthenticated]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.logo}>HairVerse</Text>
       <Text style={styles.tagline}>Try Before You Cut.</Text>
       <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
-      <Text style={styles.status}>Initializing AI Engine...</Text>
+      <Text style={styles.status}>
+        {isInitializing ? 'Restoring session...' : 'Initializing AI Engine...'}
+      </Text>
     </View>
   );
 }

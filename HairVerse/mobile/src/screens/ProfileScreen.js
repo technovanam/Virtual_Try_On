@@ -14,7 +14,8 @@ import {
   Platform, 
   UIManager,
   Alert,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -271,7 +272,7 @@ const PRESET_AVATARS = [
 ];
 
 export default function ProfileScreen({ navigation }) {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   // Dynamic Identity States
   const [profilesList, setProfilesList] = useState(INITIAL_FACE_PROFILES);
@@ -284,6 +285,8 @@ export default function ProfileScreen({ navigation }) {
   const [addScanModalVisible, setAddScanModalVisible] = useState(false);
   const [guidelineModalVisible, setGuidelineModalVisible] = useState(false);
   const [activeGuideline, setActiveGuideline] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // AI Insights Scanner Telemetry
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -786,6 +789,14 @@ export default function ProfileScreen({ navigation }) {
 
     setActiveGuideline({ title, value: specValue, text });
     setGuidelineModalVisible(true);
+  };
+
+  // ── Logout handler ────────────────────────────────────────────────────────
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    // Conditional rendering in AppNavigator switches to AuthStack automatically
+    // when isAuthenticated changes to false. No manual navigation needed.
   };
 
   // ─── PREMIUM SKELETON LOADER ─────────────────────────────────────────────
@@ -1800,6 +1811,24 @@ export default function ProfileScreen({ navigation }) {
               <Ionicons name="chevron-forward" size={16} color={COLORS.secondary} />
             </TouchableOpacity>
 
+            {/* ╔══════════════════════════════════════════════════════════╗ */}
+            {/* ║  LOGOUT                                                ║ */}
+            {/* ╚══════════════════════════════════════════════════════════╝ */}
+            <TouchableOpacity
+              style={styles.profileLogoutBtn}
+              onPress={() => setShowLogoutConfirm(true)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.logoutIconBox}>
+                <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.logoutLabel}>Logout</Text>
+                <Text style={styles.logoutSubLabel}>Sign out of your HairVerse account</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
+            </TouchableOpacity>
+
           </Animated.View>
         )}
       </ScrollView>
@@ -2088,6 +2117,47 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.calibrateLogText}>✓ Follicular health metric verified: {activeProfile.hairHealth}</Text>
               <Text style={styles.calibrateLogText}>✓ Diagnostic face shape sync: 100%</Text>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* --- LOGOUT CONFIRMATION MODAL --- */}
+      <Modal visible={showLogoutConfirm} transparent animationType="fade">
+        <View style={styles.drawerOverlay}>
+          <TouchableOpacity style={styles.drawerDismissArea} onPress={() => setShowLogoutConfirm(false)} />
+          <View style={[styles.drawerContainer, { paddingVertical: 30, alignItems: 'center' }]}>
+            <View style={styles.drawerHandle} />
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,82,82,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+              <Ionicons name="log-out-outline" size={26} color={COLORS.error} />
+            </View>
+            <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700', marginBottom: 6 }}>Logout</Text>
+            <Text style={{ color: COLORS.textSecondary, fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              Are you sure you want to sign out of{'\n'}your HairVerse account?
+            </Text>
+            <View style={{ flexDirection: 'row', width: '100%', gap: 10 }}>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' }}
+                onPress={() => setShowLogoutConfirm(false)}
+              >
+                <Text style={{ color: COLORS.textSecondary, fontSize: 14, fontWeight: '600' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: 'rgba(255,82,82,0.15)', alignItems: 'center', justifyContent: 'center' }}
+                onPress={handleLogout}
+              >
+                <Text style={{ color: COLORS.error, fontSize: 14, fontWeight: '700' }}>Sign Out</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* --- LOGOUT LOADING OVERLAY --- */}
+      <Modal visible={isLoggingOut} transparent animationType="fade">
+        <View style={styles.drawerOverlay}>
+          <View style={{ width: 160, height: 160, borderRadius: 24, backgroundColor: 'rgba(18,18,30,0.95)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+            <ActivityIndicator size="large" color={COLORS.secondary} />
+            <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginTop: 16, fontWeight: '500' }}>Signing out...</Text>
           </View>
         </View>
       </Modal>
