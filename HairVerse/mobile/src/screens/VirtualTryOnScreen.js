@@ -100,6 +100,12 @@ const getAIExplanation = (faceShape, styleId) => {
   return explanations[styleId]?.[shape] || explanations['fade_01']['Oval'];
 };
 
+const normalizeBase64 = (value) => {
+  if (!value) return null;
+  if (value.startsWith('data:')) return value;
+  return `data:image/png;base64,${value}`;
+};
+
 export default function VirtualTryOnScreen({ navigation }) {
   const { 
     selectedHairstyle, 
@@ -261,7 +267,7 @@ export default function VirtualTryOnScreen({ navigation }) {
 
   // Full AI Generation Trigger
   const triggerAIGeneration = async (hairstyle = selectedHairstyle, color = selectedColor, beard = selectedBeardStyle) => {
-    const activeImage = selectedModel ? selectedModel.avatarUrl : userSelfieBase64;
+    const activeImage = selectedModel ? selectedModel.base64 : userSelfieBase64;
     if (!activeImage) return;
 
     setActiveState(STATES.AI_ANALYZING);
@@ -284,7 +290,7 @@ export default function VirtualTryOnScreen({ navigation }) {
           fadeImage.setValue(0);
           scaleImage.setValue(1.04);
           
-          const finalRender = await generateTryOn(activeImage);
+          const finalRender = await generateTryOn(normalizeBase64(activeImage));
           
           if (finalRender) {
             setStep3Status('done');
@@ -313,13 +319,13 @@ export default function VirtualTryOnScreen({ navigation }) {
 
   // Fast Update custom details instantly
   const triggerInstantUpdate = async (color = selectedColor, beard = selectedBeardStyle, style = selectedHairstyle) => {
-    const activeImage = selectedModel ? selectedModel.avatarUrl : userSelfieBase64;
+    const activeImage = selectedModel ? selectedModel.base64 : userSelfieBase64;
     if (!activeImage) return;
 
     setIsQuickUpdating(true);
     fadeImage.setValue(0.7);
 
-    const finalRender = await generateTryOn(activeImage);
+    const finalRender = await generateTryOn(normalizeBase64(activeImage));
 
     setIsQuickUpdating(false);
     if (finalRender) {

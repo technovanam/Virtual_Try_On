@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import List, Optional
+from firebase_config import db
 
 router = APIRouter()
 
@@ -54,6 +55,9 @@ MOCK_PROFILES = [
     }
 ]
 
+def _profiles_collection(uid: str):
+    return db.collection("users").document(uid).collection("profiles")
+
 @router.get("/config")
 async def get_homepage_config(username: str = "Sasi", hour: int = 12):
     # Greeting based on current device hour
@@ -105,26 +109,47 @@ async def get_search_suggestions():
     ]
 
 @router.get("/profiles", response_model=List[ProfileItem])
-async def get_profiles():
-    return MOCK_PROFILES
+async def get_profiles(uid: str = "anonymous"):
+    if not db:
+        return MOCK_PROFILES
+
+    docs = _profiles_collection(uid).stream()
+    profiles = []
+    for doc in docs:
+        data = doc.to_dict() or {}
+        if "id" not in data:
+            data["id"] = doc.id
+        profiles.append(data)
+    return profiles
 
 @router.post("/profiles", response_model=ProfileItem)
-async def create_profile(profile: ProfileItem):
-    # Check if profile already exists, otherwise add it
-    for p in MOCK_PROFILES:
-        if p["id"] == profile.id:
-            return p
-    MOCK_PROFILES.append(profile.model_dump())
+async def create_profile(profile: ProfileItem, uid: str = "anonymous"):
+    if not db:
+        for p in MOCK_PROFILES:
+            if p["id"] == profile.id:
+                return p
+        MOCK_PROFILES.append(profile.model_dump())
+        return profile
+
+    ref = _profiles_collection(uid).document(profile.id)
+    existing = ref.get()
+    if existing.exists:
+        return existing.to_dict()
+    ref.set(profile.model_dump())
     return profile
 
 @router.put("/profiles/{id}", response_model=ProfileItem)
-async def update_profile(id: str, profile: ProfileItem):
-    for i, p in enumerate(MOCK_PROFILES):
-        if p["id"] == id:
-            MOCK_PROFILES[i] = profile.model_dump()
-            return MOCK_PROFILES[i]
-    # If not found, add it
-    MOCK_PROFILES.append(profile.model_dump())
+async def update_profile(id: str, profile: ProfileItem, uid: str = "anonymous"):
+    if not db:
+        for i, p in enumerate(MOCK_PROFILES):
+            if p["id"] == id:
+                MOCK_PROFILES[i] = profile.model_dump()
+                return MOCK_PROFILES[i]
+        MOCK_PROFILES.append(profile.model_dump())
+        return profile
+
+    ref = _profiles_collection(uid).document(id)
+    ref.set(profile.model_dump())
     return profile
 
 @router.get("/trends")

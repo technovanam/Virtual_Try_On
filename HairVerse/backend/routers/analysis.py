@@ -1,14 +1,30 @@
-from fastapi import APIRouter, File, UploadFile
+import base64
+from fastapi import APIRouter, Body, File, HTTPException, UploadFile
+from pydantic import BaseModel
 from services.face_detection import detect_face_shape
 from services.hair_analysis import analyze_hair, analyze_beard
 from services.recommendation_engine import generate_ai_recommendations
 
 router = APIRouter()
 
+class AnalysisRequest(BaseModel):
+    image_base64: str
+
 @router.post("/upload")
-async def process_image(file: UploadFile = File(...)):
+async def process_image(
+    file: UploadFile = File(default=None),
+    payload: AnalysisRequest = Body(default=None)
+):
     try:
-        contents = await file.read()
+        contents = None
+        if file is not None:
+            contents = await file.read()
+        elif payload and payload.image_base64:
+            header_indicator = "base64,"
+            base64_data = payload.image_base64.split(header_indicator, 1)[1] if header_indicator in payload.image_base64 else payload.image_base64
+            contents = base64.b64decode(base64_data)
+        else:
+            raise HTTPException(status_code=400, detail="No image provided")
         
         # Run AI intelligence services
         face_result = detect_face_shape(contents)
@@ -46,8 +62,10 @@ async def process_image(file: UploadFile = File(...)):
                 {"name": "Gong Yoo", "similarity": 82}
             ]
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        return {"error": f"Image processing failed: {str(e)}"}
+        raise HTTPException(status_code=500, detail=f"Image processing failed: {str(e)}")
 
 @router.get("/{uid}/latest")
 async def get_latest_analysis(uid: str):

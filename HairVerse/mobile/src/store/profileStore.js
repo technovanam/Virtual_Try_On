@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { useAnalysisStore } from './analysisStore';
+import { useAuthStore } from './authStore';
 
-const BACKEND_BASE_URL = 'http://localhost:8000';
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
+
+const getUid = () => useAuthStore.getState().user?.uid || 'anonymous';
 
 const MOCK_PROFILE_AVATARS = {
   sasi: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
@@ -54,7 +57,9 @@ export const useProfileStore = create((set, get) => ({
 
   fetchProfiles: async () => {
     try {
-      const response = await axios.get(`${BACKEND_BASE_URL}/homepage/profiles`);
+      const response = await axios.get(`${BACKEND_BASE_URL}/homepage/profiles`, {
+        params: { uid: getUid() }
+      });
       if (response.data && response.data.length > 0) {
         set({ profiles: response.data });
         // Restore active profile bindings in analysis store
@@ -92,7 +97,9 @@ export const useProfileStore = create((set, get) => ({
       // Update backend if possible
       const targetProfile = updatedProfiles.find(p => p.id === id);
       if (targetProfile) {
-        axios.put(`${BACKEND_BASE_URL}/homepage/profiles/${id}`, targetProfile)
+        axios.put(`${BACKEND_BASE_URL}/homepage/profiles/${id}`, targetProfile, {
+          params: { uid: getUid() }
+        })
           .catch(err => console.warn("Failed to sync profile update on backend", err));
       }
       
@@ -118,7 +125,9 @@ export const useProfileStore = create((set, get) => ({
 
     // Save on backend dynamically
     try {
-      await axios.post(`${BACKEND_BASE_URL}/homepage/profiles`, newProfile);
+      await axios.post(`${BACKEND_BASE_URL}/homepage/profiles`, newProfile, {
+        params: { uid: getUid() }
+      });
     } catch (error) {
       console.warn("Failed to push profile to backend, saving locally only.", error);
     }
@@ -165,7 +174,9 @@ export const useProfileStore = create((set, get) => ({
     if (updatedProfile) {
       // Save on backend dynamically
       try {
-        await axios.put(`${BACKEND_BASE_URL}/homepage/profiles/${activeProfileId}`, updatedProfile);
+        await axios.put(`${BACKEND_BASE_URL}/homepage/profiles/${activeProfileId}`, updatedProfile, {
+          params: { uid: getUid() }
+        });
       } catch (error) {
         console.warn("Failed to update profile selfie on backend, updating locally only.", error);
       }

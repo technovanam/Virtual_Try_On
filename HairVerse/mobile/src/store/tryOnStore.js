@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const BACKEND_BASE_URL = 'http://localhost:8000'; // Fallback to localhost for development
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000'; // Fallback to localhost for development
 
 const DEFAULT_COLORS = [
   {"id": "black", "name": "Black", "hex": "#09090C", "gradient": ["#000000", "#1E1E24"], "popularity": 94, "skinCompatibility": "All Skin Tones", "trending": false, "recommended": true},

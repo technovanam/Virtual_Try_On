@@ -6,7 +6,7 @@ import { COLORS } from '../constants/theme';
 import { useTryOnStore } from '../store/tryOnStore';
 import { useProfileStore } from '../store/profileStore';
 
-const BACKEND_BASE_URL = 'http://localhost:8000';
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 const { width, height } = Dimensions.get('window');
 
 // Enable LayoutAnimation for Android

@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import { useProfileStore } from '../store/profileStore';
 import { useTryOnStore } from '../store/tryOnStore';
 
-const BACKEND_BASE_URL = 'http://localhost:8000';
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 
 export default function DashboardScreen({ navigation }) {
   const { user } = useAuthStore();

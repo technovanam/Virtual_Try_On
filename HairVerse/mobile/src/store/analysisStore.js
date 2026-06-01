@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const BACKEND_BASE_URL = 'http://localhost:8000';
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 
 export const useAnalysisStore = create((set, get) => ({
   currentAnalysis: null,
@@ -15,8 +15,7 @@ export const useAnalysisStore = create((set, get) => ({
     try {
       // Create form data to upload the image or pass the base64 directly
       const response = await axios.post(`${BACKEND_BASE_URL}/analysis/upload`, {
-        // For simplicity in MVP, we can mock upload or send base64 depending on API design.
-        // We'll simulate a standard upload with mock data fallback if backend is unreachable
+        image_base64: base64Image.startsWith('data:') ? base64Image : `data:image/png;base64,${base64Image}`
       });
       set({ currentAnalysis: response.data, isAnalyzing: false });
       return response.data;
