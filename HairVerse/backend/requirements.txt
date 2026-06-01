@@ -8,3 +8,5 @@ openai
 httpx
 firebase-admin
 numpy
+pyjwt
+email-validator

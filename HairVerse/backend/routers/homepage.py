@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from typing import List, Optional
 from firebase_config import db
+from middleware.auth_middleware import get_current_user, get_optional_user
 
 router = APIRouter()
 
@@ -109,7 +110,14 @@ async def get_search_suggestions():
     ]
 
 @router.get("/profiles", response_model=List[ProfileItem])
-async def get_profiles(uid: str = "anonymous"):
+async def get_profiles(user: dict | None = Depends(get_optional_user), uid: str = None):
+    # Users can only access their own profiles when authenticated
+    if user and uid and uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access another user's profiles.",
+        )
+    uid = uid or (user["uid"] if user else None)
     if not db:
         return MOCK_PROFILES
 
@@ -123,7 +131,14 @@ async def get_profiles(uid: str = "anonymous"):
     return profiles
 
 @router.post("/profiles", response_model=ProfileItem)
-async def create_profile(profile: ProfileItem, uid: str = "anonymous"):
+async def create_profile(profile: ProfileItem, user: dict = Depends(get_current_user), uid: str = None):
+    # Users can only create profiles for themselves
+    if uid and uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot create profiles for another user.",
+        )
+    uid = uid or user["uid"]
     if not db:
         for p in MOCK_PROFILES:
             if p["id"] == profile.id:
@@ -139,7 +154,14 @@ async def create_profile(profile: ProfileItem, uid: str = "anonymous"):
     return profile
 
 @router.put("/profiles/{id}", response_model=ProfileItem)
-async def update_profile(id: str, profile: ProfileItem, uid: str = "anonymous"):
+async def update_profile(id: str, profile: ProfileItem, user: dict = Depends(get_current_user), uid: str = None):
+    # Users can only update their own profiles
+    if uid and uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot update another user's profiles.",
+        )
+    uid = uid or user["uid"]
     if not db:
         for i, p in enumerate(MOCK_PROFILES):
             if p["id"] == id:

@@ -21,6 +21,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -352,13 +354,13 @@ export default function ProfileScreen({ navigation }) {
           toValue: 0.9,
           duration: 900,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         }),
         Animated.timing(skeletonPulse, {
           toValue: 0.35,
           duration: 900,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         })
       ])
     );
@@ -373,7 +375,7 @@ export default function ProfileScreen({ navigation }) {
         toValue: 1,
         duration: 6000,
         easing: Easing.linear,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       })
     );
     loop.start();
@@ -386,7 +388,7 @@ export default function ProfileScreen({ navigation }) {
     if (isAnalyzing) {
       scanSpinAnim.setValue(0);
       spinLoop = Animated.loop(
-        Animated.timing(scanSpinAnim, { toValue: 1, duration: 700, easing: Easing.linear, useNativeDriver: true })
+        Animated.timing(scanSpinAnim, { toValue: 1, duration: 700, easing: Easing.linear, useNativeDriver: USE_NATIVE_DRIVER })
       );
       spinLoop.start();
     } else {
@@ -399,8 +401,8 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(premiumGlowAnim, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(premiumGlowAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(premiumGlowAnim, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(premiumGlowAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
     loop.start();
@@ -411,8 +413,8 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(shimmerAnim, { toValue: 1, duration: 1400, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(shimmerAnim, { toValue: 0, duration: 0, useNativeDriver: true }),
+        Animated.timing(shimmerAnim, { toValue: 1, duration: 1400, easing: Easing.linear, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(shimmerAnim, { toValue: 0, duration: 0, useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
     loop.start();
@@ -423,8 +425,8 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(upgradeGlow, { toValue: 1, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(upgradeGlow, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(upgradeGlow, { toValue: 1, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(upgradeGlow, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
     loop.start();
@@ -435,8 +437,8 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(learningPulse, { toValue: 1.05, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(learningPulse, { toValue: 1.0, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(learningPulse, { toValue: 1.05, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(learningPulse, { toValue: 1.0, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
     loop.start();
@@ -455,10 +457,10 @@ export default function ProfileScreen({ navigation }) {
     if (personalityAnimating) return;
     setPersonalityAnimating(true);
     Animated.sequence([
-      Animated.timing(personalityFade, { toValue: 0, duration: 180, useNativeDriver: true }),
+      Animated.timing(personalityFade, { toValue: 0, duration: 180, useNativeDriver: USE_NATIVE_DRIVER }),
     ]).start(() => {
       setStylePersonalityIndex(prev => (prev + 1) % STYLE_PERSONALITIES.length);
-      Animated.timing(personalityFade, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+      Animated.timing(personalityFade, { toValue: 1, duration: 250, useNativeDriver: USE_NATIVE_DRIVER }).start();
       setPersonalityAnimating(false);
     });
   };
@@ -496,16 +498,16 @@ export default function ProfileScreen({ navigation }) {
       setIsLoading(false);
       // Fade + slide header in
       Animated.parallel([
-        Animated.timing(fadeContent, { toValue: 1, duration: 380, useNativeDriver: true }),
-        Animated.spring(headerSlideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
-        Animated.timing(headerFadeAnim, { toValue: 1, duration: 320, useNativeDriver: true }),
+        Animated.timing(fadeContent, { toValue: 1, duration: 380, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.spring(headerSlideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(headerFadeAnim, { toValue: 1, duration: 320, useNativeDriver: USE_NATIVE_DRIVER }),
       ]).start();
 
       // Greeting slides up with delay
       setTimeout(() => {
         Animated.parallel([
-          Animated.spring(greetingSlideAnim, { toValue: 0, tension: 70, friction: 10, useNativeDriver: true }),
-          Animated.timing(greetingFadeAnim, { toValue: 1, duration: 280, useNativeDriver: true }),
+          Animated.spring(greetingSlideAnim, { toValue: 0, tension: 70, friction: 10, useNativeDriver: USE_NATIVE_DRIVER }),
+          Animated.timing(greetingFadeAnim, { toValue: 1, duration: 280, useNativeDriver: USE_NATIVE_DRIVER }),
         ]).start();
       }, 180);
 
@@ -521,7 +523,7 @@ export default function ProfileScreen({ navigation }) {
       // Stat cards stagger in from bottom
       setTimeout(() => {
         Animated.stagger(60, statsStaggerAnims.map(a =>
-          Animated.spring(a, { toValue: 1, tension: 70, friction: 10, useNativeDriver: true })
+          Animated.spring(a, { toValue: 1, tension: 70, friction: 10, useNativeDriver: USE_NATIVE_DRIVER })
         )).start();
       }, 350);
 
@@ -540,13 +542,13 @@ export default function ProfileScreen({ navigation }) {
             toValue: 1,
             duration: 1000,
             easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true
+            useNativeDriver: USE_NATIVE_DRIVER
           }),
           Animated.timing(scannerLineAnim, {
             toValue: 0,
             duration: 1000,
             easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true
+            useNativeDriver: USE_NATIVE_DRIVER
           })
         ])
       );
@@ -627,12 +629,12 @@ export default function ProfileScreen({ navigation }) {
       Animated.timing(profileScale, {
         toValue: 0.88,
         duration: 120,
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       }),
       Animated.timing(profileScale, {
         toValue: 1.0,
         duration: 180,
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       })
     ]).start();
 
@@ -1035,8 +1037,8 @@ export default function ProfileScreen({ navigation }) {
                 { title: 'Beard Trim Compatibility',spec: activeProfile.beardStatus,icon: 'shield-checkmark',    color: COLORS.error,     bg: 'rgba(255,82,82,0.1)',   label: 'BEARD SPEC' },
               ].map((badge, i) => {
                 const pressAnim = badgePressAnims[i];
-                const handleIn  = () => Animated.spring(pressAnim, { toValue: 0.93, useNativeDriver: true, speed: 30 }).start();
-                const handleOut = () => Animated.spring(pressAnim, { toValue: 1,    useNativeDriver: true, speed: 20 }).start();
+                const handleIn  = () => Animated.spring(pressAnim, { toValue: 0.93, useNativeDriver: USE_NATIVE_DRIVER, speed: 30 }).start();
+                const handleOut = () => Animated.spring(pressAnim, { toValue: 1,    useNativeDriver: USE_NATIVE_DRIVER, speed: 20 }).start();
                 return (
                   <TouchableOpacity
                     key={badge.label}
@@ -1275,7 +1277,7 @@ export default function ProfileScreen({ navigation }) {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recentlyTriedRow}>
               {activeProfile.recentlyTried.map(item => (
                 <TouchableOpacity key={item.id} style={styles.recentCard} onPress={() => {/* TODO: toast interaction */}}>
-                  <Image source={{ uri: item.imageUrl }} style={styles.recentImg} />
+                      <Image source={{ uri: item.imageUrl }} style={styles.recentImg} resizeMode="cover" />
                   <View style={styles.recentOverlay}>
                     <Text style={styles.recentMatch}>{item.match} Match</Text>
                   </View>
@@ -1977,7 +1979,7 @@ export default function ProfileScreen({ navigation }) {
                       onPress={() => setNewAvatar(url)}
                       style={[styles.avatarPresetBtn, isSelected && styles.avatarPresetSelected]}
                     >
-                      <Image source={{ uri: url }} style={styles.presetAvatarImg} />
+                      <Image source={{ uri: url }} style={styles.presetAvatarImg} resizeMode="cover" />
                     </TouchableOpacity>
                   );
                 })}
@@ -2089,7 +2091,7 @@ export default function ProfileScreen({ navigation }) {
             {/* Scanning viewport */}
             <View style={styles.scannerViewportBox}>
               {activeProfile && (
-                <Image source={{ uri: activeProfile.avatarUrl }} style={styles.scannerTargetAvatar} />
+                <Image source={{ uri: activeProfile.avatarUrl }} style={styles.scannerTargetAvatar} resizeMode="cover" />
               )}
               {/* Green scanner laser line */}
               <Animated.View style={[
@@ -3612,7 +3614,6 @@ const styles = StyleSheet.create({
   presetAvatarImg: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 
   // === SELECTOR GRID CHIPS ===
@@ -4123,7 +4124,6 @@ const styles = StyleSheet.create({
   recentImg: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   recentOverlay: {
     position: 'absolute',
@@ -4242,7 +4242,6 @@ const styles = StyleSheet.create({
   scannerTargetAvatar: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   scannerBeamLine: {
     position: 'absolute',

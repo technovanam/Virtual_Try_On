@@ -1,22 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../constants/theme';
+import { COLORS, FONTS, RADIUS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState(null);
   const { login, isLoading, error } = useAuthStore();
 
-  // Show Firebase error alerts
+  // Sync store error to local state for inline display
   useEffect(() => {
+    // 🔍 DEBUG: Log whenever error state changes
+
     if (error) {
+      setLocalError(error);
       Alert.alert('Login Failed', error);
+      // Clear store error so it doesn't re-trigger on re-mount
       useAuthStore.setState({ error: null });
     }
   }, [error]);
+
+  // Clear error when user starts typing
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (localError) {
+      setLocalError(null);
+      useAuthStore.setState({ error: null });
+    }
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (localError) {
+      setLocalError(null);
+      useAuthStore.setState({ error: null });
+    }
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -39,7 +61,7 @@ export default function LoginScreen({ navigation }) {
         placeholder="Email"
         placeholderTextColor={COLORS.textSecondary}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -49,7 +71,7 @@ export default function LoginScreen({ navigation }) {
           placeholder="Password"
           placeholderTextColor={COLORS.textSecondary}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity
@@ -64,7 +86,19 @@ export default function LoginScreen({ navigation }) {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleLogin} disabled={isLoading}>
+
+      {/* Inline error message */}
+      {localError ? (
+        <View style={styles.errorRow}>
+          <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: 6 }} />
+          <Text style={styles.errorText}>{localError}</Text>
+        </View>
+      ) : null}
+
+      <TouchableOpacity
+        style={[styles.button, isLoading && styles.buttonDisabled]}
+        onPress={handleLogin}
+        disabled={isLoading}>
         {isLoading ? (
           <ActivityIndicator size="small" color={COLORS.textPrimary} />
         ) : (
@@ -120,10 +154,7 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     borderWidth: 1,
     borderColor: COLORS.border,
-    shadowColor: '#1B2233',
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
+    boxShadow: '0px 8px 14px rgba(27, 34, 51, 0.08)',
     elevation: 3,
   },
   noteRow: {
@@ -190,5 +221,22 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     paddingHorizontal: 4,
+  },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(201, 73, 73, 0.08)',
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(201, 73, 73, 0.25)',
+  },
+  errorText: {
+    flex: 1,
+    ...TYPOGRAPHY.caption,
+    color: COLORS.error,
+    fontWeight: '500',
   },
 });

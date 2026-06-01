@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from services.ai_rendering import render_tryon_composition
 import base64
 from typing import Optional, List
+from middleware.auth_middleware import get_current_user, get_optional_user
 
 router = APIRouter()
 
@@ -56,11 +57,11 @@ async def get_hair_colors():
 @router.get("/beards")
 async def get_beard_styles():
     return [
-        {"id": "clean_shave", "name": "Clean Shave", "compatibility": 95, "bestMatch": true, "thumbnail": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=100&h=100&fit=crop"},
-        {"id": "stubble", "name": "Stubble", "compatibility": 88, "bestMatch": false, "thumbnail": "https://images.unsplash.com/photo-1605497746444-ac9dbd39f4a5?w=100&h=100&fit=crop"},
-        {"id": "short_beard", "name": "Short Beard", "compatibility": 82, "bestMatch": false, "thumbnail": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"},
-        {"id": "full_beard", "name": "Full Beard", "compatibility": 75, "bestMatch": false, "thumbnail": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop"},
-        {"id": "fade_beard", "name": "Fade Beard", "compatibility": 90, "bestMatch": true, "thumbnail": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"}
+        {"id": "clean_shave", "name": "Clean Shave", "compatibility": 95, "bestMatch": True, "thumbnail": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=100&h=100&fit=crop"},
+        {"id": "stubble", "name": "Stubble", "compatibility": 88, "bestMatch": False, "thumbnail": "https://images.unsplash.com/photo-1605497746444-ac9dbd39f4a5?w=100&h=100&fit=crop"},
+        {"id": "short_beard", "name": "Short Beard", "compatibility": 82, "bestMatch": False, "thumbnail": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"},
+        {"id": "full_beard", "name": "Full Beard", "compatibility": 75, "bestMatch": False, "thumbnail": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop"},
+        {"id": "fade_beard", "name": "Fade Beard", "compatibility": 90, "bestMatch": True, "thumbnail": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"}
     ]
 
 @router.post("/compare")
@@ -68,7 +69,14 @@ async def generate_comparison(request: dict):
     return {"status": "success", "comparison_url": "https://example.com/mock_compare.png"}
 
 @router.get("/history")
-async def get_tryon_history(uid: Optional[str] = None):
+async def get_tryon_history(user: dict | None = Depends(get_optional_user), uid: Optional[str] = None):
+    # Users can only access their own try-on history when authenticated
+    if user and uid and uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access another user's try-on history.",
+        )
+    uid = uid or (user["uid"] if user else None)
     return [
         {
             "id": "curly_03",

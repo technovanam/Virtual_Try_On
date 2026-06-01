@@ -19,6 +19,8 @@ import { useTryOnStore } from '../store/tryOnStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { useProfileStore } from '../store/profileStore';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 const { width, height } = Dimensions.get('window');
 const sliderWidth = width - 32;
 
@@ -178,8 +180,8 @@ export default function VirtualTryOnScreen({ navigation }) {
     // Pulse skeleton loader animation
     Animated.loop(
       Animated.sequence([
-        Animated.timing(skeletonPulse, { toValue: 0.7, duration: 800, useNativeDriver: true }),
-        Animated.timing(skeletonPulse, { toValue: 0.3, duration: 800, useNativeDriver: true })
+        Animated.timing(skeletonPulse, { toValue: 0.7, duration: 800, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(skeletonPulse, { toValue: 0.3, duration: 800, useNativeDriver: USE_NATIVE_DRIVER })
       ])
     ).start();
   }, []);
@@ -238,12 +240,12 @@ export default function VirtualTryOnScreen({ navigation }) {
         Animated.timing(nodeAnim, {
           toValue: 1,
           duration: 600,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(nodeAnim, {
           toValue: 0,
           duration: 600,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         })
       ])
     ).start();
@@ -300,13 +302,13 @@ export default function VirtualTryOnScreen({ navigation }) {
               Animated.timing(fadeImage, {
                 toValue: 1,
                 duration: 600,
-                useNativeDriver: true
+                useNativeDriver: USE_NATIVE_DRIVER
               }),
               Animated.timing(scaleImage, {
                 toValue: 1.0,
                 duration: 650,
                 easing: Easing.out(Easing.back(1.2)),
-                useNativeDriver: true
+                useNativeDriver: USE_NATIVE_DRIVER
               })
             ]).start();
           } else {
@@ -333,7 +335,7 @@ export default function VirtualTryOnScreen({ navigation }) {
       Animated.timing(fadeImage, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       }).start();
     } else {
       setActiveState(STATES.FAILED_GENERATION);
@@ -414,11 +416,11 @@ export default function VirtualTryOnScreen({ navigation }) {
     toastScale.setValue(0.7);
 
     Animated.parallel([
-      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(toastScale, { toValue: 1, duration: 400, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true })
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(toastScale, { toValue: 1, duration: 400, easing: Easing.out(Easing.back(1.5)), useNativeDriver: USE_NATIVE_DRIVER })
     ]).start(() => {
       setTimeout(() => {
-        Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+        Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: USE_NATIVE_DRIVER }).start(() => {
           setShowSavedToast(false);
         });
       }, 1500);

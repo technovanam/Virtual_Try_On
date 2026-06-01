@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { useTryOnStore } from '../store/tryOnStore';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 const { width } = Dimensions.get('window');
 
 const LIVE_HAIRSTYLES = [
@@ -87,8 +89,8 @@ export default function LiveCameraScreen({ navigation }) {
 
       Animated.loop(
         Animated.sequence([
-          Animated.timing(shimmerOpacity, { toValue: 0.6, duration: 800, useNativeDriver: true }),
-          Animated.timing(shimmerOpacity, { toValue: 0.2, duration: 800, useNativeDriver: true })
+          Animated.timing(shimmerOpacity, { toValue: 0.6, duration: 800, useNativeDriver: USE_NATIVE_DRIVER }),
+          Animated.timing(shimmerOpacity, { toValue: 0.2, duration: 800, useNativeDriver: USE_NATIVE_DRIVER })
         ])
       ).start();
     }
@@ -153,11 +155,11 @@ export default function LiveCameraScreen({ navigation }) {
       snapshotToastScale.setValue(0.7);
 
       Animated.parallel([
-        Animated.timing(snapshotToastOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.timing(snapshotToastScale, { toValue: 1, duration: 350, useNativeDriver: true })
+        Animated.timing(snapshotToastOpacity, { toValue: 1, duration: 250, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(snapshotToastScale, { toValue: 1, duration: 350, useNativeDriver: USE_NATIVE_DRIVER })
       ]).start(() => {
         setTimeout(() => {
-          Animated.timing(snapshotToastOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+          Animated.timing(snapshotToastOpacity, { toValue: 0, duration: 250, useNativeDriver: USE_NATIVE_DRIVER }).start(() => {
             setShowSnapshotToast(false);
           });
         }, 1500);

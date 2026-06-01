@@ -6,6 +6,8 @@ import { COLORS } from '../constants/theme';
 import { useTryOnStore } from '../store/tryOnStore';
 import { useProfileStore } from '../store/profileStore';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 const { width, height } = Dimensions.get('window');
 
@@ -139,7 +141,7 @@ export default function SearchScreen({ route, navigation }) {
           toValue: 1,
           duration: 1000,
           easing: Easing.linear,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         })
       ).start();
     } else {
@@ -155,12 +157,12 @@ export default function SearchScreen({ route, navigation }) {
           Animated.timing(skeletonPulse, {
             toValue: 0.8,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
           }),
           Animated.timing(skeletonPulse, {
             toValue: 0.3,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
           })
         ])
       ).start();
@@ -431,7 +433,7 @@ export default function SearchScreen({ route, navigation }) {
         Animated.timing(listFadeAnim, {
           toValue: 0,
           duration: 100,
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         }).start(() => {
           cardSlideAnim.setValue(20);
           setFilteredHairstyles(data.results || []);
@@ -440,12 +442,12 @@ export default function SearchScreen({ route, navigation }) {
             Animated.timing(listFadeAnim, {
               toValue: 1,
               duration: 350,
-              useNativeDriver: true
+              useNativeDriver: USE_NATIVE_DRIVER
             }),
             Animated.timing(cardSlideAnim, {
               toValue: 0,
               duration: 350,
-              useNativeDriver: true
+              useNativeDriver: USE_NATIVE_DRIVER
             })
           ]).start();
         });
@@ -547,12 +549,12 @@ export default function SearchScreen({ route, navigation }) {
         Animated.timing(voicePulse, {
           toValue: 1.4,
           duration: 700,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(voicePulse, {
           toValue: 1.0,
           duration: 700,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         })
       ])
     ).start();
@@ -1166,7 +1168,7 @@ export default function SearchScreen({ route, navigation }) {
                           onPress={() => toggleCategoryExpand(item.id)}
                           activeOpacity={0.9}
                         >
-                          <Image source={{ uri: item.bannerUrl }} style={styles.categoryCardBanner} />
+                          <Image source={{ uri: item.bannerUrl }} style={styles.categoryCardBanner} resizeMode="cover" />
                           <View style={styles.categoryCardOverlayGlow} />
 
                           {item.isRecommended && (
@@ -2171,7 +2173,6 @@ const styles = StyleSheet.create({
   },
   categoryCardBanner: {
     ...StyleSheet.absoluteFillObject,
-    resizeMode: 'cover',
   },
   categoryCardOverlayGlow: {
     ...StyleSheet.absoluteFillObject,

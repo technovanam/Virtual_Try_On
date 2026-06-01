@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Animated, Easing, ActivityIndicator, Image, Modal } from 'react-native';
+import { Platform, StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Animated, Easing, ActivityIndicator, Image, Modal } from 'react-native';
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { COLORS } from '../constants/theme';
@@ -152,13 +153,13 @@ export default function DashboardScreen({ navigation }) {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 900,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 750,
         easing: Easing.out(Easing.back(1)),
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       })
     ]).start();
 
@@ -169,13 +170,13 @@ export default function DashboardScreen({ navigation }) {
           toValue: 1,
           duration: 2000,
           easing: Easing.linear,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(scanAnim, {
           toValue: 0,
           duration: 2000,
           easing: Easing.linear,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
       ])
     ).start();
@@ -186,12 +187,12 @@ export default function DashboardScreen({ navigation }) {
         Animated.timing(skeletonPulse, {
           toValue: 0.7,
           duration: 1100,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(skeletonPulse, {
           toValue: 0.3,
           duration: 1100,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         })
       ])
     ).start();
@@ -246,7 +247,7 @@ export default function DashboardScreen({ navigation }) {
     Animated.timing(profileFadeAnim, {
       toValue: 1,
       duration: 350,
-      useNativeDriver: true,
+      useNativeDriver: USE_NATIVE_DRIVER,
     }).start();
   }, [activeProfileId]);
 
@@ -1628,6 +1629,12 @@ export default function DashboardScreen({ navigation }) {
   );
 }
 
+const buildShadow = (boxShadow, nativeShadow) =>
+  Platform.select({
+    web: { boxShadow },
+    default: nativeShadow,
+  });
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1727,11 +1734,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    ...buildShadow('0px 4px 12px rgba(0, 212, 255, 0.08)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 3,
+    }),
   },
   searchIcon: {
     marginRight: 10,
@@ -1755,11 +1764,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0, 212, 255, 0.25)',
     paddingVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
+    ...buildShadow('0px 8px 16px rgba(0, 0, 0, 0.3)', {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 10,
+    }),
     zIndex: 99,
   },
   suggestionItem: {
@@ -1839,11 +1850,13 @@ const styles = StyleSheet.create({
   activeChip: {
     backgroundColor: 'rgba(0, 212, 255, 0.15)',
     borderColor: '#00D4FF',
-    shadowColor: '#00D4FF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+    ...buildShadow('0px 2px 6px rgba(0, 212, 255, 0.3)', {
+      shadowColor: '#00D4FF',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 4,
+    }),
   },
   activeChipText: {
     color: '#00D4FF',
@@ -1858,11 +1871,13 @@ const styles = StyleSheet.create({
     marginBottom: 28,
     overflow: 'hidden',
     position: 'relative',
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 8,
+    ...buildShadow('0px 10px 20px rgba(0, 212, 255, 0.15)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.15,
+      shadowRadius: 20,
+      elevation: 8,
+    }),
   },
   glowSpot1: {
     position: 'absolute',
@@ -1951,10 +1966,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 2,
     backgroundColor: COLORS.secondary,
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
+    ...buildShadow('0px 0px 4px rgba(0, 212, 255, 0.8)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+    }),
   },
   statusPanel: {
     backgroundColor: 'rgba(255, 255, 255, 0.02)',
@@ -2045,11 +2062,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 212, 255, 0.15)',
     position: 'relative',
     overflow: 'hidden',
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    ...buildShadow('0px 6px 12px rgba(0, 212, 255, 0.1)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+    }),
   },
   glowSpotProfile: {
     position: 'absolute',
@@ -2311,11 +2330,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.05)',
     marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
+    ...buildShadow('0px 4px 8px rgba(0, 0, 0, 0.1)', {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 2,
+    }),
   },
   trendImageContainer: {
     height: 120,
@@ -2325,7 +2346,7 @@ const styles = StyleSheet.create({
   trendImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    
   },
   trendImageOverlay: {
     position: 'absolute',
@@ -2493,28 +2514,38 @@ const styles = StyleSheet.create({
   },
   cardUploading: {
     borderColor: 'rgba(124, 92, 252, 0.4)',
-    shadowColor: '#7C5CFC',
-    shadowOpacity: 0.15,
+    ...buildShadow('0px 0px 12px rgba(124, 92, 252, 0.15)', {
+      shadowColor: '#7C5CFC',
+      shadowOpacity: 0.15,
+    }),
   },
   cardAnalyzing: {
     borderColor: 'rgba(0, 212, 255, 0.4)',
-    shadowColor: '#00D4FF',
-    shadowOpacity: 0.18,
+    ...buildShadow('0px 0px 12px rgba(0, 212, 255, 0.18)', {
+      shadowColor: '#00D4FF',
+      shadowOpacity: 0.18,
+    }),
   },
   cardProcessing: {
     borderColor: 'rgba(0, 230, 118, 0.4)',
-    shadowColor: '#00E676',
-    shadowOpacity: 0.15,
+    ...buildShadow('0px 0px 12px rgba(0, 230, 118, 0.15)', {
+      shadowColor: '#00E676',
+      shadowOpacity: 0.15,
+    }),
   },
   cardReady: {
     borderColor: 'rgba(0, 212, 255, 0.5)',
-    shadowColor: '#00D4FF',
-    shadowOpacity: 0.25,
+    ...buildShadow('0px 0px 14px rgba(0, 212, 255, 0.25)', {
+      shadowColor: '#00D4FF',
+      shadowOpacity: 0.25,
+    }),
   },
   cardFailed: {
     borderColor: 'rgba(255, 23, 68, 0.5)',
-    shadowColor: '#FF1744',
-    shadowOpacity: 0.25,
+    ...buildShadow('0px 0px 14px rgba(255, 23, 68, 0.25)', {
+      shadowColor: '#FF1744',
+      shadowOpacity: 0.25,
+    }),
   },
 
   // Badge States
@@ -2760,11 +2791,13 @@ const styles = StyleSheet.create({
   },
   carouselAvatarRingSelected: {
     borderColor: COLORS.secondary,
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 5,
+    ...buildShadow('0px 0px 6px rgba(0, 212, 255, 0.8)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 6,
+      elevation: 5,
+    }),
   },
   carouselAvatar: {
     width: '100%',
@@ -2856,17 +2889,19 @@ const styles = StyleSheet.create({
     marginRight: 16,
     overflow: 'hidden',
     position: 'relative',
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    ...buildShadow('0px 6px 10px rgba(0, 212, 255, 0.1)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 3,
+    }),
   },
   recommendedImage: {
     width: '100%',
     height: '100%',
     position: 'absolute',
-    resizeMode: 'cover',
+    
   },
   recommendedCardOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -2884,11 +2919,13 @@ const styles = StyleSheet.create({
     borderColor: COLORS.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 4,
+    ...buildShadow('0px 0px 4px rgba(0, 212, 255, 0.8)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      elevation: 4,
+    }),
   },
   recommendedMatchText: {
     fontSize: 10,
@@ -3007,11 +3044,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 212, 255, 0.15)',
     overflow: 'hidden',
     position: 'relative',
-    shadowColor: COLORS.secondary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    ...buildShadow('0px 6px 10px rgba(0, 212, 255, 0.1)', {
+      shadowColor: COLORS.secondary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 3,
+    }),
   },
   recentCardGlow: {
     position: 'absolute',

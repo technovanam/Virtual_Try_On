@@ -1,9 +1,10 @@
 import base64
-from fastapi import APIRouter, Body, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
 from services.face_detection import detect_face_shape
 from services.hair_analysis import analyze_hair, analyze_beard
 from services.recommendation_engine import generate_ai_recommendations
+from middleware.auth_middleware import get_current_user
 
 router = APIRouter()
 
@@ -13,7 +14,8 @@ class AnalysisRequest(BaseModel):
 @router.post("/upload")
 async def process_image(
     file: UploadFile = File(default=None),
-    payload: AnalysisRequest = Body(default=None)
+    payload: AnalysisRequest = Body(default=None),
+    user: dict = Depends(get_current_user),
 ):
     try:
         contents = None
@@ -68,9 +70,21 @@ async def process_image(
         raise HTTPException(status_code=500, detail=f"Image processing failed: {str(e)}")
 
 @router.get("/{uid}/latest")
-async def get_latest_analysis(uid: str):
+async def get_latest_analysis(uid: str, user: dict = Depends(get_current_user)):
+    # Users can only access their own analysis
+    if uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access another user's analysis.",
+        )
     return {"message": "Latest analysis placeholder"}
 
 @router.get("/{uid}/history")
-async def get_analysis_history(uid: str):
+async def get_analysis_history(uid: str, user: dict = Depends(get_current_user)):
+    # Users can only access their own history
+    if uid != user["uid"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access another user's history.",
+        )
     return []

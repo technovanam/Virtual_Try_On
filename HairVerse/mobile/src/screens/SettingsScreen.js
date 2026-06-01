@@ -18,6 +18,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── Futuristic Toggle Component ───────────────────────────────────────────────
@@ -88,10 +90,10 @@ function SettingRow({
 }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: true, speed: 30 }).start();
+    Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: USE_NATIVE_DRIVER, speed: 30 }).start();
   };
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 20 }).start();
+    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: USE_NATIVE_DRIVER, speed: 20 }).start();
   };
 
   return (
@@ -153,16 +155,16 @@ function ConfirmModal({ visible, onClose, onConfirm, title, body, confirmLabel, 
       slideAnim.setValue(80);
       fadeAnim.setValue(0);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 80, friction: 10 }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: USE_NATIVE_DRIVER, tension: 80, friction: 10 }),
       ]).start();
     }
   }, [visible]);
 
   const handleClose = () => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 180, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 80, duration: 180, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 180, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(slideAnim, { toValue: 80, duration: 180, useNativeDriver: USE_NATIVE_DRIVER }),
     ]).start(() => onClose());
   };
 
@@ -202,16 +204,16 @@ function BottomSheet({ visible, onClose, title, children }) {
     if (visible) {
       slideAnim.setValue(600);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 70, friction: 11 }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: USE_NATIVE_DRIVER, tension: 70, friction: 11 }),
       ]).start();
     }
   }, [visible]);
 
   const handleClose = () => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(slideAnim, { toValue: 600, duration: 220, useNativeDriver: USE_NATIVE_DRIVER }),
     ]).start(() => onClose());
   };
 
@@ -306,8 +308,8 @@ export default function SettingsScreen({ navigation }) {
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(headerGlow, { toValue: 1, duration: 2200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(headerGlow, { toValue: 0, duration: 2200, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(headerGlow, { toValue: 1, duration: 2200, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(headerGlow, { toValue: 0, duration: 2200, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     ).start();
   }, []);

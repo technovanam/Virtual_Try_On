@@ -20,6 +20,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 
+import { USE_NATIVE_DRIVER } from '../constants/nativeDriver';
+
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -159,7 +161,7 @@ function SwipeableItem({ item, onDelete, onFavorite, onRestore, hairColors }) {
       toValue: isOpen ? 0 : -162, // Reveal 3 actions (54px each)
       friction: 8,
       tension: 50,
-      useNativeDriver: true
+      useNativeDriver: USE_NATIVE_DRIVER
     }).start();
     setIsOpen(!isOpen);
   };
@@ -168,7 +170,7 @@ function SwipeableItem({ item, onDelete, onFavorite, onRestore, hairColors }) {
     Animated.timing(translateX, {
       toValue: 0,
       duration: 180,
-      useNativeDriver: true
+      useNativeDriver: USE_NATIVE_DRIVER
     }).start(() => {
       setIsOpen(false);
       callback();
@@ -398,7 +400,7 @@ export default function SavedCollectionsScreen({ navigation }) {
     Animated.timing(fadeContent, {
       toValue: 1,
       duration: 300,
-      useNativeDriver: true
+      useNativeDriver: USE_NATIVE_DRIVER
     }).start();
   };
 
@@ -429,13 +431,13 @@ export default function SavedCollectionsScreen({ navigation }) {
           toValue: 0.9,
           duration: 900,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         }),
         Animated.timing(skeletonPulse, {
           toValue: 0.35,
           duration: 900,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         })
       ])
     );

@@ -11,6 +11,8 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 db = None
 auth_client = None
 storage_bucket = None
+firebase_web_api_key = None
+jwt_secret_key = None
 
 service_account_filename = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET")
@@ -48,3 +50,7 @@ else:
         print(f"    Looked for: {service_account_path}")
     # In mock mode, db, auth_client, and storage_bucket remain None.
     # Handlers should fall back safely.
+
+# ── Additional config exports (always available, even in mock mode) ─────
+firebase_web_api_key = os.getenv("FIREBASE_WEB_API_KEY")
+jwt_secret_key = os.getenv("JWT_SECRET_KEY")
