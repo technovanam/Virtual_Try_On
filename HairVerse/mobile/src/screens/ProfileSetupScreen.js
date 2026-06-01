@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert, useWindowDimensions, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
+import { useAuthStore } from '../store/authStore';
 
-const GENDERS = ['Male', 'Female', 'Other', 'Prefer not to say'];
+const GENDERS = ['Male', 'Female', 'Prefer Not To Say'];
 const LENGTHS = ['Short', 'Medium', 'Long'];
-const STYLES = ['Fade', 'Korean', 'Curly', 'Wolf Cut', 'Professional', 'Buzz Cut'];
-const GOALS = ['Volume', 'Shine', 'Growth', 'Damage Repair'];
+const BEARDS = ['Clean Shave', 'Stubble', 'Short Beard', 'Full Beard', 'No Preference'];
+const STYLES = ['Professional', 'Trendy', 'Korean', 'Casual', 'Modern Fade', 'Celebrity Inspired'];
+const GOALS = ['Try New Hairstyles', 'Professional Look', 'Trendy Look', 'Hair Growth Journey', 'Experiment With Colors'];
+const COLORS_OPTS = ['Natural Black', 'Brown', 'Blonde', 'Fashion Colors', 'No Preference'];
 
 export default function ProfileSetupScreen({ navigation }) {
-  const [fullName, setFullName] = useState('');
-  const [age, setAge] = useState('');
+  const { completeProfile, isLoading, logout } = useAuthStore();
+
   const [gender, setGender] = useState('Male');
   const [hairLength, setHairLength] = useState('Short');
+  const [beardPreference, setBeardPreference] = useState('Clean Shave');
   const [selectedStyles, setSelectedStyles] = useState([]);
-  const [selectedGoals, setSelectedGoals] = useState([]);
-  
-  // Style Quiz States
-  const [isTrendy, setIsTrendy] = useState(true);
-  const [isBold, setIsBold] = useState(false);
-  const [colorInterest, setColorInterest] = useState(false);
+  const [mainGoal, setMainGoal] = useState('Try New Hairstyles');
+  const [preferredHairColor, setPreferredHairColor] = useState('Natural Black');
 
   const toggleStyle = (style) => {
     if (selectedStyles.includes(style)) {
@@ -28,42 +29,47 @@ export default function ProfileSetupScreen({ navigation }) {
     }
   };
 
-  const toggleGoal = (goal) => {
-    if (selectedGoals.includes(goal)) {
-      setSelectedGoals(selectedGoals.filter(g => g !== goal));
+  const handleSave = async () => {
+    if (selectedStyles.length === 0) {
+      Alert.alert('Required', 'Please select at least one preferred style.');
+      return;
+    }
+
+    const preferences = {
+      gender,
+      hairLength,
+      beardPreference: gender === 'Female' ? 'No Preference' : beardPreference,
+      preferredStyles: selectedStyles,
+      mainGoal,
+      preferredHairColor,
+    };
+
+    const res = await completeProfile(preferences);
+    if (res.success) {
+      navigation.replace('Main');
     } else {
-      setSelectedGoals([...selectedGoals, goal]);
+      Alert.alert('Error', res.error || 'Failed to save profile preferences.');
     }
   };
 
-  const handleSave = () => {
-    // Save to global profile store or state
-    navigation.replace('Main');
+  const handleLogout = async () => {
+    await logout();
   };
 
+  const { height } = useWindowDimensions();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>Profile Setup</Text>
-      <Text style={styles.subtitle}>Customize your hair preferences</Text>
-
-      <Text style={styles.label}>Full Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your name"
-        placeholderTextColor={COLORS.textSecondary}
-        value={fullName}
-        onChangeText={setFullName}
-      />
-
-      <Text style={styles.label}>Age</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your age"
-        placeholderTextColor={COLORS.textSecondary}
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
-      />
+    <View style={{ height: Platform.OS === 'web' ? '100vh' : height, flex: 1, backgroundColor: COLORS.background }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={true}>
+        <View style={styles.headerRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Profile Completion</Text>
+          <Text style={styles.subtitle}>Help us personalize your experience</Text>
+        </View>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn} activeOpacity={0.7}>
+          <Ionicons name="log-out-outline" size={24} color={COLORS.textSecondary} />
+        </TouchableOpacity>
+      </View>
 
       <Text style={styles.label}>Gender</Text>
       <View style={styles.chipRow}>
@@ -78,7 +84,7 @@ export default function ProfileSetupScreen({ navigation }) {
         ))}
       </View>
 
-      <Text style={styles.label}>Preferred Hair Length</Text>
+      <Text style={styles.label}>Hair Length Preference</Text>
       <View style={styles.chipRow}>
         {LENGTHS.map(l => (
           <TouchableOpacity
@@ -91,7 +97,24 @@ export default function ProfileSetupScreen({ navigation }) {
         ))}
       </View>
 
-      <Text style={styles.label}>Styles Interest</Text>
+      {gender !== 'Female' && (
+        <>
+          <Text style={styles.label}>Beard Preference</Text>
+          <View style={styles.chipRow}>
+            {BEARDS.map(b => (
+              <TouchableOpacity
+                key={b}
+                style={[styles.chip, beardPreference === b && styles.activeChip]}
+                onPress={() => setBeardPreference(b)}
+              >
+                <Text style={[styles.chipText, beardPreference === b && styles.activeChipText]}>{b}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
+
+      <Text style={styles.label}>Preferred Style Type (Select Multiple)</Text>
       <View style={styles.chipRow}>
         {STYLES.map(s => {
           const active = selectedStyles.includes(s);
@@ -107,70 +130,58 @@ export default function ProfileSetupScreen({ navigation }) {
         })}
       </View>
 
-      <Text style={styles.label}>Hair Goals</Text>
+      <Text style={styles.label}>Main Goal</Text>
       <View style={styles.chipRow}>
-        {GOALS.map(g => {
-          const active = selectedGoals.includes(g);
-          return (
-            <TouchableOpacity
-              key={g}
-              style={[styles.chip, active && styles.activeChip]}
-              onPress={() => toggleGoal(g)}
-            >
-              <Text style={[styles.chipText, active && styles.activeChipText]}>{g}</Text>
-            </TouchableOpacity>
-          );
-        })}
+        {GOALS.map(g => (
+          <TouchableOpacity
+            key={g}
+            style={[styles.chip, mainGoal === g && styles.activeChip]}
+            onPress={() => setMainGoal(g)}
+          >
+            <Text style={[styles.chipText, mainGoal === g && styles.activeChipText]}>{g}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <Text style={styles.sectionTitle}>AI Style Quiz</Text>
-
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>{isTrendy ? 'Trendy Style Vibe' : 'Professional Style Vibe'}</Text>
-        <Switch
-          value={isTrendy}
-          onValueChange={setIsTrendy}
-          trackColor={{ false: COLORS.card, true: COLORS.primary }}
-          thumbColor={COLORS.secondary}
-        />
+      <Text style={styles.label}>Preferred Hair Color</Text>
+      <View style={styles.chipRow}>
+        {COLORS_OPTS.map(c => (
+          <TouchableOpacity
+            key={c}
+            style={[styles.chip, preferredHairColor === c && styles.activeChip]}
+            onPress={() => setPreferredHairColor(c)}
+          >
+            <Text style={[styles.chipText, preferredHairColor === c && styles.activeChipText]}>{c}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>{isBold ? 'Bold Looks' : 'Minimalist Looks'}</Text>
-        <Switch
-          value={isBold}
-          onValueChange={setIsBold}
-          trackColor={{ false: COLORS.card, true: COLORS.primary }}
-          thumbColor={COLORS.secondary}
-        />
-      </View>
-
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>Open to Hair Colors?</Text>
-        <Switch
-          value={colorInterest}
-          onValueChange={setColorInterest}
-          trackColor={{ false: COLORS.card, true: COLORS.primary }}
-          thumbColor={COLORS.secondary}
-        />
-      </View>
-
-      <TouchableOpacity style={styles.btn} onPress={handleSave}>
-        <Text style={styles.btnText}>Save & Continue</Text>
+      <TouchableOpacity style={[styles.btn, isLoading && { opacity: 0.7 }]} onPress={handleSave} disabled={isLoading}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color={COLORS.background} />
+        ) : (
+          <Text style={styles.btnText}>Save & Continue</Text>
+        )}
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   contentContainer: {
+    flexGrow: 1,
     padding: 24,
     paddingTop: 60,
     paddingBottom: 40,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  logoutBtn: {
+    padding: 4,
   },
   title: {
     fontSize: 28,
@@ -189,24 +200,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: 12,
     marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.secondary,
-    marginBottom: 16,
-    marginTop: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    paddingBottom: 8,
-  },
-  input: {
-    backgroundColor: COLORS.card,
-    color: COLORS.textPrimary,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   chipRow: {
     flexDirection: 'row',
@@ -233,27 +226,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: 'bold',
   },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    backgroundColor: COLORS.card,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  switchLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 15,
-  },
   btn: {
     backgroundColor: COLORS.secondary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 40,
   },
   btnText: {
     color: COLORS.background,

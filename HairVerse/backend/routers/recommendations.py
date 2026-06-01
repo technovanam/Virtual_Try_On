@@ -281,6 +281,20 @@ async def get_personalized(
     results.sort(key=lambda x: int(x["matchScore"].replace("%", "")), reverse=True)
     return results
 
+@router.get("/", response_model=List[HairstyleItem])
+async def get_general_recommendations():
+    # Return some general recommendations
+    results = []
+    for item in HAIRSTYLES_DATABASE[:5]:
+        recommended_item = {
+            **item,
+            "matchScore": "90%",
+            "badge": "Recommended",
+            "why_matches": "General recommendation based on overall popularity."
+        }
+        results.append(recommended_item)
+    return results
+
 @router.get("/hairstyles")
 async def get_hairstyles(
     query: Optional[str] = None,

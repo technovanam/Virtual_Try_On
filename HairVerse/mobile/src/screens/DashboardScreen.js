@@ -7,11 +7,12 @@ import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useProfileStore } from '../store/profileStore';
 import { useTryOnStore } from '../store/tryOnStore';
+import { useDashboardStore } from '../store/dashboardStore';
 
 const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 
 export default function DashboardScreen({ navigation }) {
-  const { user } = useAuthStore();
+  const { user, completeOnboarding } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   // Dynamic Greeting States
@@ -41,15 +42,25 @@ export default function DashboardScreen({ navigation }) {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Dynamic AI Recommendation Feed States
-  const [trendingFeeds, setTrendingFeeds] = useState([]);
-  const [personalizedFeeds, setPersonalizedFeeds] = useState([]);
-  const [isLoadingHairstyles, setIsLoadingHairstyles] = useState(true);
+  // Dynamic Dashboard Store integration
+  const { recommendations, trendingStyles, recentActivity, savedCollections, insights, loading, error, fetchDashboardAll } = useDashboardStore();
   const [savedStyleIds, setSavedStyleIds] = useState(['fade_01']);
-  const [recentlyTried, setRecentlyTried] = useState([]);
 
   // Try-on State Integration for Recycled Selections
   const { setSelectedHairstyle, setSelectedColor: setStoreColor, setSelectedBeardStyle } = useTryOnStore();
+
+  const [onboardingVisible, setOnboardingVisible] = useState(false);
+
+  useEffect(() => {
+    if (user && user.onboardingCompleted === false) {
+      setOnboardingVisible(true);
+    }
+  }, [user?.onboardingCompleted]);
+
+  const handleFinishOnboarding = async () => {
+    setOnboardingVisible(false);
+    await completeOnboarding();
+  };
 
   // Load entry animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -206,7 +217,7 @@ export default function DashboardScreen({ navigation }) {
   // 3. Calculate dynamic greeting and subtitle based on time of day via backend config
   const fetchGreeting = async () => {
     try {
-      const activeName = user?.name || activeProfile?.name || 'Sasi';
+      const activeName = user?.displayName || activeProfile?.name || 'User';
       const hours = new Date().getHours();
       const response = await axios.get(`${BACKEND_BASE_URL}/homepage/config`, {
         params: { username: activeName, hour: hours }
@@ -257,117 +268,9 @@ export default function DashboardScreen({ navigation }) {
     }
   };
 
-  const fetchHairstyles = async () => {
-    setIsLoadingHairstyles(true);
-    try {
-      // 1. Fetch trending feed
-      const trendingRes = await axios.get(`${BACKEND_BASE_URL}/recommendations/trending`, {
-        params: { category: selectedCategory }
-      });
-      setTrendingFeeds(trendingRes.data);
-
-      // 2. Fetch personalized recommendations based on active profile's face shape and hair texture
-      const fShape = activeProfile?.analysisData?.face_shape || 'Oval';
-      const hTexture = activeProfile?.analysisData?.hair_texture || 'Straight';
-      const personalizedRes = await axios.get(`${BACKEND_BASE_URL}/recommendations/personalized`, {
-        params: { face_shape: fShape, hair_texture: hTexture }
-      });
-      setPersonalizedFeeds(personalizedRes.data);
-
-      // 3. Fetch recently tried history
-      const historyRes = await axios.get(`${BACKEND_BASE_URL}/tryon/history`);
-      setRecentlyTried(historyRes.data);
-    } catch (error) {
-      console.warn("Failed to fetch hairstyles from backend recommendations, using offline fallbacks.", error);
-      setTrendingFeeds([
-        {
-          id: 'fade_01',
-          name: 'Classic Fade',
-          matchScore: '95%',
-          maintenance: 'Medium Maintenance',
-          badge: 'Trending',
-          popularity: 4.9,
-          category: 'Fade',
-          imageUrl: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=350&h=350&fit=crop',
-        },
-        {
-          id: 'korean_02',
-          name: 'Korean Textured',
-          matchScore: '92%',
-          maintenance: 'Low Maintenance',
-          badge: 'New Style',
-          popularity: 4.7,
-          category: 'Korean',
-          imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=350&h=350&fit=crop',
-        },
-        {
-          id: 'curly_03',
-          name: 'Textured Crop',
-          matchScore: '88%',
-          maintenance: 'High Maintenance',
-          badge: 'Recommended',
-          popularity: 4.6,
-          category: 'Curly',
-          imageUrl: 'https://images.unsplash.com/photo-1605497746444-ac9dbd39f4a5?w=350&h=350&fit=crop',
-        },
-        {
-          id: 'buzz_04',
-          name: 'Modern Buzz',
-          matchScore: '90%',
-          maintenance: 'Low Maintenance',
-          badge: 'Popular',
-          popularity: 4.8,
-          category: 'Trending',
-          imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=350&h=350&fit=crop',
-        }
-      ]);
-      setPersonalizedFeeds([
-        {
-          id: 'fade_01',
-          name: 'Classic Fade',
-          matchScore: '95%',
-          maintenance: 'Medium Maintenance',
-          badge: 'Recommended',
-          popularity: 4.9,
-          category: 'Fade',
-          imageUrl: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=350&h=350&fit=crop',
-        },
-        {
-          id: 'korean_02',
-          name: 'Korean Textured',
-          matchScore: '92%',
-          maintenance: 'Recommended',
-          popularity: 4.7,
-          category: 'Korean',
-          imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=350&h=350&fit=crop',
-        }
-      ]);
-      setRecentlyTried([
-        {
-          id: 'curly_03',
-          name: 'Textured Curly Crop',
-          color: 'Silver',
-          beard: 'Stubble Beard',
-          time: '2 hours ago',
-          imageUrl: 'https://images.unsplash.com/photo-1605497746444-ac9dbd39f4a5?w=200&h=200&fit=crop'
-        },
-        {
-          id: 'fade_01',
-          name: 'Classic Fade',
-          color: 'Dark Brown',
-          beard: 'Clean Shave',
-          time: '1 day ago',
-          imageUrl: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=200&h=200&fit=crop'
-        }
-      ]);
-    } finally {
-      setIsLoadingHairstyles(false);
-    }
-  };
-
   useEffect(() => {
-    fetchHairstyles();
-  }, [activeProfileId, selectedCategory, activeProfile?.analysisData]);
+    fetchDashboardAll(user?.token);
+  }, [activeProfileId, selectedCategory, activeProfile?.analysisData, user?.token]);
 
   const toggleBookmark = (id) => {
     if (savedStyleIds.includes(id)) {
@@ -635,6 +538,7 @@ export default function DashboardScreen({ navigation }) {
   const summaryData = getAiSummaryData();
 
   return (
+    <>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Animated Top Section */}
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
@@ -643,7 +547,7 @@ export default function DashboardScreen({ navigation }) {
           <View style={styles.greetContainer}>
             <Text style={styles.welcomeSubtitle}>{subtitle.toUpperCase()}</Text>
             <Text style={styles.welcomeTitle} numberOfLines={1}>
-              {greeting}, {user?.name || activeProfile?.name || 'Sasi'}
+              {greeting}, {user?.displayName || activeProfile?.name || 'User'}
             </Text>
           </View>
           
@@ -670,7 +574,7 @@ export default function DashboardScreen({ navigation }) {
                     <Image source={{ uri: activeProfile.avatarUrl }} style={styles.avatarImage} />
                   ) : (
                     <Text style={styles.avatarText}>
-                      {activeProfile?.name?.substring(0, 2).toUpperCase() || 'JD'}
+                      {activeProfile?.name?.substring(0, 2).toUpperCase() || (user?.displayName ? user.displayName.substring(0, 2).toUpperCase() : 'US')}
                     </Text>
                   )}
                 </View>
@@ -823,11 +727,11 @@ export default function DashboardScreen({ navigation }) {
                 aiState === 'READY' && styles.innerRingReady
               ]}>
                 {aiState === 'NO_SELFIE' && <Ionicons name="camera-outline" size={26} color="rgba(255, 255, 255, 0.4)" />}
-                {aiState === 'UPLOADING' && <Ionicons name="cloud-upload-outline" size={26} color="#7C5CFC" />}
-                {aiState === 'ANALYZING' && <Ionicons name="scan-outline" size={26} color="#00D4FF" />}
-                {aiState === 'PROCESSING' && <Ionicons name="git-branch-outline" size={26} color="#00E676" />}
-                {aiState === 'READY' && <Ionicons name="checkmark-circle-outline" size={28} color="#00E676" />}
-                {aiState === 'FAILED' && <Ionicons name="alert-circle-outline" size={28} color="#FF1744" />}
+                {aiState === 'UPLOADING' && <Ionicons name="cloud-upload-outline" size={26} color={COLORS.secondary} />}
+                {aiState === 'ANALYZING' && <Ionicons name="scan-outline" size={26} color={COLORS.primary} />}
+                {aiState === 'PROCESSING' && <Ionicons name="git-branch-outline" size={26} color={COLORS.success} />}
+                {aiState === 'READY' && <Ionicons name="checkmark-circle-outline" size={28} color={COLORS.success} />}
+                {aiState === 'FAILED' && <Ionicons name="alert-circle-outline" size={28} color={COLORS.error} />}
               </View>
               {(aiState === 'ANALYZING' || aiState === 'PROCESSING') && (
                 <Animated.View style={[styles.scanLine, { transform: [{ translateY }] }]} />
@@ -848,11 +752,11 @@ export default function DashboardScreen({ navigation }) {
           {aiState === 'UPLOADING' && (
             <View style={styles.statusRow}>
               <View style={styles.statusLabelRow}>
-                <ActivityIndicator size="small" color="#7C5CFC" style={styles.statusIndicator} />
+                <ActivityIndicator size="small" color={COLORS.secondary} style={styles.statusIndicator} />
                 <Text style={styles.statusText}>Uploading base64 image streams... {uploadProgress}%</Text>
               </View>
               <View style={styles.progressContainer}>
-                <View style={[styles.progressBar, { width: `${uploadProgress}%`, backgroundColor: '#7C5CFC' }]} />
+                <View style={[styles.progressBar, { width: `${uploadProgress}%`, backgroundColor: COLORS.secondary }]} />
               </View>
             </View>
           )}
@@ -861,20 +765,20 @@ export default function DashboardScreen({ navigation }) {
             <>
               <View style={styles.statusRow}>
                 <View style={styles.statusLabelRow}>
-                  <ActivityIndicator size="small" color="#00D4FF" style={styles.statusIndicator} />
+                  <ActivityIndicator size="small" color={COLORS.primary} style={styles.statusIndicator} />
                   <Text style={styles.statusText}>Analyzing Face Shape... {analysisProgress}%</Text>
                 </View>
                 <View style={styles.progressContainer}>
-                  <View style={[styles.progressBar, { width: `${analysisProgress}%`, backgroundColor: '#00D4FF' }]} />
+                  <View style={[styles.progressBar, { width: `${analysisProgress}%`, backgroundColor: COLORS.primary }]} />
                 </View>
               </View>
               <View style={[styles.statusRow, { marginBottom: 0 }]}>
                 <View style={styles.statusLabelRow}>
-                  <ActivityIndicator size="small" color="#00D4FF" style={styles.statusIndicator} />
+                  <ActivityIndicator size="small" color={COLORS.primary} style={styles.statusIndicator} />
                   <Text style={styles.statusText}>Detecting Hair Texture... {textureProgress}%</Text>
                 </View>
                 <View style={styles.progressContainer}>
-                  <View style={[styles.progressBar, { width: `${textureProgress}%`, backgroundColor: '#00D4FF' }]} />
+                  <View style={[styles.progressBar, { width: `${textureProgress}%`, backgroundColor: COLORS.primary }]} />
                 </View>
               </View>
             </>
@@ -884,29 +788,29 @@ export default function DashboardScreen({ navigation }) {
             <>
               <View style={styles.statusRow}>
                 <View style={styles.statusLabelRow}>
-                  <Ionicons name="checkmark-circle" size={14} color="#00E676" style={styles.successStatusIcon} />
-                  <Text style={[styles.statusText, { color: '#00E676' }]}>Analyzing Face Shape... 100%</Text>
+                  <Ionicons name="checkmark-circle" size={14} color={COLORS.success} style={styles.successStatusIcon} />
+                  <Text style={[styles.statusText, { color: COLORS.success }]}>Analyzing Face Shape... 100%</Text>
                 </View>
                 <View style={styles.progressContainer}>
-                  <View style={[styles.progressBar, { width: '100%', backgroundColor: '#00E676' }]} />
+                  <View style={[styles.progressBar, { width: '100%', backgroundColor: COLORS.success }]} />
                 </View>
               </View>
               <View style={styles.statusRow}>
                 <View style={styles.statusLabelRow}>
-                  <Ionicons name="checkmark-circle" size={14} color="#00E676" style={styles.successStatusIcon} />
-                  <Text style={[styles.statusText, { color: '#00E676' }]}>Detecting Hair Texture... 100%</Text>
+                  <Ionicons name="checkmark-circle" size={14} color={COLORS.success} style={styles.successStatusIcon} />
+                  <Text style={[styles.statusText, { color: COLORS.success }]}>Detecting Hair Texture... 100%</Text>
                 </View>
                 <View style={styles.progressContainer}>
-                  <View style={[styles.progressBar, { width: '100%', backgroundColor: '#00E676' }]} />
+                  <View style={[styles.progressBar, { width: '100%', backgroundColor: COLORS.success }]} />
                 </View>
               </View>
               <View style={[styles.statusRow, { marginBottom: 0 }]}>
                 <View style={styles.statusLabelRow}>
-                  <ActivityIndicator size="small" color="#00D4FF" style={styles.statusIndicator} />
+                  <ActivityIndicator size="small" color={COLORS.primary} style={styles.statusIndicator} />
                   <Text style={styles.statusText}>Generating Realistic Hair... {generationProgress}%</Text>
                 </View>
                 <View style={styles.progressContainer}>
-                  <View style={[styles.progressBar, { width: `${generationProgress}%`, backgroundColor: '#00D4FF' }]} />
+                  <View style={[styles.progressBar, { width: `${generationProgress}%`, backgroundColor: COLORS.primary }]} />
                 </View>
               </View>
             </>
@@ -914,8 +818,8 @@ export default function DashboardScreen({ navigation }) {
 
           {aiState === 'READY' && (
             <View style={styles.statusRowSimple}>
-              <Ionicons name="sparkles" size={16} color="#00E676" style={styles.infoIcon} />
-              <Text style={[styles.statusTextSimple, { color: '#00E676', fontWeight: 'bold' }]}>
+              <Ionicons name="sparkles" size={16} color={COLORS.success} style={styles.infoIcon} />
+              <Text style={[styles.statusTextSimple, { color: COLORS.success, fontWeight: 'bold' }]}>
                 Neural profile fully generated. 95% matching accuracy active.
               </Text>
             </View>
@@ -923,8 +827,8 @@ export default function DashboardScreen({ navigation }) {
 
           {aiState === 'FAILED' && (
             <View style={styles.statusRowSimple}>
-              <Ionicons name="close-circle" size={16} color="#FF1744" style={styles.infoIcon} />
-              <Text style={[styles.statusTextSimple, { color: '#FF1744', fontWeight: 'bold' }]}>
+              <Ionicons name="close-circle" size={16} color={COLORS.error} style={styles.infoIcon} />
+              <Text style={[styles.statusTextSimple, { color: COLORS.error, fontWeight: 'bold' }]}>
                 Error: No face detected. Make sure your face is well-lit and fully visible.
               </Text>
             </View>
@@ -945,7 +849,7 @@ export default function DashboardScreen({ navigation }) {
               <Ionicons 
                 name="cloud-upload-outline" 
                 size={16} 
-                color={aiState === 'FAILED' ? '#FF1744' : COLORS.background} 
+                color={aiState === 'FAILED' ? COLORS.error : COLORS.background} 
                 style={styles.btnIcon} 
               />
               <Text style={[
@@ -1041,7 +945,7 @@ export default function DashboardScreen({ navigation }) {
             <View style={styles.profileInfoContainer}>
               <Text style={styles.profileCardLabel}>CURRENT ACTIVE PROFILE</Text>
               <Text style={styles.profileCardTitle}>
-                {activeProfile?.name || 'Sasi'} {activeProfile?.isGuest && ' (Guest)'}
+                {activeProfile?.name || user?.displayName || 'User'} {activeProfile?.isGuest && ' (Guest)'}
               </Text>
               <Text style={styles.profileMetaText}>
                 Last used: <Text style={styles.profileHighlightText}>{activeProfile?.lastUsedTime || 'Active Now'}</Text>
@@ -1054,15 +958,15 @@ export default function DashboardScreen({ navigation }) {
             {activeProfile?.analysisData ? (
               <>
                 <View style={[styles.aiBadge, styles.badgeFaceShape]}>
-                  <Ionicons name="scan" size={10} color="#00D4FF" style={styles.badgeIcon} />
+                  <Ionicons name="scan" size={10} color={COLORS.primary} style={styles.badgeIcon} />
                   <Text style={styles.aiBadgeText}>{activeProfile.analysisData.face_shape} Shape</Text>
                 </View>
                 <View style={[styles.aiBadge, styles.badgeHairType]}>
-                  <Ionicons name="git-branch" size={10} color="#7C5CFC" style={styles.badgeIcon} />
+                  <Ionicons name="git-branch" size={10} color={COLORS.secondary} style={styles.badgeIcon} />
                   <Text style={styles.aiBadgeText}>{activeProfile.analysisData.hair_texture || activeProfile.analysisData.hair_type} Hair</Text>
                 </View>
                 <View style={[styles.aiBadge, styles.badgeDensity]}>
-                  <Ionicons name="grid" size={10} color="#00E676" style={styles.badgeIcon} />
+                  <Ionicons name="grid" size={10} color={COLORS.success} style={styles.badgeIcon} />
                   <Text style={styles.aiBadgeText}>{activeProfile.analysisData.hair_density} Density</Text>
                 </View>
               </>
@@ -1101,7 +1005,7 @@ export default function DashboardScreen({ navigation }) {
               }}
               activeOpacity={0.75}
             >
-              <Ionicons name="person-add-outline" size={14} color="#00E676" style={styles.profileBtnIcon} />
+              <Ionicons name="person-add-outline" size={14} color={COLORS.success} style={styles.profileBtnIcon} />
               <Text style={styles.profileAddBtnText}>Add New</Text>
             </TouchableOpacity>
           </View>
@@ -1229,7 +1133,7 @@ export default function DashboardScreen({ navigation }) {
               <View style={styles.addProfileRow}>
                 <TextInput
                   style={styles.addProfileInput}
-                  placeholder="Enter name (e.g. Sasi)..."
+                  placeholder="Enter name..."
                   placeholderTextColor="rgba(255, 255, 255, 0.4)"
                   value={newProfileName}
                   onChangeText={setNewProfileName}
@@ -1257,20 +1161,20 @@ export default function DashboardScreen({ navigation }) {
       {/* Dynamic AI Recommendation Section - Recommended For You */}
       <View style={styles.sectionHeaderRow}>
         <Text style={styles.sectionTitle}>Recommended For You</Text>
-        <Ionicons name="sparkles-outline" size={16} color="#00D4FF" />
+        <Ionicons name="sparkles-outline" size={16} color={COLORS.primary} />
       </View>
       <Text style={styles.sectionSubtitle}>
         AI Recommendations tailored for your {activeProfile?.analysisData?.face_shape || 'Oval'} face & {activeProfile?.analysisData?.hair_type || 'Straight'} hair
       </Text>
 
-      {isLoadingHairstyles ? renderRecommendationSkeleton() : (
+      {loading.recommendations ? renderRecommendationSkeleton() : (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.recommendedScroll}
           contentContainerStyle={styles.recommendedScrollContent}
         >
-          {personalizedFeeds.map((item) => {
+          {recommendations.map((item) => {
             const isBookmarked = savedStyleIds.includes(item.id);
             return (
               <TouchableOpacity
@@ -1310,7 +1214,7 @@ export default function DashboardScreen({ navigation }) {
                       <Ionicons 
                         name={isBookmarked ? "bookmark" : "bookmark-outline"} 
                         size={14} 
-                        color={isBookmarked ? "#00D4FF" : COLORS.textPrimary} 
+                        color={isBookmarked ? COLORS.primary : COLORS.textPrimary} 
                       />
                     </TouchableOpacity>
 
@@ -1319,7 +1223,7 @@ export default function DashboardScreen({ navigation }) {
                       onPress={() => handleQuickTryOn(item)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons name="sparkles" size={14} color="#00E676" />
+                      <Ionicons name="sparkles" size={14} color={COLORS.success} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -1327,7 +1231,7 @@ export default function DashboardScreen({ navigation }) {
                       onPress={() => handleQuickCompare(item)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons name="git-compare" size={14} color="#7C5CFC" />
+                      <Ionicons name="git-compare" size={14} color={COLORS.secondary} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -1346,9 +1250,9 @@ export default function DashboardScreen({ navigation }) {
       </View>
 
       {/* Redesigned Premium Trending Grid */}
-      {isLoadingHairstyles ? renderTrendingSkeleton() : (
+      {loading.trendingStyles ? renderTrendingSkeleton() : (
         <View style={styles.trendingGrid}>
-          {trendingFeeds.map((item) => {
+          {trendingStyles.map((item) => {
             const isBookmarked = savedStyleIds.includes(item.id);
             return (
               <TouchableOpacity
@@ -1393,7 +1297,7 @@ export default function DashboardScreen({ navigation }) {
                         <Ionicons 
                           name={isBookmarked ? "bookmark" : "bookmark-outline"} 
                           size={12} 
-                          color={isBookmarked ? "#00D4FF" : COLORS.textPrimary} 
+                          color={isBookmarked ? COLORS.primary : COLORS.textPrimary} 
                         />
                       </TouchableOpacity>
 
@@ -1402,7 +1306,7 @@ export default function DashboardScreen({ navigation }) {
                         onPress={() => handleQuickTryOn(item)}
                         activeOpacity={0.7}
                       >
-                        <Ionicons name="sparkles" size={12} color="#00E676" />
+                        <Ionicons name="sparkles" size={12} color={COLORS.success} />
                       </TouchableOpacity>
 
                       <TouchableOpacity
@@ -1410,7 +1314,7 @@ export default function DashboardScreen({ navigation }) {
                         onPress={() => handleQuickCompare(item)}
                         activeOpacity={0.7}
                       >
-                        <Ionicons name="git-compare" size={12} color="#7C5CFC" />
+                        <Ionicons name="git-compare" size={12} color={COLORS.secondary} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -1421,13 +1325,37 @@ export default function DashboardScreen({ navigation }) {
         </View>
       )}
 
-      {/* SECTION 1 — Recently Tried (Dynamic & Premium Swipeable History) */}
+      {/* SECTION 5 — QUICK ACTIONS */}
       <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionTitle}>Recently Tried</Text>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Ionicons name="flash-outline" size={16} color={COLORS.secondary} />
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, marginBottom: 24, gap: 12 }}>
+         <TouchableOpacity style={{backgroundColor: COLORS.card, padding: 16, borderRadius: 12, alignItems: 'center', width: 90}} onPress={() => navigation.navigate('UploadSelfie')}>
+            <Ionicons name="camera-outline" size={24} color={COLORS.primary} style={{marginBottom: 8}} />
+            <Text style={{fontSize: 12, color: COLORS.textPrimary, textAlign: 'center'}}>Upload Selfie</Text>
+         </TouchableOpacity>
+         <TouchableOpacity style={{backgroundColor: COLORS.card, padding: 16, borderRadius: 12, alignItems: 'center', width: 90}} onPress={() => navigation.navigate('LiveCamera')}>
+            <Ionicons name="videocam-outline" size={24} color={COLORS.primary} style={{marginBottom: 8}} />
+            <Text style={{fontSize: 12, color: COLORS.textPrimary, textAlign: 'center'}}>Start Camera</Text>
+         </TouchableOpacity>
+         <TouchableOpacity style={{backgroundColor: COLORS.card, padding: 16, borderRadius: 12, alignItems: 'center', width: 90}} onPress={() => navigation.navigate('Search')}>
+            <Ionicons name="search-outline" size={24} color={COLORS.primary} style={{marginBottom: 8}} />
+            <Text style={{fontSize: 12, color: COLORS.textPrimary, textAlign: 'center'}}>Search Styles</Text>
+         </TouchableOpacity>
+         <TouchableOpacity style={{backgroundColor: COLORS.card, padding: 16, borderRadius: 12, alignItems: 'center', width: 90}} onPress={() => navigation.navigate('SavedCollections')}>
+            <Ionicons name="bookmark-outline" size={24} color={COLORS.primary} style={{marginBottom: 8}} />
+            <Text style={{fontSize: 12, color: COLORS.textPrimary, textAlign: 'center'}}>Saved Styles</Text>
+         </TouchableOpacity>
+      </ScrollView>
+
+      {/* SECTION 6 — RECENT ACTIVITY */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
         <Ionicons name="time-outline" size={16} color={COLORS.secondary} />
       </View>
       
-      {recentlyTried && recentlyTried.length > 0 ? (
+      {loading.recentActivity ? <ActivityIndicator color={COLORS.primary} style={{ margin: 20 }} /> : recentActivity && recentActivity.length > 0 ? (
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -1436,7 +1364,7 @@ export default function DashboardScreen({ navigation }) {
           snapToInterval={286} // Snaps perfectly for card sizing + margin
           decelerationRate="fast"
         >
-          {recentlyTried.map((item, index) => (
+          {recentActivity.map((item, index) => (
             <View key={index} style={styles.recentHistoryCard}>
               <View style={styles.recentCardGlow} />
               
@@ -1459,7 +1387,7 @@ export default function DashboardScreen({ navigation }) {
                                    c.includes('blonde') ? '#F4F1DE' : 
                                    c.includes('burgundy') ? '#800020' : 
                                    c.includes('black') ? '#000000' : 
-                                   c.includes('brown') ? '#4E3629' : '#7C5CFC';
+                                   c.includes('brown') ? '#4E3629' : COLORS.secondary;
                           })()
                         }
                       ]} />
@@ -1509,7 +1437,7 @@ export default function DashboardScreen({ navigation }) {
         </ScrollView>
       ) : (
         <View style={styles.emptyHistoryContainer}>
-          <Ionicons name="color-palette-outline" size={28} color="rgba(0, 212, 255, 0.4)" style={{ marginBottom: 6 }} />
+          <Ionicons name="color-palette-outline" size={28} color={COLORS.primary} style={{ marginBottom: 6 }} />
           <Text style={styles.emptyHistoryText}>No recently tried styles yet.</Text>
           <TouchableOpacity
             style={styles.emptyHistoryBtn}
@@ -1521,111 +1449,90 @@ export default function DashboardScreen({ navigation }) {
         </View>
       )}
 
-      {/* SECTION 2 — AI Hair Summary (Premium Analytics Dashboard) */}
+      {/* SECTION 9 — CONTINUE TRY-ON */}
       <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionTitle}>AI Hair Summary</Text>
-        <Ionicons name="sparkles-outline" size={14} color={COLORS.secondary} />
+        <Text style={styles.sectionTitle}>Continue Try-On</Text>
+        <Ionicons name="play-circle-outline" size={16} color={COLORS.secondary} />
+      </View>
+      {loading.recentActivity ? <ActivityIndicator color={COLORS.primary} style={{ margin: 20 }} /> : recentActivity && recentActivity.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recentScroll} contentContainerStyle={styles.recentScrollContent}>
+          {recentActivity.map((item, index) => (
+            <TouchableOpacity key={index} style={styles.recentHistoryCard} activeOpacity={0.8} onPress={() => navigation.navigate('VirtualTryOn', { id: item.id })}>
+              <Image source={{ uri: item.imageUrl }} style={styles.recentHistoryThumbnail} />
+              <View style={styles.recentInfoBox}>
+                <Text style={styles.recentItemName}>{item.name}</Text>
+                <Text style={styles.recentItemMeta}>Resume Try-On</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyHistoryContainer}>
+          <Text style={styles.emptyHistoryText}>No unfinished try-ons.</Text>
+        </View>
+      )}
+
+      {/* SECTION 7 — SAVED COLLECTIONS */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Saved Collections</Text>
+        <Ionicons name="bookmark-outline" size={16} color={COLORS.secondary} />
       </View>
       
-      <View style={styles.summaryHeroCard}>
-        <View style={styles.summaryHeroGlow} />
-        
-        {/* Top Analytics Row */}
-        <View style={styles.summaryTopRow}>
-          {/* AI Insight Score Meter */}
-          <View style={styles.scoreMeterContainer}>
-            <View style={styles.scoreMeterOuter}>
-              <View style={styles.scoreMeterInner}>
-                <Text style={styles.scoreMeterValueText}>{summaryData.matchScore}</Text>
-                <Text style={styles.scoreMeterLabelText}>MATCH</Text>
-              </View>
-            </View>
-          </View>
-          
-          {/* Dynamic Score KPIs */}
-          <View style={styles.kpiContainer}>
-            <View style={styles.kpiItem}>
-              <View style={styles.kpiLabelRow}>
-                <Text style={styles.kpiLabel}>Hair Health Score</Text>
-                <Text style={[styles.kpiValue, { color: '#00E676' }]}>{summaryData.hairHealth}/100</Text>
-              </View>
-              <View style={styles.kpiProgressContainer}>
-                <View style={[styles.kpiProgressBar, { width: `${summaryData.hairHealth}%`, backgroundColor: '#00E676' }]} />
-              </View>
-            </View>
-            
-            <View style={styles.kpiItem}>
-              <View style={styles.kpiLabelRow}>
-                <Text style={styles.kpiLabel}>AI Recommendation Strength</Text>
-                <Text style={[styles.kpiValue, { color: '#7C5CFC' }]}>{summaryData.recommendationStrength}</Text>
-              </View>
-              <View style={styles.kpiProgressContainer}>
-                <View style={[styles.kpiProgressBar, { width: summaryData.recProgress, backgroundColor: '#7C5CFC' }]} />
-              </View>
-            </View>
-            
-            <View style={[styles.kpiItem, { marginBottom: 0 }]}>
-              <View style={styles.kpiLabelRow}>
-                <Text style={styles.kpiLabel}>Style Compatibility %</Text>
-                <Text style={[styles.kpiValue, { color: '#00D4FF' }]}>{summaryData.styleCompatibility}%</Text>
-              </View>
-              <View style={styles.kpiProgressContainer}>
-                <View style={[styles.kpiProgressBar, { width: `${summaryData.styleCompatibility}%`, backgroundColor: '#00D4FF' }]} />
-              </View>
-            </View>
-          </View>
-        </View>
-        
-        {/* Futuristic Mini Analytics Grid (2x2 premium layout) */}
-        <View style={styles.miniAnalyticsGrid}>
-          {/* Card 1: Face Shape */}
-          <View style={styles.miniAnalyticCard}>
-            <Ionicons name="scan-outline" size={14} color="#00D4FF" style={styles.miniAnalyticIcon} />
-            <Text style={styles.miniAnalyticLabel}>Face Shape</Text>
-            <Text style={styles.miniAnalyticVal} numberOfLines={1}>
-              {summaryData.faceShape}
-            </Text>
-          </View>
-          
-          {/* Card 2: Hair Texture */}
-          <View style={styles.miniAnalyticCard}>
-            <Ionicons name="git-branch-outline" size={14} color="#7C5CFC" style={styles.miniAnalyticIcon} />
-            <Text style={styles.miniAnalyticLabel}>Texture</Text>
-            <Text style={styles.miniAnalyticVal} numberOfLines={1}>
-              {summaryData.texture}
-            </Text>
-          </View>
-          
-          {/* Card 3: Density */}
-          <View style={styles.miniAnalyticCard}>
-            <Ionicons name="grid-outline" size={14} color="#00E676" style={styles.miniAnalyticIcon} />
-            <Text style={styles.miniAnalyticLabel}>Density</Text>
-            <Text style={styles.miniAnalyticVal} numberOfLines={1}>
-              {summaryData.density}
-            </Text>
-          </View>
-
-          {/* Card 4: Beard Compatibility */}
-          <View style={styles.miniAnalyticCard}>
-            <Ionicons name="sparkles-outline" size={14} color="#FFD740" style={styles.miniAnalyticIcon} />
-            <Text style={styles.miniAnalyticLabel}>Beard Match</Text>
-            <Text style={styles.miniAnalyticVal} numberOfLines={1}>
-              {summaryData.beardCompatibility}
-            </Text>
-          </View>
-        </View>
-        
-        {/* Dynamic CTA */}
-        <TouchableOpacity
-          style={styles.fullReportBtn}
-          onPress={() => navigation.navigate('HairInsights')}
-          activeOpacity={0.8}
+      {loading.savedCollections ? <ActivityIndicator color={COLORS.primary} style={{ margin: 20 }} /> : savedCollections && savedCollections.length > 0 ? (
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.recentScroll}
+          contentContainerStyle={styles.recentScrollContent}
         >
-          <Ionicons name="sparkles" size={16} color="#00D4FF" style={styles.fullReportIcon} />
-          <Text style={styles.fullReportBtnText}>View Full AI Report</Text>
-        </TouchableOpacity>
+          {savedCollections.map((item, index) => (
+            <TouchableOpacity key={index} style={styles.recentHistoryCard} activeOpacity={0.8} onPress={() => navigation.navigate('SavedCollections')}>
+              <Image source={{ uri: item.imageUrl }} style={styles.recentHistoryThumbnail} />
+              <View style={styles.recentInfoBox}>
+                <Text style={styles.recentItemName}>{item.name}</Text>
+                <Text style={styles.recentItemMeta}>{item.count} items</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyHistoryContainer}>
+          <Text style={styles.emptyHistoryText}>No saved collections yet.</Text>
+        </View>
+      )}
+
+      {/* SECTION 8 — FUTURE AI INSIGHTS */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>AI Insights</Text>
+        <Ionicons name="sparkles-outline" size={14} color={COLORS.secondary} />
+      </View>
+      <View style={styles.summaryHeroCard}>
+        {insights ? (
+           <View><Text style={{color: COLORS.background}}>Insights Available</Text></View>
+        ) : (
+           <View style={{padding: 20, alignItems: 'center'}}>
+             <Ionicons name="construct-outline" size={32} color={COLORS.secondary} style={{marginBottom: 10}}/>
+             <Text style={{color: COLORS.textPrimary, fontSize: 16, fontWeight: 'bold'}}>No analysis available yet</Text>
+             <Text style={{color: COLORS.secondary, fontSize: 12, textAlign: 'center', marginTop: 5}}>Face Shape, Hair Density, Thickness, Texture, Length, Color, and Shine will be available in future MediaPipe/OpenCV integrations.</Text>
+           </View>
+        )}
       </View>
     </ScrollView>
+    <Modal visible={onboardingVisible} animationType="fade" transparent={true}>
+      <View style={styles.onboardingOverlay}>
+        <View style={styles.onboardingModal}>
+          <Ionicons name="sparkles" size={40} color={COLORS.secondary} style={{ marginBottom: 16 }} />
+          <Text style={styles.onboardingTitle}>Welcome to HairVerse!</Text>
+          <Text style={styles.onboardingText}>
+            Explore tailored hairstyles, perform AI analysis, and see what looks best on you in real-time.
+          </Text>
+          <TouchableOpacity style={styles.onboardingBtn} onPress={handleFinishOnboarding}>
+            <Text style={styles.onboardingBtnText}>Get Started</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -1849,9 +1756,9 @@ const styles = StyleSheet.create({
   },
   activeChip: {
     backgroundColor: 'rgba(0, 212, 255, 0.15)',
-    borderColor: '#00D4FF',
+    borderColor: COLORS.primary,
     ...buildShadow('0px 2px 6px rgba(0, 212, 255, 0.3)', {
-      shadowColor: '#00D4FF',
+      shadowColor: COLORS.primary,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
@@ -1859,7 +1766,7 @@ const styles = StyleSheet.create({
     }),
   },
   activeChipText: {
-    color: '#00D4FF',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   heroCard: {
@@ -2173,7 +2080,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#0F0F16',
+    backgroundColor: COLORS.card,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
@@ -2515,35 +2422,35 @@ const styles = StyleSheet.create({
   cardUploading: {
     borderColor: 'rgba(124, 92, 252, 0.4)',
     ...buildShadow('0px 0px 12px rgba(124, 92, 252, 0.15)', {
-      shadowColor: '#7C5CFC',
+      shadowColor: COLORS.secondary,
       shadowOpacity: 0.15,
     }),
   },
   cardAnalyzing: {
-    borderColor: 'rgba(0, 212, 255, 0.4)',
+    borderColor: COLORS.primary,
     ...buildShadow('0px 0px 12px rgba(0, 212, 255, 0.18)', {
-      shadowColor: '#00D4FF',
+      shadowColor: COLORS.primary,
       shadowOpacity: 0.18,
     }),
   },
   cardProcessing: {
     borderColor: 'rgba(0, 230, 118, 0.4)',
     ...buildShadow('0px 0px 12px rgba(0, 230, 118, 0.15)', {
-      shadowColor: '#00E676',
+      shadowColor: COLORS.success,
       shadowOpacity: 0.15,
     }),
   },
   cardReady: {
     borderColor: 'rgba(0, 212, 255, 0.5)',
     ...buildShadow('0px 0px 14px rgba(0, 212, 255, 0.25)', {
-      shadowColor: '#00D4FF',
+      shadowColor: COLORS.primary,
       shadowOpacity: 0.25,
     }),
   },
   cardFailed: {
     borderColor: 'rgba(255, 23, 68, 0.5)',
     ...buildShadow('0px 0px 14px rgba(255, 23, 68, 0.25)', {
-      shadowColor: '#FF1744',
+      shadowColor: COLORS.error,
       shadowOpacity: 0.25,
     }),
   },
@@ -2561,35 +2468,35 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(124, 92, 252, 0.4)',
   },
   badgeTextUploading: {
-    color: '#7C5CFC',
+    color: COLORS.secondary,
   },
   badgeAnalyzing: {
     backgroundColor: 'rgba(0, 212, 255, 0.15)',
-    borderColor: 'rgba(0, 212, 255, 0.4)',
+    borderColor: COLORS.primary,
   },
   badgeTextAnalyzing: {
-    color: '#00D4FF',
+    color: COLORS.primary,
   },
   badgeProcessing: {
     backgroundColor: 'rgba(0, 230, 118, 0.15)',
     borderColor: 'rgba(0, 230, 118, 0.4)',
   },
   badgeTextProcessing: {
-    color: '#00E676',
+    color: COLORS.success,
   },
   badgeReady: {
     backgroundColor: 'rgba(0, 212, 255, 0.2)',
     borderColor: 'rgba(0, 212, 255, 0.6)',
   },
   badgeTextReady: {
-    color: '#00D4FF',
+    color: COLORS.primary,
   },
   badgeFailed: {
     backgroundColor: 'rgba(255, 23, 68, 0.15)',
     borderColor: 'rgba(255, 23, 68, 0.4)',
   },
   badgeTextFailed: {
-    color: '#FF1744',
+    color: COLORS.error,
   },
 
   // Ring States
@@ -2601,11 +2508,11 @@ const styles = StyleSheet.create({
   },
   innerRingFailed: {
     backgroundColor: 'rgba(255, 23, 68, 0.08)',
-    borderColor: '#FF1744',
+    borderColor: COLORS.error,
   },
   innerRingReady: {
     backgroundColor: 'rgba(0, 230, 118, 0.08)',
-    borderColor: '#00E676',
+    borderColor: COLORS.success,
   },
 
   // Simple Row Status
@@ -2632,7 +2539,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 23, 68, 0.3)',
   },
   failedActionBtnText: {
-    color: '#FF1744',
+    color: COLORS.error,
   },
 
   // Profile Redesign Styles
@@ -2695,7 +2602,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: COLORS.success,
     borderWidth: 2.5,
-    borderColor: '#0F0F16',
+    borderColor: COLORS.card,
   },
   profileHighlightText: {
     color: COLORS.secondary,
@@ -2756,7 +2663,7 @@ const styles = StyleSheet.create({
     flex: 0.31,
   },
   profileAddBtnText: {
-    color: '#00E676',
+    color: COLORS.success,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -2952,7 +2859,7 @@ const styles = StyleSheet.create({
   recommendedCardBadgeText: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#7C5CFC',
+    color: COLORS.secondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -3320,5 +3227,46 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.secondary,
     fontWeight: 'bold',
+  },
+  onboardingOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  onboardingModal: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 255, 0.3)',
+    width: '100%',
+  },
+  onboardingTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  onboardingText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  onboardingBtn: {
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+  },
+  onboardingBtnText: {
+    color: COLORS.background,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

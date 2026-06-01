@@ -21,7 +21,6 @@ import SavedCollectionsScreen from '../screens/SavedCollectionsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import HairInsightsScreen from '../screens/HairInsightsScreen';
 import PremiumScreen from '../screens/PremiumScreen';
-import OnboardingScreen from '../screens/OnboardingScreen';
 import SearchScreen from '../screens/SearchScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import ExportScreen from '../screens/ExportScreen';
@@ -117,8 +116,12 @@ function AuthNavigator() {
 // Main Stack (authenticated users)
 // ═══════════════════════════════════════════════════════════════════════════════
 function MainNavigator() {
+  const { user } = useAuthStore();
+  const initialRoute = user?.profileCompleted ? 'Main' : 'ProfileSetup';
+
   return (
     <MainStack.Navigator
+      initialRouteName={initialRoute}
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: COLORS.background },
@@ -129,7 +132,6 @@ function MainNavigator() {
 
       {/* Onboarding / Setup (post-auth but before full experience) */}
       <MainStack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-      <MainStack.Screen name="Onboarding" component={OnboardingScreen} />
 
       {/* Feature screens */}
       <MainStack.Screen name="AIAnalysis" component={AIAnalysisScreen} />

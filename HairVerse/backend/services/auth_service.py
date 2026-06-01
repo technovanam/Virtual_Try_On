@@ -175,6 +175,7 @@ def create_user_profile(uid: str, email: str, username: str) -> dict:
         "createdAt": now_iso,
         "lastLogin": now_iso,
         "subscriptionStatus": "free",
+        "profileCompleted": False,
         "onboardingCompleted": False,
     }
 
@@ -191,6 +192,7 @@ def create_user_profile(uid: str, email: str, username: str) -> dict:
         "email": email,
         "display_name": username,
         "subscription_status": "free",
+        "profile_completed": False,
         "onboarding_completed": False,
         "created_at": now_iso,
     }
@@ -226,6 +228,7 @@ def get_user_profile(uid: str) -> dict:
         "email": data.get("email", ""),
         "display_name": data.get("displayName", data.get("email", uid)),
         "subscription_status": data.get("subscriptionStatus", "free"),
+        "profile_completed": data.get("profileCompleted", False),
         "onboarding_completed": data.get("onboardingCompleted", False),
         "created_at": data.get("createdAt", ""),
     }
@@ -271,6 +274,7 @@ def create_user(email: str, password: str, username: str) -> dict:
         "createdAt": now_iso,
         "lastLogin": now_iso,
         "subscriptionStatus": "free",
+        "profileCompleted": False,
         "onboardingCompleted": False,
     }
 
@@ -286,6 +290,7 @@ def create_user(email: str, password: str, username: str) -> dict:
         "email": email,
         "display_name": username,
         "subscription_status": "free",
+        "profile_completed": False,
         "onboarding_completed": False,
         "created_at": now_iso,
     }
@@ -370,6 +375,7 @@ def authenticate_user(email: str, password: str) -> dict:
             "email": email,
             "display_name": data.get("displayName", email),
             "subscription_status": data.get("subscriptionStatus", "free"),
+            "profile_completed": data.get("profileCompleted", False),
             "onboarding_completed": data.get("onboardingCompleted", False),
             "created_at": data.get("createdAt", ""),
         }
@@ -382,6 +388,7 @@ def authenticate_user(email: str, password: str) -> dict:
             "createdAt": now_iso,
             "lastLogin": now_iso,
             "subscriptionStatus": "free",
+            "profileCompleted": False,
             "onboardingCompleted": False,
         }
         doc_ref.set(fallback_data)
@@ -390,6 +397,7 @@ def authenticate_user(email: str, password: str) -> dict:
             "email": email,
             "display_name": email,
             "subscription_status": "free",
+            "profile_completed": False,
             "onboarding_completed": False,
             "created_at": now_iso,
         }

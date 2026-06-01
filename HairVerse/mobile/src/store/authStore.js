@@ -42,6 +42,7 @@ export const useAuthStore = create((set) => ({
               email: data.email,
               displayName: data.display_name || data.email,
               subscriptionStatus: data.subscription_status || 'free',
+              profileCompleted: data.profile_completed ?? false,
               onboardingCompleted: data.onboarding_completed ?? false,
             },
             isAuthenticated: true,
@@ -58,6 +59,7 @@ export const useAuthStore = create((set) => ({
               email: firebaseUser.email || '',
               displayName: firebaseUser.email || '',
               subscriptionStatus: 'free',
+              profileCompleted: false,
               onboardingCompleted: false,
             },
             isAuthenticated: true,
@@ -86,6 +88,7 @@ export const useAuthStore = create((set) => ({
               email: data.email,
               displayName: data.display_name || data.email,
               subscriptionStatus: data.subscription_status || 'free',
+              profileCompleted: data.profile_completed ?? false,
               onboardingCompleted: data.onboarding_completed ?? false,
             },
             isAuthenticated: true,
@@ -158,6 +161,7 @@ export const useAuthStore = create((set) => ({
           email: data.email,
           displayName: data.display_name || data.email,
           subscriptionStatus: data.subscription_status || 'free',
+          profileCompleted: data.profile_completed ?? false,
           onboardingCompleted: data.onboarding_completed ?? false,
         },
         isAuthenticated: true,
@@ -175,6 +179,7 @@ export const useAuthStore = create((set) => ({
             email: firebaseUser.email || '',
             displayName: firebaseUser.email || '',
             subscriptionStatus: 'free',
+            profileCompleted: false,
             onboardingCompleted: false,
           },
           isAuthenticated: true,
@@ -297,6 +302,7 @@ export const useAuthStore = create((set) => ({
           email: data.user.email,
           displayName: data.user.display_name || data.user.email,
           subscriptionStatus: data.user.subscription_status || 'free',
+          profileCompleted: data.user.profile_completed ?? false,
           onboardingCompleted: data.user.onboarding_completed ?? false,
         },
         isAuthenticated: true,
@@ -367,6 +373,52 @@ export const useAuthStore = create((set) => ({
       });
 
       return { success: false, error: errorMessage };
+    }
+  },
+
+  completeProfile: async (preferences) => {
+    set({ isLoading: true, error: null });
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error('Not logged into Firebase');
+      const idToken = await firebaseUser.getIdToken();
+      
+      const response = await axios.put(`${BACKEND_BASE_URL}/auth/profile/complete`, preferences, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      
+      const data = response.data;
+      set((state) => ({
+        user: { ...state.user, profileCompleted: data.profile_completed ?? true },
+        isLoading: false
+      }));
+      return { success: true };
+    } catch (err) {
+      set({ isLoading: false, error: err.message });
+      return { success: false, error: err.message };
+    }
+  },
+
+  completeOnboarding: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error('Not logged into Firebase');
+      const idToken = await firebaseUser.getIdToken();
+      
+      const response = await axios.put(`${BACKEND_BASE_URL}/auth/onboarding/complete`, {}, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      
+      const data = response.data;
+      set((state) => ({
+        user: { ...state.user, onboardingCompleted: data.onboarding_completed ?? true },
+        isLoading: false
+      }));
+      return { success: true };
+    } catch (err) {
+      set({ isLoading: false, error: err.message });
+      return { success: false, error: err.message };
     }
   },
 }));

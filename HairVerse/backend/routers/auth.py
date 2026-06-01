@@ -11,6 +11,7 @@ from schemas.auth_schemas import (
     RegisterRequest,
     RegisterProfileRequest,
     ProfileRequest,
+    ProfileCompletionRequest,
     LoginRequest,
     TokenRequest,
     AuthResponse,
@@ -332,3 +333,76 @@ async def get_profile(request: ProfileRequest, http_request: Request):
 
     print(f"[DEBUG  /auth/profile] SUCCESS - returning UserResponse for uid={uid}")
     return UserResponse(**user_profile)
+
+
+@router.put(
+    "/profile/complete",
+    response_model=UserResponse,
+    responses={
+        200: {"model": UserResponse},
+        401: {"description": "Unauthorized"},
+        500: {"description": "Internal server error"},
+    },
+)
+async def complete_profile(request: ProfileCompletionRequest, user: dict = Depends(get_current_user)):
+    """
+    Save the user's profile preferences and mark the profile as completed.
+    """
+    uid = user["uid"]
+    from firebase_config import db as _db
+
+    if not _db:
+        user_profile = get_user_profile(uid)
+        user_profile["profile_completed"] = True
+        return UserResponse(**user_profile)
+
+    try:
+        doc_ref = _db.collection("users").document(uid)
+        update_data = {
+            "gender": request.gender,
+            "hairLength": request.hairLength,
+            "beardPreference": request.beardPreference,
+            "preferredStyles": request.preferredStyles,
+            "mainGoal": request.mainGoal,
+            "preferredHairColor": request.preferredHairColor,
+            "profileCompleted": True,
+        }
+        doc_ref.set(update_data, merge=True)
+        
+        # Return updated profile
+        user_profile = get_user_profile(uid)
+        return UserResponse(**user_profile)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to update profile: {exc}")
+
+
+@router.put(
+    "/onboarding/complete",
+    response_model=UserResponse,
+    responses={
+        200: {"model": UserResponse},
+        401: {"description": "Unauthorized"},
+        500: {"description": "Internal server error"},
+    },
+)
+async def complete_onboarding(user: dict = Depends(get_current_user)):
+    """
+    Mark the user's onboarding tour as completed.
+    """
+    uid = user["uid"]
+    from firebase_config import db as _db
+
+    if not _db:
+        user_profile = get_user_profile(uid)
+        user_profile["onboarding_completed"] = True
+        return UserResponse(**user_profile)
+
+    try:
+        doc_ref = _db.collection("users").document(uid)
+        doc_ref.set({"onboardingCompleted": True}, merge=True)
+        
+        # Return updated profile
+        user_profile = get_user_profile(uid)
+        return UserResponse(**user_profile)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to update onboarding status: {exc}")

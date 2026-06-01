@@ -1,17 +1,17 @@
 export const COLORS = {
-  background: '#F7F9F6',
-  card: '#FFFFFF',
-  primary: '#6BCB2F',
-  secondary: '#2E7D32',
-  success: '#2E9E74',
-  warning: '#C58B2D',
-  error: '#C94949',
-  textPrimary: '#0F1C14',
-  textSecondary: '#546357',
-  border: '#E4EAE1',
-  surface: '#F1F5EE',
-  accent: '#E6F4D9',
-  ink: '#1F2B21',
+  background: '#FAFAFA', // Clean off-white
+  card: '#FFFFFF',       // Pure white cards
+  primary: '#0F172A',    // Deep sophisticated navy/slate
+  secondary: '#3B82F6',  // Clean blue for accents
+  success: '#10B981',    // Neat green
+  warning: '#F59E0B',    // Neat amber
+  error: '#EF4444',      // Clean red
+  textPrimary: '#111827', // Crisp dark gray/black
+  textSecondary: '#6B7280', // Soft readable gray
+  border: '#E5E7EB',     // Very light elegant border
+  surface: '#F3F4F6',    // Soft gray surface
+  accent: '#EEF2FF',     // Very light blue for subtle highlights
+  ink: '#000000',
 };
 
 export const FONTS = {

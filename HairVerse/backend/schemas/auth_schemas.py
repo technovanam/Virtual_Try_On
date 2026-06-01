@@ -33,6 +33,16 @@ class ProfileRequest(BaseModel):
     id_token: str = Field(..., description="Firebase ID token from Client SDK login")
 
 
+class ProfileCompletionRequest(BaseModel):
+    """Request body for PUT /auth/profile/complete."""
+    gender: str = Field(..., description="User gender")
+    hairLength: str = Field(..., description="Preferred hair length")
+    beardPreference: str = Field(..., description="Beard preference")
+    preferredStyles: list[str] = Field(..., description="List of preferred style types")
+    mainGoal: str = Field(..., description="Main goal for using the app")
+    preferredHairColor: str = Field(..., description="Preferred hair color")
+
+
 # ── Response Schemas ─────────────────────────────────────────────────────────
 
 class UserResponse(BaseModel):
@@ -41,6 +51,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: str | None = None
     subscription_status: str = "free"
+    profile_completed: bool = False
     onboarding_completed: bool = False
     created_at: str | None = None
 
