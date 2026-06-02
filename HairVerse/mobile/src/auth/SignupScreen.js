@@ -4,64 +4,48 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, RADIUS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
-export default function LoginScreen({ navigation }) {
+export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [localError, setLocalError] = useState(null);
-  const { login, isLoading, error } = useAuthStore();
+  const [username, setUsername] = useState('');
+  const [localError, setLocalError] = useState('');
+  const { register, isLoading, error } = useAuthStore();
 
-  // Sync store error to local state for inline display
-  useEffect(() => {
-    // 🔍 DEBUG: Log whenever error state changes
-
-    if (error) {
-      setLocalError(error);
-      Alert.alert('Login Failed', error);
-      // Clear store error so it doesn't re-trigger on re-mount
-      useAuthStore.setState({ error: null });
-    }
-  }, [error]);
-
-  // Clear error when user starts typing
-  const handleEmailChange = (text) => {
-    setEmail(text);
-    if (localError) {
-      setLocalError(null);
-      useAuthStore.setState({ error: null });
-    }
-  };
-
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-    if (localError) {
-      setLocalError(null);
-      useAuthStore.setState({ error: null });
-    }
-  };
-
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleSignup = async () => {
+    setLocalError('');
+    if (!email || !password || !username) {
+      setLocalError('Please fill in all fields');
       return;
     }
 
-    const result = await login(email, password);
-    if (result.success) {
-      // Conditional rendering in AppNavigator switches to MainStack automatically
-      // when isAuthenticated changes to true. No manual navigation needed.
+    if (password.length < 6) {
+      setLocalError('Password must be at least 6 characters.');
+      return;
+    }
+
+    const result = await register(email, password, username);
+    if (!result.success) {
+      setLocalError(result.error || 'This email has been already registered.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Sign Up</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        placeholderTextColor={COLORS.textSecondary}
+        value={username}
+        onChangeText={setUsername}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
         placeholderTextColor={COLORS.textSecondary}
         value={email}
-        onChangeText={handleEmailChange}
+        onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -71,7 +55,7 @@ export default function LoginScreen({ navigation }) {
           placeholder="Password"
           placeholderTextColor={COLORS.textSecondary}
           value={password}
-          onChangeText={handlePasswordChange}
+          onChangeText={setPassword}
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity
@@ -87,7 +71,6 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Inline error message */}
       {localError ? (
         <View style={styles.errorRow}>
           <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: 6 }} />
@@ -95,18 +78,15 @@ export default function LoginScreen({ navigation }) {
         </View>
       ) : null}
 
-      <TouchableOpacity
-        style={[styles.button, isLoading && styles.buttonDisabled]}
-        onPress={handleLogin}
-        disabled={isLoading}>
+      <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleSignup} disabled={isLoading}>
         {isLoading ? (
           <ActivityIndicator size="small" color={COLORS.textPrimary} />
         ) : (
-          <Text style={styles.buttonText}>Sign In</Text>
+          <Text style={styles.buttonText}>Create Account</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.linkText}>Already have an account? Login</Text>
       </TouchableOpacity>
     </View>
   );

@@ -1,218 +1,266 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING, TYPOGRAPHY } from '../constants/theme';
+import React, { useState, useRef } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  useWindowDimensions,
+  Animated,
+  TouchableOpacity,
+} from 'react-native';
+import { onboardingSlides } from '../config/onboardingSlides';
+import { useAuthStore } from '../store/authStore';
 
-const SLIDES = [
-  {
-    title: 'Mobile try-on studio',
-    description: 'See real cuts and finishes on your face before you book.',
-  },
-  {
-    title: 'Personal style guidance',
-    description: 'Recommendations tuned to your face shape and texture.',
-  },
-  {
-    title: 'Live camera preview',
-    description: 'Switch between classic, modern, and custom styles in seconds.',
-  },
-  {
-    title: 'Save and compare',
-    description: 'Keep your top looks and share them when you are ready.',
-  }
-];
+export default function OnboardingScreen() {
+  const { width, height } = useWindowDimensions();
+  const { completeOnboarding } = useAuthStore();
+  
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const slidesRef = useRef(null);
 
-export default function OnboardingScreen({ navigation }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const viewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems[0]) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  }).current;
 
-  const handleNext = () => {
-    if (currentSlide < SLIDES.length - 1) {
-      setCurrentSlide(currentSlide + 1);
-    } else {
-      navigation.replace('Main');
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+
+  const handleNext = async () => {
+    try {
+      if (currentIndex < onboardingSlides.length - 1) {
+        slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
+      } else {
+        await completeOnboarding();
+      }
+    } catch (e) {
+      console.log('Error completing onboarding', e);
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.topRow}>
-        <View style={styles.brandRow}>
-          <View style={styles.brandDot} />
-          <Text style={styles.eyebrow}>HairVerse</Text>
-        </View>
-        <Text style={styles.skip} onPress={() => navigation.replace('Main')}>Skip</Text>
-      </View>
+  const handleSkip = async () => {
+    try {
+      await completeOnboarding();
+    } catch (e) {
+      console.log('Error completing onboarding', e);
+    }
+  };
 
-      <View style={styles.heroCard}>
-        <View style={styles.mediaPanel}>
-          <View style={styles.mediaBack} />
-          <View style={styles.mediaFront}>
-            <View style={styles.mediaBadge} />
-            <View style={styles.mediaLine} />
-            <View style={styles.mediaLineShort} />
+  const cardWidth = Math.min(width * 0.9, 400);
+  const cardHeight = height * 0.8;
+
+  const renderItem = ({ item }) => {
+    return (
+      <View style={[styles.slide, { width: cardWidth }]}>
+        <View style={styles.slideContent}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleSkip} style={styles.skipButton} activeOpacity={0.7}>
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.illustrationContainer}>
+            <View style={styles.illustrationPlaceholder}>
+              <Text style={styles.illustrationText}>[Illustration Placeholder]</Text>
+            </View>
+          </View>
+
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.description}>{item.description}</Text>
           </View>
         </View>
-
-        <View style={styles.textBlock}>
-          <Text style={styles.title}>{SLIDES[currentSlide].title}</Text>
-          <Text style={styles.description}>{SLIDES[currentSlide].description}</Text>
-        </View>
       </View>
+    );
+  };
 
-      <View style={styles.controlsRow}>
-        <View style={styles.dotsRow}>
-          {SLIDES.map((_, i) => (
-            <View key={i} style={[styles.dot, currentSlide === i && styles.activeDot]} />
-          ))}
+  return (
+    <View style={styles.backdrop}>
+      <View style={[styles.card, { width: cardWidth, height: cardHeight }]}>
+        <FlatList
+          data={onboardingSlides}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          bounces={false}
+          keyExtractor={(item) => item.id}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: false,
+          })}
+          scrollEventThrottle={32}
+          onViewableItemsChanged={viewableItemsChanged}
+          viewabilityConfig={viewConfig}
+          ref={slidesRef}
+          getItemLayout={(data, index) => ({
+            length: cardWidth,
+            offset: cardWidth * index,
+            index,
+          })}
+          keyboardShouldPersistTaps="handled"
+        />
+        
+        <View style={styles.footerContainer} pointerEvents="box-none">
+          <View style={styles.footer} pointerEvents="box-none">
+            <View style={styles.paginatorContainer}>
+              {onboardingSlides.map((_, i) => {
+                const inputRange = [(i - 1) * cardWidth, i * cardWidth, (i + 1) * cardWidth];
+
+                const dotWidth = scrollX.interpolate({
+                  inputRange,
+                  outputRange: [8, 24, 8],
+                  extrapolate: 'clamp',
+                });
+
+                const opacity = scrollX.interpolate({
+                  inputRange,
+                  outputRange: [0.3, 1, 0.3],
+                  extrapolate: 'clamp',
+                });
+
+                return (
+                  <Animated.View
+                    style={[
+                      styles.dot,
+                      {
+                        width: dotWidth,
+                        opacity,
+                      },
+                    ]}
+                    key={i.toString()}
+                  />
+                );
+              })}
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={handleNext} activeOpacity={0.7}>
+              <Text style={styles.buttonText}>
+                {currentIndex === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <TouchableOpacity style={styles.btn} onPress={handleNext}>
-          <Text style={styles.btnText}>
-            {currentSlide === SLIDES.length - 1 ? 'Get Started' : 'Next'}
-          </Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  backdrop: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    padding: SPACING.xxl,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  topRow: {
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    overflow: 'hidden',
+    elevation: 10,
+    boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.2)',
+  },
+  slide: {
+    flex: 1,
+  },
+  slideContent: {
+    flex: 1,
+    paddingBottom: 80, // Leave space for the absolute footer
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    alignItems: 'flex-end',
+    zIndex: 10,
+  },
+  skipButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+  skipText: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  illustrationContainer: {
+    flex: 0.55,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    marginTop: 10,
+  },
+  illustrationPlaceholder: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(0,0,0,0.1)',
+    borderStyle: 'dashed',
+  },
+  illustrationText: {
+    color: '#666666',
+    fontWeight: 'bold',
+  },
+  textContainer: {
+    flex: 0.45,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 15,
+    color: '#444444',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  footerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    zIndex: 20,
+  },
+  footer: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    paddingHorizontal: 24,
   },
-  brandRow: {
+  paginatorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  brandDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.primary,
-    marginRight: SPACING.sm,
-  },
-  eyebrow: {
-    ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  skip: {
-    color: COLORS.textSecondary,
-    ...TYPOGRAPHY.caption,
-    fontWeight: '600',
-  },
-  heroCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: '#1B2233',
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
-  },
-  mediaPanel: {
-    height: 230,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.xl,
-  },
-  mediaBack: {
-    position: 'absolute',
-    width: 210,
-    height: 190,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    transform: [{ rotate: '-4deg' }],
-  },
-  mediaFront: {
-    width: 200,
-    height: 200,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    justifyContent: 'center',
-    shadowColor: '#1B2233',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  mediaBadge: {
-    width: 30,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
-    marginBottom: SPACING.md,
-  },
-  mediaLine: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.surface,
-    marginBottom: SPACING.sm,
-  },
-  mediaLineShort: {
-    width: '70%',
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.surface,
-  },
-  textBlock: {
-    alignItems: 'flex-start',
-  },
-  title: {
-    ...TYPOGRAPHY.title,
-    fontFamily: FONTS.display,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  description: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
-    lineHeight: 22,
-  },
-  controlsRow: {
-    marginTop: SPACING.xl,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
   },
   dot: {
-    width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.border,
-    marginRight: SPACING.sm,
+    backgroundColor: '#000000',
+    marginHorizontal: 4,
   },
-  activeDot: {
-    backgroundColor: COLORS.primary,
-    width: 24,
+  button: {
+    backgroundColor: '#000000',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    elevation: 2,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
   },
-  btn: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
-  },
-  btnText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+  buttonText: {
+    color: '#ffffff',
     fontSize: 15,
+    fontWeight: 'bold',
   },
 });

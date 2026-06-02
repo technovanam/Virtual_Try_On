@@ -12,8 +12,6 @@ db = None
 auth_client = None
 storage_bucket = None
 firebase_web_api_key = None
-jwt_secret_key = None
-
 service_account_filename = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET")
 
@@ -53,4 +51,3 @@ else:
 
 # ── Additional config exports (always available, even in mock mode) ─────
 firebase_web_api_key = os.getenv("FIREBASE_WEB_API_KEY")
-jwt_secret_key = os.getenv("JWT_SECRET_KEY")

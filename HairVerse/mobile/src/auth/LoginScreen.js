@@ -4,33 +4,48 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, RADIUS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 
-export default function SignupScreen({ navigation }) {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState('');
-  const { register, isLoading, error } = useAuthStore();
+  const [localError, setLocalError] = useState(null);
+  const { login, isLoading, error } = useAuthStore();
 
-  // Show Firebase error alerts
+  // Sync store error to local state for inline display
   useEffect(() => {
+    // 🔍 DEBUG: Log whenever error state changes
+
     if (error) {
-      Alert.alert('Signup Failed', error);
+      setLocalError(error);
+      // Clear store error so it doesn't re-trigger on re-mount
       useAuthStore.setState({ error: null });
     }
   }, [error]);
 
-  const handleSignup = async () => {
-    if (!email || !password || !username) {
+  // Clear error when user starts typing
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (localError) {
+      setLocalError(null);
+      useAuthStore.setState({ error: null });
+    }
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (localError) {
+      setLocalError(null);
+      useAuthStore.setState({ error: null });
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters.');
-      return;
-    }
-
-    const result = await register(email, password, username);
+    const result = await login(email, password);
     if (result.success) {
       // Conditional rendering in AppNavigator switches to MainStack automatically
       // when isAuthenticated changes to true. No manual navigation needed.
@@ -39,20 +54,13 @@ export default function SignupScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        placeholderTextColor={COLORS.textSecondary}
-        value={username}
-        onChangeText={setUsername}
-      />
+      <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
         placeholderTextColor={COLORS.textSecondary}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -62,7 +70,7 @@ export default function SignupScreen({ navigation }) {
           placeholder="Password"
           placeholderTextColor={COLORS.textSecondary}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity
@@ -77,15 +85,27 @@ export default function SignupScreen({ navigation }) {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleSignup} disabled={isLoading}>
+
+      {/* Inline error message */}
+      {localError ? (
+        <View style={styles.errorRow}>
+          <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: 6 }} />
+          <Text style={styles.errorText}>{localError}</Text>
+        </View>
+      ) : null}
+
+      <TouchableOpacity
+        style={[styles.button, isLoading && styles.buttonDisabled]}
+        onPress={handleLogin}
+        disabled={isLoading}>
         {isLoading ? (
           <ActivityIndicator size="small" color={COLORS.textPrimary} />
         ) : (
-          <Text style={styles.buttonText}>Create Account</Text>
+          <Text style={styles.buttonText}>Sign In</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.linkText}>Already have an account? Login</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+        <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
@@ -200,5 +220,22 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     paddingHorizontal: 4,
+  },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(201, 73, 73, 0.08)',
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(201, 73, 73, 0.25)',
+  },
+  errorText: {
+    flex: 1,
+    ...TYPOGRAPHY.caption,
+    color: COLORS.error,
+    fontWeight: '500',
   },
 });

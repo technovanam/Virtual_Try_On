@@ -1,47 +1,39 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, EmailStr
-
+from pydantic import BaseModel, Field
 
 # ── Request Schemas ──────────────────────────────────────────────────────────
 
-class RegisterRequest(BaseModel):
-    """Request body for POST /auth/register."""
-    email: EmailStr = Field(..., description="User email address")
-    password: str = Field(..., min_length=6, description="User password (min 6 chars)")
-    username: str = Field(..., min_length=1, max_length=100, description="Display name")
-
-
-class LoginRequest(BaseModel):
-    """Request body for POST /auth/login."""
-    email: EmailStr = Field(..., description="User email address")
-    password: str = Field(..., min_length=1, description="User password")
-
-
-class TokenRequest(BaseModel):
-    """Request body for POST /auth/verify."""
-    token: str = Field(..., description="JWT access token to validate")
-
-
 class RegisterProfileRequest(BaseModel):
     """Request body for POST /auth/register-profile."""
-    id_token: str = Field(..., description="Firebase ID token from Client SDK signup")
     username: str = Field(..., min_length=1, max_length=100, description="Display name")
-
-
-class ProfileRequest(BaseModel):
-    """Request body for POST /auth/profile."""
-    id_token: str = Field(..., description="Firebase ID token from Client SDK login")
-
 
 class ProfileCompletionRequest(BaseModel):
     """Request body for PUT /auth/profile/complete."""
     gender: str = Field(..., description="User gender")
-    hairLength: str = Field(..., description="Preferred hair length")
-    beardPreference: str = Field(..., description="Beard preference")
-    preferredStyles: list[str] = Field(..., description="List of preferred style types")
-    mainGoal: str = Field(..., description="Main goal for using the app")
-    preferredHairColor: str = Field(..., description="Preferred hair color")
+    age: int | str | None = Field(None, description="User age")
+    country: str | None = Field(None, description="User country")
+    hairLength: str | None = Field(None, description="Preferred hair length")
+    hairType: str | None = Field(None, description="Hair type")
+    hairColor: str | None = Field(None, description="Hair color")
+    hairConcerns: list[str] = Field(default_factory=list, description="List of hair concerns")
+    preferredStyles: list[str] = Field(default_factory=list, description="List of preferred style types")
+    goals: list[str] = Field(default_factory=list, description="Main goals for using the app")
+    beardStatus: str | None = Field(None, description="Beard status")
+    beardPreference: str | None = Field(None, description="Beard preference")
 
+class ProfileUpdateRequest(BaseModel):
+    """Request body for PATCH /auth/profile."""
+    gender: str | None = Field(None, description="User gender")
+    age: int | str | None = Field(None, description="User age")
+    country: str | None = Field(None, description="User country")
+    hairLength: str | None = Field(None, description="Preferred hair length")
+    hairType: str | None = Field(None, description="Hair type")
+    hairColor: str | None = Field(None, description="Hair color")
+    hairConcerns: list[str] | None = Field(None, description="List of hair concerns")
+    preferredStyles: list[str] | None = Field(None, description="List of preferred style types")
+    goals: list[str] | None = Field(None, description="Main goals for using the app")
+    beardStatus: str | None = Field(None, description="Beard status")
+    beardPreference: str | None = Field(None, description="Beard preference")
 
 # ── Response Schemas ─────────────────────────────────────────────────────────
 
@@ -53,34 +45,17 @@ class UserResponse(BaseModel):
     subscription_status: str = "free"
     profile_completed: bool = False
     onboarding_completed: bool = False
+    onboarding_version: int | None = None
+    onboarding_completed_at: str | None = None
+    profileCompletion: dict | None = None
     created_at: str | None = None
-
-
-class AuthResponse(BaseModel):
-    """Successful authentication response containing user + access token."""
-    user: UserResponse
-    token: str
-    token_type: str = "bearer"
-    expires_in: int = 3600  # seconds
-
 
 class FirebaseUserResponse(BaseModel):
     """Minimal user identity returned from Firebase ID token verification."""
     uid: str
     email: str
 
-
 class ErrorResponse(BaseModel):
     """Standard error response."""
     detail: str
     code: str | None = None
-
-
-# ── Internal / Middleware Schemas ────────────────────────────────────────────
-
-class TokenData(BaseModel):
-    """Payload extracted from a verified JWT."""
-    uid: str
-    email: str
-    exp: int
-    iat: int
