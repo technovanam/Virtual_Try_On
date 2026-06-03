@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   FlatList,
@@ -52,23 +51,23 @@ export default function OnboardingScreen() {
 
   const renderItem = ({ item }) => {
     return (
-      <View style={[styles.slide, { width: cardWidth }]}>
-        <View style={styles.slideContent}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={handleSkip} style={styles.skipButton} activeOpacity={0.7}>
-              <Text style={styles.skipText}>Skip</Text>
+      <View className="flex-1" style={{ width: cardWidth }}>
+        <View className="flex-1 pb-20">
+          <View className="px-5 pt-5 items-end z-10">
+            <TouchableOpacity onPress={handleSkip} className="py-2 px-4 rounded-full bg-black/5" activeOpacity={0.7}>
+              <Text className="text-black text-sm font-semibold">Skip</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={styles.illustrationContainer}>
-            <View style={styles.illustrationPlaceholder}>
-              <Text style={styles.illustrationText}>[Illustration Placeholder]</Text>
+          <View className="justify-center items-center px-[30px] mt-2.5 flex-[0.55]">
+            <View className="w-full aspect-square bg-black/5 rounded-[24px] justify-center items-center border-2 border-black/10 border-dashed">
+              <Text className="text-[#666666] font-bold">[Illustration Placeholder]</Text>
             </View>
           </View>
 
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
+          <View className="px-6 items-center justify-center flex-[0.45]">
+            <Text className="text-[26px] font-bold text-black text-center mb-3">{item.title}</Text>
+            <Text className="text-[15px] text-[#444444] text-center leading-[22px]">{item.description}</Text>
           </View>
         </View>
       </View>
@@ -76,8 +75,8 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={styles.backdrop}>
-      <View style={[styles.card, { width: cardWidth, height: cardHeight }]}>
+    <View className="flex-1 bg-black/60 justify-center items-center">
+      <View className="bg-white rounded-[24px] overflow-hidden shadow-xl" style={{ width: cardWidth, height: cardHeight, elevation: 10 }}>
         <FlatList
           data={onboardingSlides}
           renderItem={renderItem}
@@ -101,9 +100,9 @@ export default function OnboardingScreen() {
           keyboardShouldPersistTaps="handled"
         />
         
-        <View style={styles.footerContainer} pointerEvents="box-none">
-          <View style={styles.footer} pointerEvents="box-none">
-            <View style={styles.paginatorContainer}>
+        <View className="absolute bottom-0 left-0 right-0 h-20 z-20" pointerEvents="box-none">
+          <View className="flex-1 flex-row justify-between items-center px-6" pointerEvents="box-none">
+            <View className="flex-row items-center">
               {onboardingSlides.map((_, i) => {
                 const inputRange = [(i - 1) * cardWidth, i * cardWidth, (i + 1) * cardWidth];
 
@@ -121,21 +120,16 @@ export default function OnboardingScreen() {
 
                 return (
                   <Animated.View
-                    style={[
-                      styles.dot,
-                      {
-                        width: dotWidth,
-                        opacity,
-                      },
-                    ]}
+                    className="h-2 rounded-full bg-black mx-1"
+                    style={{ width: dotWidth, opacity }}
                     key={i.toString()}
                   />
                 );
               })}
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleNext} activeOpacity={0.7}>
-              <Text style={styles.buttonText}>
+            <TouchableOpacity className="bg-black py-3 px-6 rounded-full shadow-sm" style={{ elevation: 2 }} onPress={handleNext} activeOpacity={0.7}>
+              <Text className="text-white text-[15px] font-bold">
                 {currentIndex === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
               </Text>
             </TouchableOpacity>
@@ -145,122 +139,3 @@ export default function OnboardingScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    overflow: 'hidden',
-    elevation: 10,
-    boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.2)',
-  },
-  slide: {
-    flex: 1,
-  },
-  slideContent: {
-    flex: 1,
-    paddingBottom: 80, // Leave space for the absolute footer
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    alignItems: 'flex-end',
-    zIndex: 10,
-  },
-  skipButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-  },
-  skipText: {
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  illustrationContainer: {
-    flex: 0.55,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 30,
-    marginTop: 10,
-  },
-  illustrationPlaceholder: {
-    width: '100%',
-    aspectRatio: 1,
-    backgroundColor: 'rgba(0,0,0,0.03)',
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.1)',
-    borderStyle: 'dashed',
-  },
-  illustrationText: {
-    color: '#666666',
-    fontWeight: 'bold',
-  },
-  textContainer: {
-    flex: 0.45,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 15,
-    color: '#444444',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  footerContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    zIndex: 20,
-  },
-  footer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  paginatorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#000000',
-    marginHorizontal: 4,
-  },
-  button: {
-    backgroundColor: '#000000',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-    elevation: 2,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-});

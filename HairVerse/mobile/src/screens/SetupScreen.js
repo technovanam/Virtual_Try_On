@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
-import { COLORS } from '../constants/theme';
+import { Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 
 export default function SetupScreen() {
@@ -15,84 +14,23 @@ export default function SetupScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>HairVerse Setup In Progress</Text>
-        <Text style={styles.subtitle}>Welcome back!</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-1 justify-center items-center p-6">
+        <Text className="text-2xl font-bold text-primary mb-2 text-center">HairVerse Setup In Progress</Text>
+        <Text className="text-base text-white/70 mb-8">Welcome back!</Text>
         
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Name:</Text>
-          <Text style={styles.value}>{user?.displayName || 'User'}</Text>
+        <View className="bg-white/5 p-5 rounded-2xl w-full mb-8 border border-primary/10">
+          <Text className="text-xs text-white/50 mb-1 uppercase">Name:</Text>
+          <Text className="text-base text-white mb-4 font-medium">{user?.displayName || 'User'}</Text>
           
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{user?.email || 'N/A'}</Text>
+          <Text className="text-xs text-white/50 mb-1 uppercase">Email:</Text>
+          <Text className="text-base text-white mb-4 font-medium">{user?.email || 'N/A'}</Text>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+        <TouchableOpacity className="bg-[#ff3c3c]/15 py-3.5 px-8 rounded-xl border border-[#ff3c3c]/30 w-full items-center" onPress={handleLogout}>
+          <Text className="text-[#ff4d4d] text-base font-bold">Logout</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background || '#12121a',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.primary || '#00d4ff',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textSecondary || 'rgba(255, 255, 255, 0.7)',
-    marginBottom: 32,
-  },
-  userInfo: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    padding: 20,
-    borderRadius: 16,
-    width: '100%',
-    marginBottom: 32,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 212, 255, 0.1)',
-  },
-  label: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-  },
-  value: {
-    fontSize: 16,
-    color: '#fff',
-    marginBottom: 16,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    backgroundColor: 'rgba(255, 60, 60, 0.15)',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 60, 60, 0.3)',
-    width: '100%',
-    alignItems: 'center',
-  },
-  logoutText: {
-    color: '#ff4d4d',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

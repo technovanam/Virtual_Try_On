@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth
+from routers import auth, recommendations, history
 
 app = FastAPI(title="HairVerse API", description="AI-powered hairstyle virtual try-on API")
 
@@ -18,6 +18,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(recommendations.router, prefix="/recommendations", tags=["recommendations"])
+app.include_router(history.router, prefix="/history", tags=["history"])
 
 @app.get("/")
 def read_root():

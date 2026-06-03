@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   SafeAreaView,
@@ -10,7 +9,6 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import { COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useProfileSetupStore } from '../store/useProfileSetupStore';
 
@@ -81,26 +79,21 @@ export default function ProfileCompletionScreen() {
   };
 
   const renderSingleSelect = (options, selectedValue, fieldName) => (
-    <View style={styles.optionsContainer}>
-      {options.map((opt) => (
-        <TouchableOpacity
-          key={opt}
-          style={[
-            styles.optionButton,
-            selectedValue === opt && styles.optionButtonSelected,
-          ]}
-          onPress={() => updateData({ [fieldName]: opt })}
-        >
-          <Text
-            style={[
-              styles.optionText,
-              selectedValue === opt && styles.optionTextSelected,
-            ]}
+    <View className="flex-row flex-wrap gap-2.5 mb-2">
+      {options.map((opt) => {
+        const isSelected = selectedValue === opt;
+        return (
+          <TouchableOpacity
+            key={opt}
+            className={`py-2.5 px-4 rounded-[20px] border ${isSelected ? 'border-primary bg-accent' : 'border-border bg-card'}`}
+            onPress={() => updateData({ [fieldName]: opt })}
           >
-            {opt}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <Text className={`text-sm ${isSelected ? 'text-primary font-semibold' : 'text-textSecondary'}`}>
+              {opt}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 
@@ -125,24 +118,16 @@ export default function ProfileCompletionScreen() {
     };
 
     return (
-      <View style={styles.optionsContainer}>
+      <View className="flex-row flex-wrap gap-2.5 mb-2">
         {options.map((opt) => {
           const isSelected = selectedValues.includes(opt);
           return (
             <TouchableOpacity
               key={opt}
-              style={[
-                styles.optionButton,
-                isSelected && styles.optionButtonSelected,
-              ]}
+              className={`py-2.5 px-4 rounded-[20px] border ${isSelected ? 'border-primary bg-accent' : 'border-border bg-card'}`}
               onPress={() => toggleSelection(opt)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  isSelected && styles.optionTextSelected,
-                ]}
-              >
+              <Text className={`text-sm ${isSelected ? 'text-primary font-semibold' : 'text-textSecondary'}`}>
                 {opt}
               </Text>
             </TouchableOpacity>
@@ -153,15 +138,15 @@ export default function ProfileCompletionScreen() {
   };
 
   const renderStep1 = () => (
-    <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Basic Details</Text>
+    <View className="mt-4">
+      <Text className="text-[28px] font-bold text-textPrimary mb-6">Basic Details</Text>
 
-      <Text style={styles.inputLabel}>Gender *</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Gender *</Text>
       {renderSingleSelect(['Male', 'Female', 'Other'], data.gender, 'gender')}
 
-      <Text style={styles.inputLabel}>Age *</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Age *</Text>
       <TextInput
-        style={styles.textInput}
+        className="bg-card border border-border rounded-xl text-textPrimary px-4 py-3.5 text-base"
         placeholder="Enter your age"
         placeholderTextColor="#666"
         keyboardType="numeric"
@@ -169,9 +154,9 @@ export default function ProfileCompletionScreen() {
         onChangeText={(text) => updateData({ age: text })}
       />
 
-      <Text style={styles.inputLabel}>Country</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Country</Text>
       <TextInput
-        style={styles.textInput}
+        className="bg-card border border-border rounded-xl text-textPrimary px-4 py-3.5 text-base"
         placeholder="Enter your country"
         placeholderTextColor="#666"
         value={data.country}
@@ -181,24 +166,24 @@ export default function ProfileCompletionScreen() {
   );
 
   const renderStep2 = () => (
-    <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Hair Profile</Text>
+    <View className="mt-4">
+      <Text className="text-[28px] font-bold text-textPrimary mb-6">Hair Profile</Text>
 
-      <Text style={styles.inputLabel}>Hair Length</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Hair Length</Text>
       {renderSingleSelect(['Bald', 'Very Short', 'Short', 'Medium', 'Long'], data.hairLength, 'hairLength')}
 
-      <Text style={styles.inputLabel}>Hair Type</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Hair Type</Text>
       {renderSingleSelect(['Straight', 'Wavy', 'Curly', 'Coily'], data.hairType, 'hairType')}
 
-      <Text style={styles.inputLabel}>Hair Color</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Hair Color</Text>
       {renderSingleSelect(['Black', 'Brown', 'Blonde', 'Red', 'Grey', 'Other'], data.hairColor, 'hairColor')}
     </View>
   );
 
   const renderStep3 = () => (
-    <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Hair Concerns</Text>
-      <Text style={styles.inputDescription}>Select all that apply.</Text>
+    <View className="mt-4">
+      <Text className="text-[28px] font-bold text-textPrimary mb-6">Hair Concerns</Text>
+      <Text className="text-sm text-textSecondary mb-4 -mt-4">Select all that apply.</Text>
       {renderMultiSelect(
         ['Hair Fall', 'Thin Hair', 'Dandruff', 'Dry Hair', 'Oily Hair', 'Split Ends', 'None'],
         data.hairConcerns,
@@ -208,17 +193,17 @@ export default function ProfileCompletionScreen() {
   );
 
   const renderStep4 = () => (
-    <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Style Preferences</Text>
+    <View className="mt-4">
+      <Text className="text-[28px] font-bold text-textPrimary mb-6">Style Preferences</Text>
 
-      <Text style={styles.inputLabel}>Preferred Styles</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Preferred Styles</Text>
       {renderMultiSelect(
         ['Korean', 'Professional', 'Trendy', 'Celebrity', 'Classic', 'Modern'],
         data.preferredStyles,
         'preferredStyles'
       )}
 
-      <Text style={styles.inputLabel}>Goals</Text>
+      <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Goals</Text>
       {renderMultiSelect(
         ['Professional Look', 'Improve Appearance', 'Trendy Look', 'Hair Growth Journey', 'Experiment Styles'],
         data.goals,
@@ -230,13 +215,13 @@ export default function ProfileCompletionScreen() {
   const renderStep5 = () => {
     if (data.gender === 'Female') return null; // Should be skipped in nextStep anyway
     return (
-      <View style={styles.stepContent}>
-        <Text style={styles.stepTitle}>Personalization</Text>
+      <View className="mt-4">
+        <Text className="text-[28px] font-bold text-textPrimary mb-6">Personalization</Text>
 
-        <Text style={styles.inputLabel}>Beard Status</Text>
+        <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Beard Status</Text>
         {renderSingleSelect(['No Beard', 'Light Beard', 'Medium Beard', 'Full Beard'], data.beardStatus, 'beardStatus')}
 
-        <Text style={styles.inputLabel}>Beard Preference</Text>
+        <Text className="text-base text-textPrimary font-medium mt-4 mb-3">Beard Preference</Text>
         {renderSingleSelect(['Clean Shave', 'Stubble', 'Short Beard', 'Full Beard'], data.beardPreference, 'beardPreference')}
       </View>
     );
@@ -263,49 +248,47 @@ export default function ProfileCompletionScreen() {
   const displayTotal = data.gender === 'Female' ? 4 : totalSteps;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.stepIndicator}>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="px-6 pt-6 pb-4">
+        <Text className="text-primary text-sm font-semibold mb-2">
           Step {displayStep} of {displayTotal}
         </Text>
-        <View style={styles.progressBarContainer}>
+        <View className="h-1.5 bg-border rounded-full overflow-hidden">
           <Animated.View
-            style={[
-              styles.progressBarFill,
-              {
-                width: progressAnim.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ['0%', '100%'],
-                }),
-              },
-            ]}
+            className="h-full bg-primary rounded-full"
+            style={{
+              width: progressAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            }}
           />
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerClassName="grow px-6 pb-10" keyboardShouldPersistTaps="handled">
         {renderCurrentStep()}
-        {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+        {errorMsg ? <Text className="text-error mt-5 text-center text-sm">{errorMsg}</Text> : null}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View className="flex-row px-6 py-5 border-t border-border gap-4">
         <TouchableOpacity
-          style={[styles.footerButton, styles.backButton, currentStep === 1 && styles.disabledButton]}
+          className={`flex-1 py-4 rounded-xl items-center justify-center bg-transparent border border-border ${currentStep === 1 ? 'opacity-50' : ''}`}
           onPress={prevStep}
           disabled={currentStep === 1 || isSubmitting}
         >
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text className="text-textPrimary text-base font-semibold">Back</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.footerButton, styles.nextButton, isSubmitting && styles.disabledButton]}
+          className={`flex-1 py-4 rounded-xl items-center justify-center bg-primary ${isSubmitting ? 'opacity-50' : ''}`}
           onPress={handleNext}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <ActivityIndicator color="#000" size="small" />
           ) : (
-            <Text style={styles.nextButtonText}>
+            <Text className="text-white text-base font-bold">
               {currentStep === displayTotal ? 'Complete' : 'Next'}
             </Text>
           )}
@@ -314,137 +297,3 @@ export default function ProfileCompletionScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  stepIndicator: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  progressBarContainer: {
-    height: 6,
-    backgroundColor: COLORS.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: COLORS.primary,
-    borderRadius: 3,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-  },
-  stepContent: {
-    marginTop: 16,
-  },
-  stepTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: 24,
-  },
-  inputLabel: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    fontWeight: '500',
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  inputDescription: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginBottom: 16,
-    marginTop: -16,
-  },
-  textInput: {
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    color: COLORS.textPrimary,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 8,
-  },
-  optionButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.card,
-  },
-  optionButtonSelected: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.accent,
-  },
-  optionText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-  },
-  optionTextSelected: {
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    gap: 16,
-  },
-  footerButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  backButtonText: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  nextButton: {
-    backgroundColor: COLORS.primary,
-  },
-  nextButtonText: {
-    color: '#ffffff', // primary is dark, text should be white
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  errorText: {
-    color: COLORS.error,
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 14,
-  },
-});

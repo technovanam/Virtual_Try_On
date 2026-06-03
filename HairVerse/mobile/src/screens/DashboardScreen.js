@@ -1,8 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Modal } from 'react-native';
-import { COLORS } from '../constants/theme';
+import { Text, View, TouchableOpacity, SafeAreaView, Modal, ScrollView } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import OnboardingScreen from './OnboardingScreen';
+import DashboardHeader from '../components/DashboardHeader';
+import AITryOnHero from '../components/AITryOnHero';
+import RecommendedSection from '../components/RecommendedSection';
+import RecentlyTriedSection from '../components/RecentlyTriedSection';
 
 export default function DashboardScreen() {
   const { user, logout } = useAuthStore();
@@ -16,7 +19,7 @@ export default function DashboardScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <Modal
         visible={!user?.onboardingCompleted}
         animationType="fade"
@@ -25,61 +28,28 @@ export default function DashboardScreen() {
         <OnboardingScreen />
       </Modal>
 
-      <View style={styles.header}>
-        <Text style={styles.title}>HairVerse</Text>
-        <Text style={styles.subtitle}>Welcome back, {user?.displayName || 'User'}!</Text>
-      </View>
+      <DashboardHeader />
 
-      <View style={styles.content}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <AITryOnHero />
+        
+        <RecentlyTriedSection />
+
+        <RecommendedSection />
+        
+        <View className="min-h-[24px]" />
+        
+        <TouchableOpacity 
+          className="bg-white py-3.5 px-8 rounded-xl border border-[#ff4444] w-full items-center" 
+          onPress={handleLogout}
+        >
+          <Text className="text-[#ff4444] text-base font-bold">Logout</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  logoutButton: {
-    backgroundColor: '#ffffff',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#ff4444',
-    width: '100%',
-    alignItems: 'center',
-  },
-  logoutText: {
-    color: '#ff4444',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
