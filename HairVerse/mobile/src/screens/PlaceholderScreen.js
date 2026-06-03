@@ -8,7 +8,7 @@ export default function PlaceholderScreen() {
   const title = route.params?.title || 'Coming Soon';
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       <View className="flex-1 justify-center items-center p-6">
         <Text className="text-[28px] font-bold text-textPrimary mb-4 text-center">{title}</Text>
         <Text className="text-base text-textSecondary mb-8 text-center">This feature will be built later.</Text>

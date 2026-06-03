@@ -4,7 +4,7 @@ import { auth } from '../config/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { useProfileSetupStore } from './useProfileSetupStore';
 
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
+import { BACKEND_BASE_URL } from '../config/api';
 
 export const useAuthStore = create((set) => ({
   user: null,

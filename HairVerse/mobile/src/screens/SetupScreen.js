@@ -14,7 +14,7 @@ export default function SetupScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       <View className="flex-1 justify-center items-center p-6">
         <Text className="text-2xl font-bold text-primary mb-2 text-center">HairVerse Setup In Progress</Text>
         <Text className="text-base text-white/70 mb-8">Welcome back!</Text>

@@ -21,7 +21,7 @@ function AuthNavigator() {
     <AuthStack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#FAFAFA' },
+        cardStyle: { flex: 1, backgroundColor: '#FAFAFA' },
       }}
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
@@ -40,7 +40,7 @@ function MainNavigator() {
     <MainStack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#FAFAFA' },
+        cardStyle: { flex: 1, backgroundColor: '#FAFAFA' },
       }}
     >
       {!user?.profileCompleted ? (
@@ -48,6 +48,7 @@ function MainNavigator() {
       ) : (
         <>
           <MainStack.Screen name="Dashboard" component={DashboardScreen} />
+          <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
           <MainStack.Screen name="Placeholder" component={PlaceholderScreen} />
         </>
       )}

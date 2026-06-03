@@ -13,7 +13,7 @@ export default function AITryOnHero() {
   };
 
   return (
-    <View className="px-5 py-4 w-full">
+    <View className="py-4 w-full">
       <LinearGradient
         colors={['#1a1a2e', '#16213e', '#0f3460']}
         start={{ x: 0, y: 0 }}

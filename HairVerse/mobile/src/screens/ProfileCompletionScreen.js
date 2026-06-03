@@ -14,7 +14,7 @@ import { useProfileSetupStore } from '../store/useProfileSetupStore';
 
 const PROGRESS_BAR_WIDTH = 100; // Represented as percentage
 
-export default function ProfileCompletionScreen() {
+export default function ProfileCompletionScreen({ navigation }) {
   const { user, completeProfile } = useAuthStore();
   const {
     data,
@@ -65,7 +65,12 @@ export default function ProfileCompletionScreen() {
           beardPreference: data.gender === 'Male' ? data.beardPreference : null,
         };
         const result = await completeProfile(payload);
-        if (!result.success) {
+        if (result.success) {
+          useProfileSetupStore.getState().reset();
+          if (navigation && navigation.canGoBack()) {
+            navigation.goBack();
+          }
+        } else {
           setErrorMsg(result.error || 'Failed to complete profile.');
         }
       } catch (error) {
@@ -248,7 +253,7 @@ export default function ProfileCompletionScreen() {
   const displayTotal = data.gender === 'Female' ? 4 : totalSteps;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       <View className="px-6 pt-6 pb-4">
         <Text className="text-primary text-sm font-semibold mb-2">
           Step {displayStep} of {displayTotal}
@@ -266,10 +271,12 @@ export default function ProfileCompletionScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerClassName="grow px-6 pb-10" keyboardShouldPersistTaps="handled">
-        {renderCurrentStep()}
-        {errorMsg ? <Text className="text-error mt-5 text-center text-sm">{errorMsg}</Text> : null}
-      </ScrollView>
+      <View style={{ flex: 1, minHeight: 0 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerClassName="grow px-6 pb-10" keyboardShouldPersistTaps="handled">
+          {renderCurrentStep()}
+          {errorMsg ? <Text className="text-error mt-5 text-center text-sm">{errorMsg}</Text> : null}
+        </ScrollView>
+      </View>
 
       <View className="flex-row px-6 py-5 border-t border-border gap-4">
         <TouchableOpacity

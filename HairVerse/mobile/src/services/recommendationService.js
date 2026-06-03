@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
 
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
+import { BACKEND_BASE_URL } from '../config/api';
 
 export const recommendationService = {
   fetchRecommendations: async () => {
