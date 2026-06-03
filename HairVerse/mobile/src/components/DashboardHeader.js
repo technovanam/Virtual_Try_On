@@ -17,8 +17,11 @@ const SearchIcon = ({ color, size }) => (
   </Svg>
 );
 
+import { useNavigation } from '@react-navigation/native';
+
 export default function DashboardHeader() {
   const { user } = useAuthStore();
+  const navigation = useNavigation();
   
   const displayName = user?.displayName || 'User';
   const profileImage = user?.photoURL || user?.profileImage; 
@@ -56,15 +59,16 @@ export default function DashboardHeader() {
       </View>
 
       {/* Bottom Row: Search Bar */}
-      <View className="flex-row items-center bg-[#f4f5f7] rounded-2xl px-4 h-[52px]">
+      <TouchableOpacity 
+        className="flex-row items-center bg-[#f4f5f7] rounded-2xl px-4 h-[52px]"
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Search')}
+      >
         <SearchIcon size={20} color="#8e8e93" />
-        <TextInput
-          className="flex-1 text-base text-[#1a1a1a] ml-2.5 h-full"
-          placeholder="Search hairstyles..."
-          placeholderTextColor="#8e8e93"
-          editable={false} 
-        />
-      </View>
+        <View className="flex-1 ml-2.5">
+          <Text className="text-base text-[#8e8e93]">Search hairstyles...</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }

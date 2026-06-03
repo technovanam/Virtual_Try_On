@@ -9,6 +9,7 @@ import SignupScreen from '../auth/SignupScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import ProfileCompletionScreen from '../screens/ProfileCompletionScreen';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
+import SearchScreen from '../screens/SearchScreen';
 
 const AuthStack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -48,6 +49,7 @@ function MainNavigator() {
       ) : (
         <>
           <MainStack.Screen name="Dashboard" component={DashboardScreen} />
+          <MainStack.Screen name="Search" component={SearchScreen} />
           <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
           <MainStack.Screen name="Placeholder" component={PlaceholderScreen} />
         </>

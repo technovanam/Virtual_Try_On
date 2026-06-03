@@ -6,6 +6,10 @@ import DashboardHeader from '../components/DashboardHeader';
 import AITryOnHero from '../components/AITryOnHero';
 import RecommendedSection from '../components/RecommendedSection';
 import RecentlyTriedSection from '../components/RecentlyTriedSection';
+import SavedCollectionsSection from '../components/SavedCollectionsSection';
+import AIInsightsSection from '../components/AIInsightsSection';
+import ContinueTryOnSection from '../components/ContinueTryOnSection';
+import NotificationsSection from '../components/NotificationsSection';
 
 export default function DashboardScreen() {
   const { user, logout, isAuthenticated } = useAuthStore();
@@ -38,7 +42,15 @@ export default function DashboardScreen() {
         >
           <AITryOnHero />
           
+          <NotificationsSection />
+          
+          <ContinueTryOnSection />
+          
+          <AIInsightsSection />
+          
           <RecentlyTriedSection />
+
+          <SavedCollectionsSection />
 
           <RecommendedSection />
           
