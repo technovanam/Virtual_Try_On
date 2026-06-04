@@ -51,3 +51,49 @@ class TryOnService:
         except Exception as e:
             print(f"[ERROR] Failed to fetch TryOn sessions for uid {uid}: {e}")
             raise e
+
+    @staticmethod
+    def start_tryon(uid: str, image_id: str, hairstyle_id: str) -> dict:
+        if db is None:
+            raise Exception("Database is not initialized.")
+        
+        tryon_ref = db.collection("users").document(uid).collection("tryons").document()
+        tryon_id = tryon_ref.id
+        
+        now = datetime.now()
+        
+        data = {
+            "tryOnId": tryon_id,
+            "imageId": image_id,
+            "hairstyleId": hairstyle_id,
+            "status": "pending",
+            "resultImage": None,
+            "createdAt": now,
+            "completedAt": None
+        }
+        
+        tryon_ref.set(data)
+        
+        return {
+            "tryOnId": tryon_id,
+            "status": "pending"
+        }
+        
+    @staticmethod
+    def get_tryon_status(uid: str, tryon_id: str) -> dict:
+        if db is None:
+            raise Exception("Database is not initialized.")
+            
+        tryon_ref = db.collection("users").document(uid).collection("tryons").document(tryon_id)
+        doc = tryon_ref.get()
+        
+        if not doc.exists:
+            raise Exception("TryOn session not found")
+            
+        data = doc.to_dict()
+        
+        return {
+            "tryOnId": data.get("tryOnId", tryon_id),
+            "status": data.get("status", "pending"),
+            "resultImage": data.get("resultImage")
+        }

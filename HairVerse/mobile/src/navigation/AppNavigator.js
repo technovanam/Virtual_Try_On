@@ -10,6 +10,8 @@ import DashboardScreen from '../screens/DashboardScreen';
 import ProfileCompletionScreen from '../screens/ProfileCompletionScreen';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
 import SearchScreen from '../screens/SearchScreen';
+import UploadSelfieScreen from '../screens/UploadSelfieScreen';
+import LiveCameraScreen from '../screens/LiveCameraScreen';
 
 const AuthStack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -50,6 +52,13 @@ function MainNavigator() {
         <>
           <MainStack.Screen name="Dashboard" component={DashboardScreen} />
           <MainStack.Screen name="Search" component={SearchScreen} />
+          <MainStack.Screen name="UploadSelfie" component={UploadSelfieScreen} />
+          <MainStack.Screen name="LiveCamera" component={LiveCameraScreen} />
+          <MainStack.Screen name="AIAnalysis" component={require('../screens/AIAnalysisScreen').default} />
+          <MainStack.Screen name="Recommendations" component={require('../screens/RecommendationsScreen').default} />
+          <MainStack.Screen name="HairstyleDetails" component={require('../screens/HairstyleDetailsScreen').default} />
+          <MainStack.Screen name="VirtualTryOn" component={require('../screens/VirtualTryOnScreen').default} />
+          <MainStack.Screen name="CompareHairstyles" component={require('../screens/CompareHairstylesScreen').default} />
           <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
           <MainStack.Screen name="Placeholder" component={PlaceholderScreen} />
         </>

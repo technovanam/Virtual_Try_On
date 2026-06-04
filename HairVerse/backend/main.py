@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, recommendations, history, saved_collections, ai_insights, tryon, notifications, search
+from routers import auth, recommendations, history, saved_collections, ai_insights, tryon, notifications, search, trending, celebrity_matches, selfie, camera, analysis, hairstyles, compare
 
 app = FastAPI(title="HairVerse API", description="AI-powered hairstyle virtual try-on API")
 
@@ -25,6 +25,13 @@ app.include_router(ai_insights.router, prefix="/ai-insights", tags=["ai-insights
 app.include_router(tryon.router, prefix="/tryon", tags=["tryon"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 app.include_router(search.router, prefix="/search", tags=["search"])
+app.include_router(trending.router, prefix="/trending-hairstyles", tags=["trending"])
+app.include_router(celebrity_matches.router, prefix="/celebrity-matches", tags=["celebrity-matches"])
+app.include_router(selfie.router, prefix="/user/selfie", tags=["user", "selfie"])
+app.include_router(camera.router, prefix="/camera", tags=["camera"])
+app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
+app.include_router(hairstyles.router, prefix="/hairstyles", tags=["hairstyles"])
+app.include_router(compare.router, prefix="/compare", tags=["compare"])
 
 @app.get("/")
 def read_root():

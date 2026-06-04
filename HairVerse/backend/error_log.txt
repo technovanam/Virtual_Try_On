@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\Admin\Documents\Virtual_Try_On\HairVerse\backend\services\selfie_service.py", line 38, in upload_selfie
+    image_url = blob.generate_signed_url(version="v4", expiration=timedelta(days=36500), method="GET")
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python314\Lib\site-packages\google\cloud\storage\blob.py", line 662, in generate_signed_url
+    return helper(
+        credentials,
+    ...<13 lines>...
+        universe_domain=universe_domain,
+    )
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python314\Lib\site-packages\google\cloud\storage\_signing.py", line 539, in generate_signed_url_v4
+    expiration_seconds = get_expiration_seconds_v4(expiration)
+  File "C:\Users\Admin\AppData\Local\Programs\Python\Python314\Lib\site-packages\google\cloud\storage\_signing.py", line 164, in get_expiration_seconds_v4
+    raise ValueError(f"Max allowed expiration interval is seven days {SEVEN_DAYS}")
+ValueError: Max allowed expiration interval is seven days 604800

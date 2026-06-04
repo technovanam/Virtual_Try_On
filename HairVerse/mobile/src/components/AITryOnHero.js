@@ -34,7 +34,7 @@ export default function AITryOnHero() {
           <TouchableOpacity 
             className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#00d2ff] shadow-md"
             style={{ elevation: 5, shadowColor: '#00d2ff' }}
-            onPress={() => navigateToPlaceholder('Upload Selfie')}
+            onPress={() => navigation.navigate('UploadSelfie')}
             activeOpacity={0.8}
           >
             <Text className="text-[#0f3460] text-[15px] font-bold">Upload Selfie</Text>
@@ -42,7 +42,7 @@ export default function AITryOnHero() {
 
           <TouchableOpacity 
             className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-white/15 border border-white/30"
-            onPress={() => navigateToPlaceholder('Live Camera')}
+            onPress={() => navigation.navigate('LiveCamera')}
             activeOpacity={0.8}
           >
             <Text className="text-white text-[15px] font-semibold">Live Camera</Text>

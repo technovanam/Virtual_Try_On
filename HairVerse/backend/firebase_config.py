@@ -15,6 +15,9 @@ firebase_web_api_key = None
 service_account_filename = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET")
 
+# Keep the original bucket name since new Firebase projects use .firebasestorage.app
+if bucket_name:
+    pass # No need to replace .firebasestorage.app to .appspot.com
 # Build an absolute path to the service account file
 service_account_path = os.path.join(BASE_DIR, service_account_filename) if service_account_filename else None
 

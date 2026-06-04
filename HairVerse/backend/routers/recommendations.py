@@ -1,23 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from middleware.auth_middleware import get_current_user
+from schemas.recommendations import RecommendationResponse
+from services.recommendation_service import RecommendationService
 
 router = APIRouter()
 
 @router.get(
     "/",
-    response_model=dict,
+    response_model=RecommendationResponse,
     responses={
-        200: {"description": "Return empty recommendations with pending status"},
+        200: {"description": "Return recommendations"},
         401: {"description": "Invalid or expired Firebase ID token"},
     },
 )
-async def get_recommendations(user: dict = Depends(get_current_user)):
+async def get_recommendations(current_user: dict = Depends(get_current_user)):
     """
     Get personalized hairstyle recommendations for the authenticated user.
-    Currently returns an empty list while the recommendation engine is under construction.
     """
-    # Later: fetch user profile, pass to recommendation service, return actual recommendations.
-    return {
-        "recommendations": [],
-        "status": "pending"
-    }
+    try:
+        uid = current_user.get("uid")
+        if not uid:
+            raise HTTPException(status_code=401, detail="Invalid user authentication")
+            
+        response = RecommendationService.get_recommendations(uid)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

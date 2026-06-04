@@ -3,6 +3,8 @@ import { recommendationService } from '../services/recommendationService';
 
 export const useRecommendationStore = create((set) => ({
   recommendations: [],
+  total: 0,
+  generatedAt: null,
   isLoading: false,
   error: null,
   status: 'idle',
@@ -13,7 +15,9 @@ export const useRecommendationStore = create((set) => ({
       const data = await recommendationService.fetchRecommendations();
       set({ 
         recommendations: data.recommendations || [], 
-        status: data.status || 'success',
+        total: data.total || 0,
+        generatedAt: data.generatedAt,
+        status: data.recommendations?.length > 0 ? 'success' : 'empty',
         isLoading: false,
         error: null
       });
@@ -27,4 +31,5 @@ export const useRecommendationStore = create((set) => ({
   },
 
   clearError: () => set({ error: null, status: 'idle' }),
+  reset: () => set({ recommendations: [], total: 0, generatedAt: null, isLoading: false, error: null, status: 'idle' }),
 }));

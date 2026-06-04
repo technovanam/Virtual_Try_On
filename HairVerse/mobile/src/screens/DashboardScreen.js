@@ -5,6 +5,8 @@ import OnboardingScreen from './OnboardingScreen';
 import DashboardHeader from '../components/DashboardHeader';
 import AITryOnHero from '../components/AITryOnHero';
 import RecommendedSection from '../components/RecommendedSection';
+import TrendingHairstylesSection from '../components/TrendingHairstylesSection';
+import CelebrityMatchSection from '../components/CelebrityMatchSection';
 import RecentlyTriedSection from '../components/RecentlyTriedSection';
 import SavedCollectionsSection from '../components/SavedCollectionsSection';
 import AIInsightsSection from '../components/AIInsightsSection';
@@ -51,6 +53,10 @@ export default function DashboardScreen() {
           <RecentlyTriedSection />
 
           <SavedCollectionsSection />
+
+          <TrendingHairstylesSection />
+
+          <CelebrityMatchSection />
 
           <RecommendedSection />
           

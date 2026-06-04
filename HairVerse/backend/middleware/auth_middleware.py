@@ -45,7 +45,12 @@ async def get_current_user(
         )
 
     # 2. Extract the Bearer token
+    # Let's check raw headers for debugging
+    from fastapi import Request
+    # Wait, we don't have Request here, it's just HTTPAuthorizationCredentials. 
+    # But credentials is not None means HTTPBearer successfully parsed `Bearer <token>`.
     if credentials is None:
+        print("AUTH HEADER: Missing or not Bearer format")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing authorization header. Use: Authorization: Bearer <firebase_id_token>",
@@ -53,7 +58,10 @@ async def get_current_user(
         )
 
     id_token = credentials.credentials
+    print(f"AUTH HEADER: Bearer {id_token[:15]}...{id_token[-10:] if id_token else ''}")
+    
     if not id_token:
+        print("Token is empty.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token is empty.",
@@ -63,25 +71,30 @@ async def get_current_user(
     # 3. Verify the Firebase ID token using Admin SDK
     try:
         decoded = admin_auth.verify_id_token(id_token)
-    except admin_auth.ExpiredIdTokenError:
+        print(f"TOKEN VERIFIED: {decoded.get('uid')}")
+    except admin_auth.ExpiredIdTokenError as e:
+        print(f"ExpiredIdTokenError: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Firebase ID token has expired. Sign in again to get a fresh token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except admin_auth.RevokedIdTokenError:
+    except admin_auth.RevokedIdTokenError as e:
+        print(f"RevokedIdTokenError: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Firebase ID token has been revoked. Sign in again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except admin_auth.InvalidIdTokenError:
+    except admin_auth.InvalidIdTokenError as e:
+        print(f"InvalidIdTokenError: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Firebase ID token. The token is malformed or forged.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except ValueError as exc:
+        print(f"ValueError during token verification: {exc}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Token verification error: {exc}",
