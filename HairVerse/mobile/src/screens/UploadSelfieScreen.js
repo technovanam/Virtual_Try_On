@@ -43,7 +43,7 @@ export default function UploadSelfieScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 p-6">
+      <View className="flex-1 px-6 pt-6 pb-28">
         
         {/* Header */}
         <View className="flex-row items-center mb-8 mt-4">

@@ -32,7 +32,11 @@ export default function DashboardHeader() {
     <View className="px-5 pt-4 pb-5 bg-white">
       {/* Top Row: Profile & Notifications */}
       <View className="flex-row justify-between items-center mb-6">
-        <View className="flex-row items-center flex-1 mr-4">
+        <TouchableOpacity 
+          className="flex-row items-center flex-1 mr-4"
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Profile')}
+        >
           {profileImage ? (
             <Image source={{ uri: profileImage }} className="w-12 h-12 rounded-full bg-[#f4f5f7]" />
           ) : (
@@ -46,7 +50,7 @@ export default function DashboardHeader() {
             <Text className="text-sm text-[#8e8e93] mb-0.5">Hello,</Text>
             <Text className="text-xl font-extrabold text-[#1a1a1a] tracking-[-0.5px]" numberOfLines={1}>{displayName}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity className="relative w-11 h-11 rounded-full bg-[#f8f9fa] justify-center items-center border border-[#f0f0f0]">
           <NotificationIcon size={22} color="#1a1a1a" />

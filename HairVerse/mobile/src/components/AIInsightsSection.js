@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useAIInsightsStore } from '../store/aiInsightsStore';
 import InsightCard from './InsightCard';
+import { useNavigation } from '@react-navigation/native';
 
 const SkeletonCard = () => (
   <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-3 flex-row items-center justify-between">
@@ -12,6 +13,7 @@ const SkeletonCard = () => (
 
 export default function AIInsightsSection() {
   const { insights, status, isLoading, error, fetchInsights } = useAIInsightsStore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchInsights();
@@ -58,7 +60,7 @@ export default function AIInsightsSection() {
           </Text>
           <TouchableOpacity 
             className="bg-indigo-600 py-3 px-8 rounded-xl shadow-sm"
-            onPress={() => console.log('Navigate to Analysis')}
+            onPress={() => navigation.navigate('Try-On')}
           >
             <Text className="text-white font-bold text-base">Start Analysis</Text>
           </TouchableOpacity>

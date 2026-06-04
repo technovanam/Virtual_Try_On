@@ -34,7 +34,7 @@ export default function AITryOnHero() {
           <TouchableOpacity 
             className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#00d2ff] shadow-md"
             style={{ elevation: 5, shadowColor: '#00d2ff' }}
-            onPress={() => navigation.navigate('UploadSelfie')}
+            onPress={() => navigation.navigate('Try-On')}
             activeOpacity={0.8}
           >
             <Text className="text-[#0f3460] text-[15px] font-bold">Upload Selfie</Text>

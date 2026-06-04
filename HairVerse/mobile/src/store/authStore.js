@@ -24,7 +24,7 @@ export const useAuthStore = create((set) => ({
           console.log("TOKEN (restoreSession):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
           
           // Load profile from backend using the Bearer token standard
-          const response = await axios.get(`${BACKEND_BASE_URL}/auth/profile`, {
+          const response = await axios.get(`${BACKEND_BASE_URL}/profile`, {
             headers: { Authorization: `Bearer ${idToken}` },
             timeout: 10000 
           });
@@ -100,7 +100,7 @@ export const useAuthStore = create((set) => ({
       console.log("TOKEN (login):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
 
       // 3. Get Firestore profile via standardized Bearer token
-      const response = await axios.get(`${BACKEND_BASE_URL}/auth/profile`, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/profile`, {
         headers: { Authorization: `Bearer ${idToken}` },
         timeout: 15000 
       });

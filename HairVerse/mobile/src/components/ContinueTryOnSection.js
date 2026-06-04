@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTryonStore } from '../store/tryonStore';
 import SessionCard from './SessionCard';
+import { useNavigation } from '@react-navigation/native';
 
 const SkeletonSessionCard = () => (
   <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex-row items-center">
@@ -18,6 +19,7 @@ const SkeletonSessionCard = () => (
 
 export default function ContinueTryOnSection() {
   const { sessions, isLoading, error, fetchSessions } = useTryonStore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchSessions();
@@ -60,7 +62,7 @@ export default function ContinueTryOnSection() {
           </Text>
           <TouchableOpacity 
             className="bg-indigo-600 py-3 px-6 rounded-xl"
-            onPress={() => console.log('Navigate to Start New Try-On')}
+            onPress={() => navigation.navigate('Try-On')}
           >
             <Text className="text-white font-bold">Start New Try-On</Text>
           </TouchableOpacity>
@@ -74,7 +76,7 @@ export default function ContinueTryOnSection() {
             <SessionCard 
               key={session.sessionId} 
               session={session} 
-              onResume={(s) => console.log('Resume session:', s.sessionId)}
+              onResume={(s) => navigation.navigate('VirtualTryOn', { sessionId: s.sessionId })}
             />
           ))}
         </View>

@@ -97,31 +97,6 @@ async def register_profile(request: RegisterProfileRequest, user: dict = Depends
     return UserResponse(**user_profile)
 
 
-@router.get(
-    "/profile",
-    response_model=UserResponse,
-    responses={
-        200: {"model": UserResponse, "description": "User profile from Firebase ID token"},
-        401: {"description": "Invalid or expired Firebase ID token"},
-        404: {"description": "User profile not found in Firestore"},
-        503: {"description": "Service unavailable"},
-    },
-)
-async def get_profile(user: dict = Depends(get_current_user)):
-    """
-    Get the authenticated user's profile from Firestore.
-    """
-    uid = user["uid"]
-
-    try:
-        user_profile = get_user_profile(uid)
-    except AuthServiceError as exc:
-        if exc.code == "profile_not_found":
-            # Return a basic response if Firestore doc is missing but user is authenticated
-            return UserResponse(uid=uid, email=user["email"])
-        raise _handle_auth_error(exc)
-
-    return UserResponse(**user_profile)
 
 
 @router.put(
@@ -197,36 +172,3 @@ async def complete_onboarding(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Failed to update onboarding status: {exc}")
 
 
-@router.patch(
-    "/profile",
-    response_model=UserResponse,
-    responses={
-        200: {"model": UserResponse},
-        401: {"description": "Unauthorized"},
-        500: {"description": "Internal server error"},
-    },
-)
-async def update_profile(request: ProfileUpdateRequest, user: dict = Depends(get_current_user)):
-    """
-    Update the user's profile with partial data using Firestore dot notation.
-    """
-    uid = user["uid"]
-    from firebase_config import db as _db
-
-    update_data = {}
-    for key, value in request.dict(exclude_unset=True).items():
-        update_data[f"profileCompletion.{key}"] = value
-
-    if not _db:
-        user_profile = get_user_profile(uid)
-        return UserResponse(**user_profile)
-
-    if update_data:
-        try:
-            doc_ref = _db.collection("users").document(uid)
-            doc_ref.update(update_data)
-        except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"Failed to update profile: {exc}")
-
-    user_profile = get_user_profile(uid)
-    return UserResponse(**user_profile)

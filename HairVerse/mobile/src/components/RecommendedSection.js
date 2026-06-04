@@ -69,7 +69,7 @@ export default function RecommendedSection() {
             previewImage={rec.previewImage}
             category={rec.category}
             trending={rec.trending}
-            onPress={() => {}}
+            onPress={() => navigation.navigate('HairstyleDetails', { hairstyleId: rec.hairstyleId })}
           />
         ))}
       </View>

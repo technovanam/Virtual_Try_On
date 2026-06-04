@@ -11,11 +11,13 @@ class TryOnService:
             
         try:
             sessions_ref = db.collection("users").document(uid).collection("tryonSessions")
-            docs = sessions_ref.order_by("updatedAt", direction="DESCENDING").stream()
+            docs = sessions_ref.order_by("updatedAt", direction="DESCENDING").limit(20).stream()
             
             sessions = []
             for doc in docs:
                 data = doc.to_dict()
+                if data.get("status") == "completed":
+                    continue
                 
                 # Handle possible timestamp types
                 def parse_timestamp(ts_raw):

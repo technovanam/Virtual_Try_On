@@ -1,50 +1,119 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from firebase_config import db
-from schemas.saved_collections import CollectionItem, SavedCollectionResponse
+from schemas.saved_collections import SavedItem, SavedItemResponse, SavedItemCreate
 from datetime import datetime
 
 class SavedCollectionsService:
     @staticmethod
-    def get_saved_collections(uid: str) -> SavedCollectionResponse:
+    def create_saved_item(uid: str, item_data: SavedItemCreate) -> SavedItem:
         if db is None:
-            # Fallback if firestore not initialized, but as per instructions no mock data
-            return SavedCollectionResponse(collections=[], total=0)
+            raise Exception("Database is not initialized.")
+            
+        saved_ref = db.collection("users").document(uid).collection("saved").document()
+        saved_id = saved_ref.id
+        
+        now = datetime.now()
+        data = {
+            "savedId": saved_id,
+            "itemType": item_data.itemType,
+            "referenceId": item_data.referenceId,
+            "title": item_data.title,
+            "imageUrl": item_data.imageUrl,
+            "createdAt": now,
+            "updatedAt": now
+        }
+        
+        saved_ref.set(data)
+        
+        return SavedItem(**data)
+
+    @staticmethod
+    def get_saved_items(uid: str) -> SavedItemResponse:
+        if db is None:
+            return SavedItemResponse(items=[], total=0)
             
         try:
-            collections_ref = db.collection("users").document(uid).collection("savedCollections")
-            # Order by savedAt descending
-            docs = collections_ref.order_by("savedAt", direction="DESCENDING").stream()
+            saved_ref = db.collection("users").document(uid).collection("saved")
+            docs = saved_ref.order_by("createdAt", direction="DESCENDING").limit(100).stream()
             
-            collections = []
+            items = []
             for doc in docs:
                 data = doc.to_dict()
                 
-                # Handle possible missing fields or different timestamp types
-                saved_at_raw = data.get("savedAt")
-                saved_at = datetime.now()
-                if hasattr(saved_at_raw, 'timestamp'):
-                    saved_at = datetime.fromtimestamp(saved_at_raw.timestamp())
-                elif isinstance(saved_at_raw, str):
-                    try:
-                        saved_at = datetime.fromisoformat(saved_at_raw.replace('Z', '+00:00'))
-                    except ValueError:
-                        pass
+                # Timestamp parsing
+                def parse_timestamp(ts_raw):
+                    if not ts_raw:
+                        return datetime.now()
+                    ts = datetime.now()
+                    if hasattr(ts_raw, 'timestamp'):
+                        ts = datetime.fromtimestamp(ts_raw.timestamp())
+                    elif isinstance(ts_raw, str):
+                        try:
+                            ts = datetime.fromisoformat(ts_raw.replace('Z', '+00:00'))
+                        except ValueError:
+                            pass
+                    return ts
                 
-                item = CollectionItem(
-                    collectionId=data.get("collectionId", doc.id),
-                    collectionName=data.get("collectionName", "Untitled Collection"),
-                    hairstyleId=data.get("hairstyleId", ""),
-                    hairstyleName=data.get("hairstyleName", "Unknown Style"),
-                    hairstyleImage=data.get("hairstyleImage", ""),
-                    category=data.get("category", "General"),
-                    savedAt=saved_at,
-                    notes=data.get("notes"),
-                    tags=data.get("tags", [])
+                item = SavedItem(
+                    savedId=data.get("savedId", doc.id),
+                    itemType=data.get("itemType", "hairstyle"),
+                    referenceId=data.get("referenceId", ""),
+                    title=data.get("title", "Untitled"),
+                    imageUrl=data.get("imageUrl", ""),
+                    createdAt=parse_timestamp(data.get("createdAt")),
+                    updatedAt=parse_timestamp(data.get("updatedAt"))
                 )
-                collections.append(item)
+                items.append(item)
                 
-            return SavedCollectionResponse(collections=collections, total=len(collections))
+            return SavedItemResponse(items=items, total=len(items))
             
         except Exception as e:
-            print(f"[ERROR] Failed to fetch saved collections for uid {uid}: {e}")
+            print(f"[ERROR] Failed to fetch saved items for uid {uid}: {e}")
             raise e
+
+    @staticmethod
+    def get_saved_item(uid: str, saved_id: str) -> Optional[SavedItem]:
+        if db is None:
+            raise Exception("Database is not initialized.")
+            
+        doc_ref = db.collection("users").document(uid).collection("saved").document(saved_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return None
+            
+        data = doc.to_dict()
+        def parse_timestamp(ts_raw):
+            if not ts_raw:
+                return datetime.now()
+            ts = datetime.now()
+            if hasattr(ts_raw, 'timestamp'):
+                ts = datetime.fromtimestamp(ts_raw.timestamp())
+            elif isinstance(ts_raw, str):
+                try:
+                    ts = datetime.fromisoformat(ts_raw.replace('Z', '+00:00'))
+                except ValueError:
+                    pass
+            return ts
+            
+        return SavedItem(
+            savedId=data.get("savedId", doc.id),
+            itemType=data.get("itemType", "hairstyle"),
+            referenceId=data.get("referenceId", ""),
+            title=data.get("title", "Untitled"),
+            imageUrl=data.get("imageUrl", ""),
+            createdAt=parse_timestamp(data.get("createdAt")),
+            updatedAt=parse_timestamp(data.get("updatedAt"))
+        )
+
+    @staticmethod
+    def delete_saved_item(uid: str, saved_id: str) -> bool:
+        if db is None:
+            raise Exception("Database is not initialized.")
+            
+        doc_ref = db.collection("users").document(uid).collection("saved").document(saved_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return False
+            
+        doc_ref.delete()
+        return True

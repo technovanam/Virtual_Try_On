@@ -39,7 +39,7 @@ export default function DashboardScreen() {
       <View style={{ flex: 1, minHeight: 0 }}>
         <ScrollView 
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
           <AITryOnHero />

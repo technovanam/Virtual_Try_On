@@ -33,6 +33,8 @@ function AuthNavigator() {
   );
 }
 
+import BottomTabNavigator from './BottomTabNavigator';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Main Stack (authenticated users)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -50,16 +52,14 @@ function MainNavigator() {
         <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
       ) : (
         <>
-          <MainStack.Screen name="Dashboard" component={DashboardScreen} />
-          <MainStack.Screen name="Search" component={SearchScreen} />
-          <MainStack.Screen name="UploadSelfie" component={UploadSelfieScreen} />
+          <MainStack.Screen name="MainTabs" component={BottomTabNavigator} />
           <MainStack.Screen name="LiveCamera" component={LiveCameraScreen} />
           <MainStack.Screen name="AIAnalysis" component={require('../screens/AIAnalysisScreen').default} />
           <MainStack.Screen name="Recommendations" component={require('../screens/RecommendationsScreen').default} />
           <MainStack.Screen name="HairstyleDetails" component={require('../screens/HairstyleDetailsScreen').default} />
           <MainStack.Screen name="VirtualTryOn" component={require('../screens/VirtualTryOnScreen').default} />
           <MainStack.Screen name="CompareHairstyles" component={require('../screens/CompareHairstylesScreen').default} />
-          <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
+          <MainStack.Screen name="EditProfile" component={require('../screens/EditProfileScreen').default} />
           <MainStack.Screen name="Placeholder" component={PlaceholderScreen} />
         </>
       )}

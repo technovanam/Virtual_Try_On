@@ -11,7 +11,7 @@ class NotificationsService:
             
         try:
             notifications_ref = db.collection("users").document(uid).collection("notifications")
-            docs = notifications_ref.order_by("createdAt", direction="DESCENDING").stream()
+            docs = notifications_ref.order_by("createdAt", direction="DESCENDING").limit(20).stream()
             
             notifications = []
             unread_count = 0

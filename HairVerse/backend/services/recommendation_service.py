@@ -15,7 +15,7 @@ class RecommendationService:
             
         try:
             # Fetch from users/{uid}/recommendations
-            docs = db.collection("users").document(uid).collection("recommendations").order_by("suitabilityScore", direction="DESCENDING").stream()
+            docs = db.collection("users").document(uid).collection("recommendations").order_by("suitabilityScore", direction="DESCENDING").limit(20).stream()
             
             recommendations = []
             

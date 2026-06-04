@@ -79,7 +79,7 @@ export default function CompareHairstylesScreen() {
         </Text>
         <TouchableOpacity 
           className="bg-black py-3 px-8 rounded-full"
-          onPress={error ? fetchComparison : () => navigation.navigate('Dashboard')}
+          onPress={error ? fetchComparison : () => navigation.navigate('Home')}
         >
           <Text className="text-white font-bold">{error ? 'Retry' : 'Browse Hairstyles'}</Text>
         </TouchableOpacity>

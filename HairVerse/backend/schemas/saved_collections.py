@@ -1,18 +1,22 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime
 
-class CollectionItem(BaseModel):
-    collectionId: str
-    collectionName: str
-    hairstyleId: str
-    hairstyleName: str
-    hairstyleImage: str
-    category: str
-    savedAt: datetime
-    notes: Optional[str] = None
-    tags: Optional[List[str]] = []
+class SavedItemCreate(BaseModel):
+    itemType: Literal["hairstyle", "tryon", "comparison"]
+    referenceId: str
+    title: str
+    imageUrl: str
 
-class SavedCollectionResponse(BaseModel):
-    collections: List[CollectionItem]
+class SavedItem(BaseModel):
+    savedId: str
+    itemType: str
+    referenceId: str
+    title: str
+    imageUrl: str
+    createdAt: datetime
+    updatedAt: datetime
+
+class SavedItemResponse(BaseModel):
+    items: List[SavedItem]
     total: int

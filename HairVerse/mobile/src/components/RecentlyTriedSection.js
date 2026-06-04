@@ -19,9 +19,7 @@ export default function RecentlyTriedSection() {
   };
 
   const handleStartTryOn = () => {
-    // Navigate to camera or try-on selection screen
-    // navigation.navigate('TryOn');
-    console.log("Navigating to Try On");
+    navigation.navigate('Try-On');
   };
 
   const renderContent = () => {
@@ -72,7 +70,7 @@ export default function RecentlyTriedSection() {
             hairstyleCategory={item.hairstyleCategory}
             tryOnImage={item.tryOnImage}
             createdAt={item.createdAt}
-            onPress={() => {}}
+            onPress={() => navigation.navigate('CompareHairstyles', { historyId: item.historyId })}
           />
         ))}
       </View>
@@ -84,7 +82,7 @@ export default function RecentlyTriedSection() {
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-xl font-bold text-[#0F172A]">Recently Tried</Text>
         {historyItems && historyItems.length > 0 && (
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('View All History')}>
             <Text className="text-[#6366F1] text-sm font-semibold">View All</Text>
           </TouchableOpacity>
         )}

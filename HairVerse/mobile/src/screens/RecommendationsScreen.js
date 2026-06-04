@@ -25,7 +25,7 @@ const RecommendationsScreen = () => {
   }, []);
 
   const handleStartNewAnalysis = () => {
-    navigation.navigate('UploadSelfie');
+    navigation.navigate('Try-On');
   };
 
   const handleRetry = () => {
@@ -35,7 +35,7 @@ const RecommendationsScreen = () => {
   const renderHeader = () => (
     <View className="mb-6">
       <TouchableOpacity 
-        onPress={() => navigation.navigate('Dashboard')}
+        onPress={() => navigation.navigate('Home')}
         className="w-10 h-10 bg-white rounded-full items-center justify-center mb-4 shadow-sm border border-slate-100"
       >
         <Ionicons name="arrow-back" size={20} color="#0F172A" />

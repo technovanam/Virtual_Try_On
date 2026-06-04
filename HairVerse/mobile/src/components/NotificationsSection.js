@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNotificationsStore } from '../store/notificationsStore';
 import NotificationCard from './NotificationCard';
+import { useNavigation } from '@react-navigation/native';
 
 const SkeletonNotificationCard = () => (
   <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-3 flex-row items-start">
@@ -19,6 +20,7 @@ const SkeletonNotificationCard = () => (
 
 export default function NotificationsSection() {
   const { notifications, unreadCount, isLoading, error, fetchNotifications } = useNotificationsStore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchNotifications();
@@ -36,7 +38,7 @@ export default function NotificationsSection() {
           )}
         </View>
         {(!isLoading && !error && notifications.length > 0) && (
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('Mark all read')}>
             <Text className="text-blue-500 font-semibold">Mark all as read</Text>
           </TouchableOpacity>
         )}
@@ -85,12 +87,16 @@ export default function NotificationsSection() {
             <NotificationCard 
               key={notification.notificationId} 
               notification={notification} 
-              onPress={(n) => console.log('Notification tapped:', n.notificationId)}
+              onPress={(n) => {
+                if (n.actionUrl) {
+                  navigation.navigate(n.actionUrl);
+                }
+              }}
             />
           ))}
           
           {notifications.length > 3 && (
-            <TouchableOpacity className="py-2 items-center mt-1">
+            <TouchableOpacity className="py-2 items-center mt-1" onPress={() => console.log('View all notifications')}>
               <Text className="text-gray-500 font-semibold text-sm">View All Notifications</Text>
             </TouchableOpacity>
           )}

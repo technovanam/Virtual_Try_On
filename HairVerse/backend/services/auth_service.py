@@ -121,12 +121,15 @@ def get_user_profile(uid: str) -> dict:
 
     data = doc_snap.to_dict()
     
-    # Update last login
+    # Update last login asynchronously
+    import threading
     now_iso = datetime.utcnow().isoformat() + "Z"
-    try:
-        doc_ref.set({"lastLogin": now_iso}, merge=True)
-    except:
-        pass
+    def update_last_login():
+        try:
+            doc_ref.set({"lastLogin": now_iso}, merge=True)
+        except:
+            pass
+    threading.Thread(target=update_last_login, daemon=True).start()
 
     return {
         "uid": uid,

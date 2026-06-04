@@ -11,7 +11,7 @@ class AIInsightsService:
             
         try:
             analysis_ref = db.collection("users").document(uid).collection("analysis")
-            docs = analysis_ref.order_by("generatedAt", direction="DESCENDING").stream()
+            docs = analysis_ref.order_by("generatedAt", direction="DESCENDING").limit(1).stream()
             
             insights = []
             for doc in docs:
