@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView, Dimensions } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { hairstyleDetailsService } from '../services/hairstyleDetailsService';
+import { hairstyleService } from '../services/hairstyleService';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +29,7 @@ export default function HairstyleDetailsScreen() {
     try {
       setLoading(true);
       setError(null);
-      const data = await hairstyleDetailsService.getHairstyleDetails(hairstyleId);
+      const data = await hairstyleService.fetchHairstyleById(hairstyleId);
       setDetails(data);
     } catch (err) {
       setError('Failed to load hairstyle details.');

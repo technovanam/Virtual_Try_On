@@ -1,13 +1,25 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field
+from typing import List, Optional, Any
 
-class HairstyleDetailsResponse(BaseModel):
+class Hairstyle(BaseModel):
     hairstyleId: str
     hairstyleName: str
     category: str
+    gender: Optional[str] = None
     description: str
-    maintenanceLevel: str
-    popularityScore: int
     imageUrl: str
-    tags: List[str]
+    tags: List[str] = []
+    maintenanceLevel: str
+    popularityScore: int = 0
+    trendingScore: int = 0
     createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+    isActive: bool = True
+
+class HairstyleDetailsResponse(Hairstyle):
+    pass
+
+class PaginatedHairstylesResponse(BaseModel):
+    hairstyles: List[Hairstyle]
+    nextCursor: Optional[str] = None
+    totalCount: Optional[int] = None
