@@ -6,6 +6,9 @@ class GenerationConfig(BaseModel):
     provider: str = Field(default="replicate", description="Provider to use for generation (e.g., replicate, mock, imagen)")
     steps: Optional[int] = 30
     guidance_scale: Optional[float] = 7.5
+    colorCode: Optional[str] = None
+    colorName: Optional[str] = None
+    beardStyle: Optional[str] = None
 
 class TryOnStartRequest(BaseModel):
     imageId: str

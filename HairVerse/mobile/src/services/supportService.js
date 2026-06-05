@@ -2,68 +2,67 @@ import axios from 'axios';
 import { auth } from '../config/firebase';
 import { BACKEND_BASE_URL } from '../config/api';
 
-export const compareService = {
-  getComparisons: async () => {
+export const supportService = {
+  getFaqs: async () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.get(`${BACKEND_BASE_URL}/compare`, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/support/faqs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching comparisons:', error);
+      console.error('Error fetching FAQs:', error);
       throw error;
     }
   },
 
-  getComparisonById: async (comparisonId) => {
+  getTickets: async () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.get(`${BACKEND_BASE_URL}/compare/${comparisonId}`, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/support/tickets`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching comparison:', error);
+      console.error('Error fetching tickets:', error);
       throw error;
     }
   },
 
-  createComparison: async (comparisonType, items) => {
+  createTicket: async (ticketData) => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.post(`${BACKEND_BASE_URL}/compare`, 
-        { comparisonType, items },
-        { headers: { Authorization: `Bearer ${token}` }, timeout: 60000 } // Higher timeout for Gemini
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error creating comparison:', error);
-      throw error;
-    }
-  },
-
-  deleteComparison: async (comparisonId) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) throw new Error('User not authenticated');
-      
-      const token = await user.getIdToken();
-      const response = await axios.delete(`${BACKEND_BASE_URL}/compare/${comparisonId}`, {
+      const response = await axios.post(`${BACKEND_BASE_URL}/support/tickets`, ticketData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error deleting comparison:', error);
+      console.error('Error creating ticket:', error);
+      throw error;
+    }
+  },
+
+  submitFeedback: async (feedbackData) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('User not authenticated');
+      
+      const token = await user.getIdToken();
+      const response = await axios.post(`${BACKEND_BASE_URL}/support/feedback`, feedbackData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
       throw error;
     }
   }

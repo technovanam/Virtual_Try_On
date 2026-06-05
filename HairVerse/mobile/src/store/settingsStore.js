@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getSettings, updateSettings } from '../services/settingsService';
+import { settingsService } from '../services/settingsService';
 
 export const useSettingsStore = create((set, get) => ({
   settings: null,
@@ -8,34 +8,47 @@ export const useSettingsStore = create((set, get) => ({
   isInitialized: false,
 
   fetchSettings: async () => {
-    set({ loading: true, error: null });
     try {
-      const data = await getSettings();
+      set({ loading: true, error: null });
+      const data = await settingsService.getSettings();
       set({ settings: data, loading: false, isInitialized: true });
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
-      set({ error: error.message || 'Failed to load settings', loading: false });
+      set({ error: error.message || 'Failed to fetch settings', loading: false });
     }
   },
 
   updateSetting: async (key, value) => {
-    const currentSettings = get().settings;
+    const previousSettings = get().settings;
     
-    // Optimistic update
-    set({
-      settings: { ...currentSettings, [key]: value },
-      error: null
-    });
+    // OPTIMISTIC UPDATE: instantly update the UI state
+    set((state) => ({
+      settings: { ...state.settings, [key]: value }
+    }));
 
     try {
-      const updatedData = await updateSettings({ [key]: value });
+      // Fire the API call in the background
+      const updatedData = await settingsService.updateSettings({ [key]: value });
+      // Sync back with the definitive backend response
       set({ settings: updatedData });
     } catch (error) {
-      console.error('Failed to update setting:', error);
-      // Revert on failure
-      set({ settings: currentSettings, error: error.message || 'Failed to update setting' });
+      console.error(`Failed to sync setting ${key} to backend:`, error);
+      // REVERT the UI state if the backend save fails
+      set({ settings: previousSettings });
+      // Briefly show an error (could connect to a toast system here)
     }
   },
 
-  reset: () => set({ settings: null, loading: false, error: null, isInitialized: false })
+  resetSettings: async () => {
+    try {
+      set({ loading: true });
+      const data = await settingsService.resetSettings();
+      set({ settings: data, loading: false });
+    } catch (error) {
+      set({ error: error.message || 'Failed to reset settings', loading: false });
+    }
+  },
+
+  clearStore: () => {
+    set({ settings: null, isInitialized: false, error: null });
+  }
 }));

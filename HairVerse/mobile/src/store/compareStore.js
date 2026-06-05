@@ -2,33 +2,59 @@ import { create } from 'zustand';
 import { compareService } from '../services/compareService';
 
 export const useCompareStore = create((set, get) => ({
-  comparisonData: null,
-  loading: false,
+  comparisons: [],
+  currentComparison: null,
+  status: 'idle', // idle, loading, generating, success, empty, error
   error: null,
-  empty: true,
 
-  fetchTryonComparison: async (tryOnId) => {
-    set({ loading: true, error: null, empty: false });
+  fetchComparisons: async () => {
     try {
-      const data = await compareService.getTryonComparison(tryOnId);
-      if (!data || !data.originalImageUrl || !data.generatedImageUrl) {
-        set({ empty: true, comparisonData: null });
+      set({ status: 'loading', error: null });
+      const data = await compareService.getComparisons();
+      if (!data.comparisons || data.comparisons.length === 0) {
+        set({ status: 'empty', comparisons: [] });
       } else {
-        set({ comparisonData: data, empty: false });
+        set({ status: 'success', comparisons: data.comparisons });
       }
     } catch (error) {
-      console.error('Error fetching tryon comparison:', error);
-      set({ 
-        error: error.response?.data?.detail || error.message || 'Failed to load comparison',
-        empty: true,
-        comparisonData: null
-      });
-    } finally {
-      set({ loading: false });
+      set({ status: 'error', error: error.message || 'Failed to fetch comparisons' });
     }
   },
 
-  clearComparison: () => {
-    set({ comparisonData: null, loading: false, error: null, empty: true });
+  fetchComparisonById: async (comparisonId) => {
+    try {
+      set({ status: 'loading', error: null });
+      const data = await compareService.getComparisonById(comparisonId);
+      set({ status: 'success', currentComparison: data.comparison });
+    } catch (error) {
+      set({ status: 'error', error: error.message || 'Failed to fetch comparison' });
+    }
+  },
+
+  createComparison: async (comparisonType, items) => {
+    try {
+      set({ status: 'generating', error: null });
+      const data = await compareService.createComparison(comparisonType, items);
+      set({ status: 'success', currentComparison: data.comparison });
+      get().fetchComparisons(); // Refresh list
+    } catch (error) {
+      set({ status: 'error', error: error.response?.data?.detail || error.message || 'Failed to create comparison' });
+    }
+  },
+
+  deleteComparison: async (comparisonId) => {
+    try {
+      await compareService.deleteComparison(comparisonId);
+      set((state) => ({
+        comparisons: state.comparisons.filter(c => c.comparisonId !== comparisonId),
+        currentComparison: state.currentComparison?.comparisonId === comparisonId ? null : state.currentComparison
+      }));
+    } catch (error) {
+      console.error('Failed to delete comparison:', error);
+    }
+  },
+  
+  clearStore: () => {
+    set({ comparisons: [], currentComparison: null, status: 'idle', error: null });
   }
 }));

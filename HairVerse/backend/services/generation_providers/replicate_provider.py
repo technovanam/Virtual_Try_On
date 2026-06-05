@@ -22,10 +22,7 @@ class ReplicateProvider(GenerationProvider):
         config: Optional[Dict[str, Any]] = None
     ) -> str:
         if not self.api_token:
-            print("[WARNING] REPLICATE_API_TOKEN is not set. Using mocked generation.")
-            await asyncio.sleep(5) # Simulate generation time
-            # Return a realistic-looking placeholder if no token is available
-            return "https://images.unsplash.com/photo-1605497788044-5a32c707d59f?w=600&h=600&fit=crop"
+            raise Exception("REPLICATE_API_TOKEN is not set in environment variables. Production generation requires a valid Replicate API token.")
 
         headers = {
             "Authorization": f"Token {self.api_token}",
@@ -33,8 +30,12 @@ class ReplicateProvider(GenerationProvider):
         }
         
         # Configure input for the Replicate model
-        # Using a generic prompt structure suitable for image-to-image or inpainting
-        prompt = f"A photorealistic portrait of a person with {hairstyle_prompt}. High quality, 8k resolution, highly detailed."
+        prompt = f"A photorealistic portrait of a person with {hairstyle_prompt}"
+        if config and config.get("colorName"):
+            prompt += f", colored {config.get('colorName')}"
+        if config and config.get("beardStyle") and config.get("beardStyle") != "None":
+            prompt += f", with a {config.get('beardStyle')} beard"
+        prompt += ". High quality, 8k resolution, highly detailed."
         
         payload = {
             "version": self.model_version,

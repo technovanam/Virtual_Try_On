@@ -47,7 +47,7 @@ class RecommendationService:
             
         # 3. Construct Prompt
         prompt = f"""
-        You are an expert AI hairstylist. Based on the user's profile and their facial/hair analysis, generate personalized hairstyle recommendations.
+        You are an expert AI hairstylist. Based on the user's profile and their facial/hair analysis, generate comprehensive and personalized hairstyle recommendations.
         
         USER PROFILE:
         {json.dumps(profile_completion, indent=2)}
@@ -56,9 +56,10 @@ class RecommendationService:
         {json.dumps(analysis_data, indent=2)}
         
         Respond ONLY with a valid JSON object matching the exact structure below. Do not include markdown formatting like ```json.
-        Generate exactly 4-6 recommended hairstyles.
+        Generate a summary, 4-6 recommended hairstyles, 3 hair colors, 3 beard styles (if male, otherwise empty), 3 celebrity matches, and 3 trending matches.
         
         {{
+            "summary": "A personalized 2-3 sentence overview of why these styles work for their specific face shape and features.",
             "recommendations": [
                 {{
                     "hairstyleName": "string",
@@ -67,6 +68,33 @@ class RecommendationService:
                     "maintenanceLevel": "string (e.g. Low, Medium, High)",
                     "recommendationReason": "string explaining why this fits their face shape and hair type",
                     "confidenceScore": 0.95
+                }}
+            ],
+            "hairColors": [
+                {{
+                    "colorName": "string",
+                    "hexCode": "string (e.g. #4A3B32)",
+                    "reason": "string"
+                }}
+            ],
+            "beards": [
+                {{
+                    "beardStyle": "string",
+                    "reason": "string",
+                    "maintenanceLevel": "string"
+                }}
+            ],
+            "celebrities": [
+                {{
+                    "celebrityName": "string",
+                    "matchScore": 90,
+                    "reason": "string"
+                }}
+            ],
+            "trending": [
+                {{
+                    "styleName": "string",
+                    "trendReason": "string"
                 }}
             ]
         }}
@@ -84,49 +112,34 @@ class RecommendationService:
             
         try:
             generated_data = json.loads(raw_text)
+            # Add IDs to recommendations
             recs_list = generated_data.get("recommendations", [])
+            for rec in recs_list:
+                rec["recommendationId"] = str(uuid.uuid4())
+            generated_data["recommendations"] = recs_list
         except json.JSONDecodeError:
             raise Exception("Failed to parse Gemini recommendations")
             
-        # Delete existing recommendations to replace with new ones
-        existing_docs = db.collection("users").document(uid).collection("recommendations").stream()
-        for doc in existing_docs:
-            doc.reference.delete()
-
         # 5. Save to Firestore
-        recommendations = []
-        for rec in recs_list:
-            rec_id = str(uuid.uuid4())
-            db_data = {
-                "recommendationId": rec_id,
-                "hairstyleName": rec.get("hairstyleName", ""),
-                "category": rec.get("category", ""),
-                "suitabilityScore": int(rec.get("suitabilityScore", 0)),
-                "maintenanceLevel": rec.get("maintenanceLevel", ""),
-                "recommendationReason": rec.get("recommendationReason", ""),
-                "confidenceScore": float(rec.get("confidenceScore", 0.0)),
-                "generatedAt": generated_at
-            }
-            db.collection("users").document(uid).collection("recommendations").document(rec_id).set(db_data)
-            recommendations.append(db_data)
-            
-        return RecommendationListResponse(recommendations=recommendations)
+        generated_data["generatedAt"] = generated_at
+        
+        db.collection("users").document(uid).collection("recommendation_reports").document("latest").set(generated_data)
+        
+        return RecommendationListResponse(**generated_data)
 
     @staticmethod
     def get_recommendations(uid: str) -> RecommendationListResponse:
         if db is None:
             raise Exception("Firestore not initialized")
             
-        # Fetch all current recommendations
-        docs = db.collection("users").document(uid).collection("recommendations").order_by("suitabilityScore", direction="DESCENDING").stream()
-        
-        recommendations = []
-        for doc in docs:
-            rec_data = doc.to_dict()
-            rec_data["generatedAt"] = RecommendationService._parse_timestamp(rec_data.get("generatedAt"))
-            recommendations.append(rec_data)
+        doc = db.collection("users").document(uid).collection("recommendation_reports").document("latest").get()
+        if not doc.exists:
+            return RecommendationListResponse(summary="", recommendations=[], hairColors=[], beards=[], celebrities=[], trending=[])
             
-        return RecommendationListResponse(recommendations=recommendations)
+        data = doc.to_dict()
+        data["generatedAt"] = RecommendationService._parse_timestamp(data.get("generatedAt"))
+            
+        return RecommendationListResponse(**data)
         
     @staticmethod
     def _parse_timestamp(ts_raw):

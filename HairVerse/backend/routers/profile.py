@@ -1,26 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas.auth_schemas import UserResponse, ProfileUpdateRequest
-from services.auth_service import get_user_profile, AuthServiceError
+from schemas.auth_schemas import ProfileUpdateRequest
+from schemas.profile_schemas import ComprehensiveProfileResponse
+from services.profile_service import ProfileService
+from services.auth_service import get_user_profile
 from middleware.auth_middleware import get_current_user
 
 router = APIRouter()
 
-@router.get("/", response_model=UserResponse)
+@router.get("/", response_model=ComprehensiveProfileResponse)
 async def get_profile(user: dict = Depends(get_current_user)):
-    """Get the authenticated user's profile from Firestore."""
+    """Get the authenticated user's comprehensive profile dashboard data."""
     uid = user["uid"]
     try:
-        user_profile = get_user_profile(uid)
-    except AuthServiceError as exc:
-        if exc.code == "profile_not_found":
-            return UserResponse(uid=uid, email=user["email"])
-        raise HTTPException(status_code=500, detail=exc.message)
+        return ProfileService.get_comprehensive_profile(uid)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
-    return UserResponse(**user_profile)
-
-@router.patch("/", response_model=UserResponse)
+@router.patch("/", response_model=ComprehensiveProfileResponse)
 async def update_profile(request: ProfileUpdateRequest, user: dict = Depends(get_current_user)):
-    """Update the user's profile with partial data using Firestore dot notation."""
+    """Update the user's profile and return the new comprehensive profile."""
     uid = user["uid"]
     from firebase_config import db as _db
 
@@ -29,8 +27,7 @@ async def update_profile(request: ProfileUpdateRequest, user: dict = Depends(get
         update_data[f"profileCompletion.{key}"] = value
 
     if not _db:
-        user_profile = get_user_profile(uid)
-        return UserResponse(**user_profile)
+        return ProfileService.get_comprehensive_profile(uid)
 
     if update_data:
         try:
@@ -39,5 +36,4 @@ async def update_profile(request: ProfileUpdateRequest, user: dict = Depends(get
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Failed to update profile: {exc}")
 
-    user_profile = get_user_profile(uid)
-    return UserResponse(**user_profile)
+    return ProfileService.get_comprehensive_profile(uid)

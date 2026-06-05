@@ -1,82 +1,53 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { formatDistanceToNow } from '../utils/dateUtils';
+
+const categoryConfig = {
+  recommendation: { icon: 'bulb', color: '#F59E0B', bg: '#FEF3C7', label: 'Recommendation' },
+  hairstyle_trend: { icon: 'trending-up', color: '#EC4899', bg: '#FCE7F3', label: 'Trend Alert' },
+  hair_insight: { icon: 'medical', color: '#10B981', bg: '#D1FAE5', label: 'Hair Insight' },
+  saved_reminder: { icon: 'bookmark', color: '#3B82F6', bg: '#DBEAFE', label: 'Reminder' },
+  system_update: { icon: 'information-circle', color: '#6B7280', bg: '#F3F4F6', label: 'Update' }
+};
 
 export default function NotificationCard({ notification, onPress, onDelete }) {
-  if (!notification) return null;
-
-  // Format date loosely to "2h ago" or specific date format
-  const formattedDate = new Date(notification.createdAt).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  });
-
-  const getIconData = (type) => {
-    switch (type) {
-      case 'analysis': return { name: 'analytics-outline', color: notification.isRead ? '#6B7280' : '#8B5CF6', bg: notification.isRead ? 'bg-gray-100' : 'bg-purple-100' };
-      case 'try-on': return { name: 'camera-outline', color: notification.isRead ? '#6B7280' : '#3B82F6', bg: notification.isRead ? 'bg-gray-100' : 'bg-blue-100' };
-      case 'recommendation': return { name: 'sparkles-outline', color: notification.isRead ? '#6B7280' : '#EAB308', bg: notification.isRead ? 'bg-gray-100' : 'bg-yellow-100' };
-      case 'system': return { name: 'settings-outline', color: notification.isRead ? '#6B7280' : '#10B981', bg: notification.isRead ? 'bg-gray-100' : 'bg-green-100' };
-      default: return { name: 'notifications-outline', color: notification.isRead ? '#6B7280' : '#3B82F6', bg: notification.isRead ? 'bg-gray-100' : 'bg-blue-100' };
-    }
-  };
-
-  const iconData = getIconData(notification.type);
+  const config = categoryConfig[notification.category] || categoryConfig.system_update;
+  const isUnread = !notification.isRead;
+  const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
 
   return (
     <TouchableOpacity 
-      className={`p-4 rounded-2xl border mb-3 flex-row items-start ${
-        notification.isRead ? 'bg-white border-gray-100' : 'bg-blue-50/30 border-blue-100'
-      }`}
-      onPress={() => onPress && onPress(notification)}
+      className={`bg-white rounded-2xl p-4 mb-3 border ${isUnread ? 'border-indigo-200 shadow-sm' : 'border-gray-100'} flex-row`}
+      onPress={() => onPress(notification)}
+      activeOpacity={0.7}
     >
-      {/* Icon Area */}
-      <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${iconData.bg}`}>
-        <Ionicons name={iconData.name} size={20} color={iconData.color} />
+      {/* Icon */}
+      <View className="w-12 h-12 rounded-full items-center justify-center mr-4 mt-1" style={{ backgroundColor: config.bg }}>
+        <Ionicons name={config.icon} size={24} color={config.color} />
+        {isUnread && (
+          <View className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-600 border-2 border-white rounded-full" />
+        )}
       </View>
 
-      {/* Content Area */}
-      <View className="flex-1 pr-6">
+      {/* Content */}
+      <View className="flex-1">
         <View className="flex-row justify-between items-start mb-1">
-          <Text className={`font-bold flex-1 mr-2 ${
-            notification.isRead ? 'text-gray-900' : 'text-gray-900'
-          }`}>
-            {notification.title}
-          </Text>
-          
-          <Text className="text-gray-400 text-xs">
-            {formattedDate}
-          </Text>
+          <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{config.label}</Text>
+          <Text className="text-xs text-gray-400 font-medium">{timeAgo}</Text>
         </View>
-
-        <Text className={`text-sm mb-2 ${
-            notification.isRead ? 'text-gray-500' : 'text-gray-700'
-          }`}
-        >
+        <Text className={`text-base mb-1 ${isUnread ? 'font-black text-gray-900' : 'font-bold text-gray-700'}`}>
+          {notification.title}
+        </Text>
+        <Text className={`text-sm ${isUnread ? 'font-medium text-gray-700' : 'text-gray-500'}`}>
           {notification.message}
         </Text>
-
-        {notification.actionUrl && (
-          <TouchableOpacity className="self-start mt-1">
-            <Text className="text-blue-600 font-semibold text-sm">View Details</Text>
-          </TouchableOpacity>
-        )}
       </View>
 
-      {/* Unread Badge & Delete Button Container */}
-      <View className="absolute top-4 right-4 items-center">
-        {!notification.isRead && (
-          <View className="w-2.5 h-2.5 rounded-full bg-blue-500 mb-2" />
-        )}
-        <TouchableOpacity 
-          onPress={() => onDelete && onDelete(notification)}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="trash-outline" size={18} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
+      {/* Delete Action */}
+      <TouchableOpacity className="ml-2 mt-1 p-1" onPress={() => onDelete(notification)}>
+        <Ionicons name="close" size={20} color="#9CA3AF" />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 }

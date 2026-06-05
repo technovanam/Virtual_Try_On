@@ -1,106 +1,187 @@
-from datetime import datetime
+import os
+import uuid
+import json
+import requests
+import tempfile
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from firebase_config import db
+from schemas.compare_schemas import CompareCreateRequest, Comparison, CompareResponse, CompareListResponse
+import google.generativeai as genai
+from fastapi import HTTPException
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
+
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key and api_key != "your_gemini_api_key_here":
+    genai.configure(api_key=api_key)
 
 class CompareService:
     @staticmethod
-    def create_comparison(uid: str, hairstyle_ids: List[str], selected_images: List[str]) -> dict:
-        if db is None:
-            raise Exception("Database is not initialized.")
-            
-        compare_ref = db.collection("users").document(uid).collection("comparisons").document()
-        comparison_id = compare_ref.id
-        
-        now = datetime.now()
-        
-        data = {
-            "comparisonId": comparison_id,
-            "hairstyleIds": hairstyle_ids,
-            "selectedImages": selected_images,
-            "createdAt": now,
-            "updatedAt": now
-        }
-        
-        compare_ref.set(data)
-        
-        return {
-            "comparisonId": comparison_id,
-            "status": "created"
-        }
-        
+    def _parse_timestamp(ts_raw):
+        if not ts_raw:
+            return None
+        ts = datetime.now()
+        if hasattr(ts_raw, 'timestamp'):
+            ts = datetime.fromtimestamp(ts_raw.timestamp())
+        elif isinstance(ts_raw, str):
+            try:
+                ts = datetime.fromisoformat(ts_raw.replace('Z', '+00:00'))
+            except ValueError:
+                pass
+        return ts
+
     @staticmethod
-    def get_comparison(uid: str, comparison_id: str) -> dict:
+    def get_all(uid: str) -> CompareListResponse:
         if db is None:
-            raise Exception("Database is not initialized.")
+            return CompareListResponse(comparisons=[])
             
-        compare_ref = db.collection("users").document(uid).collection("comparisons").document(comparison_id)
-        doc = compare_ref.get()
+        try:
+            compare_ref = db.collection("users").document(uid).collection("comparisons")
+            docs = compare_ref.order_by("createdAt", direction="DESCENDING").limit(20).stream()
+            
+            comparisons = []
+            for doc in docs:
+                data = doc.to_dict()
+                data['createdAt'] = CompareService._parse_timestamp(data.get('createdAt'))
+                data['updatedAt'] = CompareService._parse_timestamp(data.get('updatedAt'))
+                comparisons.append(Comparison(**data))
+                
+            return CompareListResponse(comparisons=comparisons)
+        except Exception as e:
+            print(f"[ERROR] get_all comparisons: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    def get_by_id(uid: str, comparison_id: str) -> CompareResponse:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database not initialized")
+            
+        doc_ref = db.collection("users").document(uid).collection("comparisons").document(comparison_id)
+        doc = doc_ref.get()
         
         if not doc.exists:
-            raise Exception("Comparison not found")
+            raise HTTPException(status_code=404, detail="Comparison not found")
             
         data = doc.to_dict()
-        hairstyle_ids = data.get("hairstyleIds", [])
+        data['createdAt'] = CompareService._parse_timestamp(data.get('createdAt'))
+        data['updatedAt'] = CompareService._parse_timestamp(data.get('updatedAt'))
         
-        hairstyles_details = []
-        
-        # Fetch each hairstyle's details from the global hairstyles collection
-        for hid in hairstyle_ids:
-            h_ref = db.collection("hairstyles").document(hid)
-            h_doc = h_ref.get()
-            if h_doc.exists:
-                h_data = h_doc.to_dict()
-                # Ensure the ID is attached
-                h_data["hairstyleId"] = hid
-                hairstyles_details.append(h_data)
-                
-        # Handle timestamps safely
-        created_at = data.get("createdAt")
-        if hasattr(created_at, 'timestamp'):
-            created_at = datetime.fromtimestamp(created_at.timestamp())
-            
-        updated_at = data.get("updatedAt")
-        if hasattr(updated_at, 'timestamp'):
-            updated_at = datetime.fromtimestamp(updated_at.timestamp())
-
-        return {
-            "comparisonId": data.get("comparisonId", comparison_id),
-            "hairstyles": hairstyles_details,
-            "createdAt": created_at,
-            "updatedAt": updated_at
-        }
+        return CompareResponse(status="success", comparison=Comparison(**data))
 
     @staticmethod
-    def get_tryon_comparison(uid: str, tryon_id: str) -> dict:
+    def delete_comparison(uid: str, comparison_id: str) -> dict:
         if db is None:
-            raise Exception("Database is not initialized.")
+            raise HTTPException(status_code=500, detail="Database not initialized")
             
-        tryon_ref = db.collection("users").document(uid).collection("tryons").document(tryon_id)
-        tryon_doc = tryon_ref.get()
-        
-        if not tryon_doc.exists:
-            raise Exception("TryOn session not found")
+        doc_ref = db.collection("users").document(uid).collection("comparisons").document(comparison_id)
+        if not doc_ref.get().exists:
+            raise HTTPException(status_code=404, detail="Comparison not found")
             
-        tryon_data = tryon_doc.to_dict()
-        image_id = tryon_data.get("imageId")
-        generated_image_url = tryon_data.get("resultImage")
-        hairstyle_id = tryon_data.get("hairstyleId")
-        created_at = tryon_data.get("createdAt")
-        
-        original_image_url = ""
-        if image_id:
-            selfie_ref = db.collection("users").document(uid).collection("selfies").document(image_id)
-            selfie_doc = selfie_ref.get()
-            if selfie_doc.exists:
-                original_image_url = selfie_doc.to_dict().get("imageUrl", "")
-                
-        if hasattr(created_at, 'timestamp'):
-            created_at = datetime.fromtimestamp(created_at.timestamp())
+        doc_ref.delete()
+        return {"status": "deleted"}
 
-        return {
-            "tryOnId": tryon_id,
-            "originalImageUrl": original_image_url,
-            "generatedImageUrl": generated_image_url,
-            "hairstyleId": hairstyle_id,
-            "generatedAt": created_at
-        }
+    @staticmethod
+    def _download_image(image_url: str) -> str:
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()
+        fd, path = tempfile.mkstemp(suffix=".jpg")
+        with os.fdopen(fd, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return path
+
+    @staticmethod
+    def create_comparison(uid: str, request: CompareCreateRequest) -> CompareResponse:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database not initialized")
+            
+        if not api_key or api_key == "your_gemini_api_key_here":
+            raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+
+        try:
+            comparison_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc)
+            
+            # Download and upload images to Gemini
+            gemini_files = []
+            tmp_paths = []
+            item_mapping = {}
+            
+            for idx, item in enumerate(request.items):
+                path = CompareService._download_image(item.imageUrl)
+                tmp_paths.append(path)
+                g_file = genai.upload_file(path=path)
+                gemini_files.append(g_file)
+                # Map the order to the item ID
+                item_mapping[f"Image {idx+1}"] = item.id
+
+            model = genai.GenerativeModel('gemini-1.5-pro', generation_config={"response_mime_type": "application/json"})
+            
+            prompt = f"""
+            Analyze the following {len(request.items)} images. The user is doing a {request.comparisonType}.
+            You must evaluate the suitability of these styles on the user.
+            
+            Image Mapping:
+            """
+            for key, val in item_mapping.items():
+                prompt += f"- {key}: Represents item {val}\n"
+                
+            prompt += """
+            Return ONLY a valid JSON object matching exactly:
+            {
+                "bestStyleId": "string (the exact item ID of the best style)",
+                "recommendationReason": "string (Why this is the winner)",
+                "scores": [
+                    {
+                        "itemId": "string (exact item ID)",
+                        "score": 85,
+                        "pros": ["string", "string"],
+                        "cons": ["string"]
+                    }
+                ]
+            }
+            Make sure to return an entry in "scores" for EVERY item.
+            """
+            
+            # Combine files and prompt
+            contents = gemini_files + [prompt]
+            response = model.generate_content(contents)
+            
+            raw_text = response.text.strip()
+            if raw_text.startswith("```json"):
+                raw_text = raw_text[7:]
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
+                
+            ai_panel_data = json.loads(raw_text)
+            
+            # Cleanup
+            for p in tmp_paths:
+                os.remove(p)
+            for gf in gemini_files:
+                gf.delete()
+                
+            # Prepare DB document
+            items_dicts = [i.model_dump() for i in request.items]
+            
+            data = {
+                "comparisonId": comparison_id,
+                "comparisonType": request.comparisonType,
+                "comparedItems": items_dicts,
+                "aiPanel": ai_panel_data,
+                "selectedWinner": None,
+                "createdAt": now,
+                "updatedAt": now
+            }
+            
+            db.collection("users").document(uid).collection("comparisons").document(comparison_id).set(data)
+            
+            comparison = Comparison(**data)
+            return CompareResponse(status="success", comparison=comparison)
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to create comparison: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to create comparison: {str(e)}")

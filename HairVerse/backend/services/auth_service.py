@@ -134,7 +134,7 @@ def get_user_profile(uid: str) -> dict:
     return {
         "uid": uid,
         "email": data.get("email", ""),
-        "display_name": data.get("displayName", data.get("email", uid)),
+        "display_name": data.get("displayName") or data.get("email") or "User",
         "subscription_status": data.get("subscriptionStatus", "free"),
         "profile_completed": data.get("profileCompleted", False),
         "onboarding_completed": data.get("onboardingCompleted", False),

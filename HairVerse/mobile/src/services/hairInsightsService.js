@@ -2,51 +2,51 @@ import axios from 'axios';
 import { auth } from '../config/firebase';
 import { BACKEND_BASE_URL } from '../config/api';
 
-export const settingsService = {
-  getSettings: async () => {
+export const hairInsightsService = {
+  getInsights: async () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.get(`${BACKEND_BASE_URL}/settings`, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/hair-insights`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('Error fetching hair insights:', error);
       throw error;
     }
   },
 
-  updateSettings: async (settingsData) => {
+  getHistory: async () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.patch(`${BACKEND_BASE_URL}/settings`, settingsData, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/hair-insights/history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error updating settings:', error);
+      console.error('Error fetching hair insights history:', error);
       throw error;
     }
   },
 
-  resetSettings: async () => {
+  generateInsights: async () => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('User not authenticated');
       
       const token = await user.getIdToken();
-      const response = await axios.post(`${BACKEND_BASE_URL}/settings/reset`, {}, {
+      const response = await axios.post(`${BACKEND_BASE_URL}/hair-insights/generate`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
     } catch (error) {
-      console.error('Error resetting settings:', error);
+      console.error('Error generating hair insights:', error);
       throw error;
     }
   }

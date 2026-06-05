@@ -11,7 +11,7 @@ class NotificationsService:
             
         try:
             notifications_ref = db.collection("users").document(uid).collection("notifications")
-            docs = notifications_ref.order_by("createdAt", direction="DESCENDING").limit(20).stream()
+            docs = notifications_ref.order_by("createdAt", direction="DESCENDING").limit(50).stream()
             
             notifications = []
             unread_count = 0
@@ -19,7 +19,6 @@ class NotificationsService:
             for doc in docs:
                 data = doc.to_dict()
                 
-                # Handle possible timestamp types
                 def parse_timestamp(ts_raw):
                     ts = datetime.now()
                     if hasattr(ts_raw, 'timestamp'):
@@ -41,11 +40,15 @@ class NotificationsService:
                     notificationId=data.get("notificationId", doc.id),
                     title=data.get("title", "Notification"),
                     message=data.get("message", ""),
-                    type=data.get("type", "info"),
+                    category=data.get("category", "system_update"),
+                    actionType=data.get("actionType"),
+                    actionId=data.get("actionId"),
                     isRead=is_read,
-                    actionUrl=data.get("actionUrl"),
                     createdAt=created_at,
-                    priority=data.get("priority", "normal")
+                    # Legacy
+                    type=data.get("type"),
+                    actionUrl=data.get("actionUrl"),
+                    priority=data.get("priority")
                 )
                 notifications.append(notification)
                 
@@ -66,6 +69,34 @@ class NotificationsService:
             return True
         except Exception as e:
             print(f"[ERROR] Failed to mark notification {notification_id} as read for uid {uid}: {e}")
+            raise e
+
+    @staticmethod
+    def mark_all_as_read(uid: str) -> bool:
+        if db is None:
+            return False
+            
+        try:
+            notifications_ref = db.collection("users").document(uid).collection("notifications")
+            unread_docs = notifications_ref.where("isRead", "==", False).stream()
+            
+            batch = db.batch()
+            count = 0
+            for doc in unread_docs:
+                batch.update(doc.reference, {"isRead": True})
+                count += 1
+                
+                if count == 500: # Firestore batch limit
+                    batch.commit()
+                    batch = db.batch()
+                    count = 0
+            
+            if count > 0:
+                batch.commit()
+                
+            return True
+        except Exception as e:
+            print(f"[ERROR] Failed to mark all notifications as read for uid {uid}: {e}")
             raise e
 
     @staticmethod
