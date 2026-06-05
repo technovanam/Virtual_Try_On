@@ -1,18 +1,16 @@
-from pydantic import BaseModel
 from typing import List, Optional
+from pydantic import BaseModel
 from datetime import datetime
 
-class CelebrityMatch(BaseModel):
-    celebrityId: str
+class CelebrityMatchItem(BaseModel):
+    matchId: str
     celebrityName: str
-    celebrityImage: str
-    hairstyleName: str
-    hairstyleImage: str
-    matchScore: float
-    faceShapeMatch: float
-    hairMatch: float
-    generatedAt: Optional[datetime] = None
+    similarityScore: float
+    hairstyleReason: str
 
 class CelebrityMatchesResponse(BaseModel):
-    matches: List[CelebrityMatch]
-    total: int
+    matches: List[CelebrityMatchItem]
+    generatedAt: Optional[datetime] = None
+
+class CelebrityMatchGenerateRequest(BaseModel):
+    analysisId: Optional[str] = None

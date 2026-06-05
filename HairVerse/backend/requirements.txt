@@ -11,3 +11,4 @@ numpy
 email-validator
 mediapipe
 requests
+google-generativeai

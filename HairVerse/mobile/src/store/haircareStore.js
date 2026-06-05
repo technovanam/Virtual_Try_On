@@ -1,20 +1,19 @@
 import { create } from 'zustand';
-import { recommendationService } from '../services/recommendationService';
+import { haircareService } from '../services/haircareService';
 
-export const useRecommendationStore = create((set) => ({
-  recommendations: [],
+export const useHaircareStore = create((set) => ({
+  suggestions: [],
   isGenerating: false,
   isLoading: false,
   error: null,
   status: 'idle', // 'idle', 'loading', 'success', 'empty', 'error'
 
-  fetchRecommendations: async () => {
+  fetchSuggestions: async () => {
     set({ isLoading: true, error: null, status: 'loading' });
     try {
-      const data = await recommendationService.fetchRecommendations();
-      // data is the array itself now based on recommendationService mapping
+      const data = await haircareService.fetchSuggestions();
       set({ 
-        recommendations: data, 
+        suggestions: data, 
         status: data.length > 0 ? 'success' : 'empty',
         isLoading: false,
         error: null
@@ -22,18 +21,18 @@ export const useRecommendationStore = create((set) => ({
     } catch (error) {
       set({ 
         isLoading: false, 
-        error: error.message || 'Failed to load recommendations',
+        error: error.message || 'Failed to load haircare suggestions',
         status: 'error'
       });
     }
   },
 
-  generateRecommendations: async (analysisId = null) => {
+  generateSuggestions: async (context = null) => {
     set({ isGenerating: true, error: null, status: 'loading' });
     try {
-      const data = await recommendationService.generateRecommendations(analysisId);
+      const data = await haircareService.generateSuggestions(context);
       set({ 
-        recommendations: data, 
+        suggestions: data, 
         status: data.length > 0 ? 'success' : 'empty',
         isGenerating: false,
         error: null
@@ -41,12 +40,12 @@ export const useRecommendationStore = create((set) => ({
     } catch (error) {
       set({ 
         isGenerating: false, 
-        error: error.message || 'Failed to generate recommendations',
+        error: error.message || 'Failed to generate haircare suggestions',
         status: 'error'
       });
     }
   },
 
   clearError: () => set({ error: null, status: 'idle' }),
-  reset: () => set({ recommendations: [], isGenerating: false, isLoading: false, error: null, status: 'idle' }),
+  reset: () => set({ suggestions: [], isGenerating: false, isLoading: false, error: null, status: 'idle' }),
 }));

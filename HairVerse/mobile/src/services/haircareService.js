@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
-
 import { BACKEND_BASE_URL } from '../config/api';
 
-export const recommendationService = {
-  fetchRecommendations: async () => {
+export const haircareService = {
+  fetchSuggestions: async () => {
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
@@ -13,19 +12,19 @@ export const recommendationService = {
 
       const idToken = await firebaseUser.getIdToken();
       
-      const response = await axios.get(`${BACKEND_BASE_URL}/recommendations/`, {
+      const response = await axios.get(`${BACKEND_BASE_URL}/haircare/`, {
         headers: { Authorization: `Bearer ${idToken}` },
         timeout: 10000
       });
       
-      return response.data.recommendations || [];
+      return response.data.suggestions || [];
     } catch (error) {
-      console.error('Error fetching recommendations:', error);
+      console.error('Error fetching haircare suggestions:', error);
       throw error;
     }
   },
 
-  generateRecommendations: async (analysisId = null) => {
+  generateSuggestions: async (context = null) => {
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
@@ -34,17 +33,17 @@ export const recommendationService = {
 
       const idToken = await firebaseUser.getIdToken();
       
-      const response = await axios.post(`${BACKEND_BASE_URL}/recommendations/generate`, 
-        { analysisId },
+      const response = await axios.post(`${BACKEND_BASE_URL}/haircare/generate`, 
+        { context },
         {
           headers: { Authorization: `Bearer ${idToken}` },
           timeout: 60000 // generation can take time
         }
       );
       
-      return response.data.recommendations || [];
+      return response.data.suggestions || [];
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      console.error('Error generating haircare suggestions:', error);
       throw error;
     }
   }

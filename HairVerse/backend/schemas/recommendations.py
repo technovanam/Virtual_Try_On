@@ -2,18 +2,18 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
-class RecommendationItem(BaseModel):
+class Recommendation(BaseModel):
     recommendationId: str
-    hairstyleId: str
     hairstyleName: str
     category: str
-    suitabilityScore: float
+    suitabilityScore: int
     maintenanceLevel: str
     recommendationReason: str
-    generatedAt: datetime
-    imageUrl: Optional[str] = None
-
-class RecommendationResponse(BaseModel):
-    recommendations: List[RecommendationItem]
-    total: int
+    confidenceScore: float
     generatedAt: Optional[datetime] = None
+
+class RecommendationListResponse(BaseModel):
+    recommendations: List[Recommendation]
+
+class RecommendationGenerateRequest(BaseModel):
+    analysisId: Optional[str] = None

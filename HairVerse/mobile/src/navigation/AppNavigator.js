@@ -56,7 +56,8 @@ function MainNavigator() {
           <MainStack.Screen name="LiveCamera" component={LiveCameraScreen} />
           <MainStack.Screen name="AIAnalysis" component={require('../screens/AIAnalysisScreen').default} />
           <MainStack.Screen name="AIInsights" component={require('../screens/AIInsightsScreen').default} />
-          <MainStack.Screen name="Recommendations" component={require('../screens/RecommendationsScreen').default} />
+          <MainStack.Screen name="Recommendations" component={require('../screens/RecommendationResultsScreen').default} />
+          <MainStack.Screen name="HairCareSuggestions" component={require('../screens/HairCareSuggestionsScreen').default} />
           <MainStack.Screen name="HairstyleDetails" component={require('../screens/HairstyleDetailsScreen').default} />
           <MainStack.Screen name="VirtualTryOn" component={require('../screens/VirtualTryOnScreen').default} />
           <MainStack.Screen name="CompareHairstyles" component={require('../screens/CompareHairstylesScreen').default} />
