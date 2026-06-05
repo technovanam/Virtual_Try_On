@@ -151,7 +151,7 @@ export default function VirtualTryOnScreen() {
           
           {/* Base Image underneath the result */}
           <Image 
-            source={{ uri: originalImageUrl || 'https://via.placeholder.com/600' }} 
+            source={{ uri: originalImageUrl || 'https://placehold.co/600x600/png' }} 
             className="absolute inset-0 w-full h-full opacity-50"
             resizeMode="cover"
           />

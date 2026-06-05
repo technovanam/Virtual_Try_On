@@ -18,15 +18,15 @@ const SearchIcon = ({ color, size }) => (
 );
 
 import { useNavigation } from '@react-navigation/native';
+import { useNotificationsStore } from '../store/notificationsStore';
 
 export default function DashboardHeader() {
   const { user } = useAuthStore();
   const navigation = useNavigation();
+  const { unreadCount } = useNotificationsStore();
   
   const displayName = user?.displayName || 'User';
   const profileImage = user?.photoURL || user?.profileImage; 
-  
-  const unreadNotifications = 0; 
 
   return (
     <View className="px-5 pt-4 pb-5 bg-white">
@@ -52,11 +52,14 @@ export default function DashboardHeader() {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity className="relative w-11 h-11 rounded-full bg-[#f8f9fa] justify-center items-center border border-[#f0f0f0]">
+        <TouchableOpacity 
+          className="relative w-11 h-11 rounded-full bg-[#f8f9fa] justify-center items-center border border-[#f0f0f0]"
+          onPress={() => navigation.navigate('Notifications')}
+        >
           <NotificationIcon size={22} color="#1a1a1a" />
-          {unreadNotifications > 0 && (
+          {unreadCount > 0 && (
             <View className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#FF3B30] justify-center items-center border-[1.5px] border-white px-1">
-              <Text className="text-white text-[10px] font-bold">{unreadNotifications > 99 ? '99+' : unreadNotifications}</Text>
+              <Text className="text-white text-[10px] font-bold">{unreadCount > 99 ? '99+' : unreadCount}</Text>
             </View>
           )}
         </TouchableOpacity>

@@ -140,19 +140,14 @@ export default function ProfileScreen() {
         <View className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-10">
           <SectionHeader title="Settings" />
           <SettingItem 
+            icon="settings-outline" 
+            label="App Settings" 
+            onPress={() => navigation.navigate('Settings')} 
+          />
+          <SettingItem 
             icon="create-outline" 
             label="Edit Profile" 
             onPress={() => navigation.navigate('EditProfile')} 
-          />
-          <SettingItem 
-            icon="notifications-outline" 
-            label="Notification Settings" 
-            onPress={() => navigation.navigate('Placeholder')} 
-          />
-          <SettingItem 
-            icon="lock-closed-outline" 
-            label="Privacy Settings" 
-            onPress={() => navigation.navigate('Placeholder')} 
           />
           <SettingItem 
             icon="log-out-outline" 

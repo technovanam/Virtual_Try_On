@@ -9,3 +9,5 @@ httpx
 firebase-admin
 numpy
 email-validator
+mediapipe
+requests

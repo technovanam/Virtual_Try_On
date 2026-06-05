@@ -23,6 +23,9 @@ export default function AIInsightsSection() {
     <View className="mt-6 mb-2">
       <View className="flex-row justify-between items-end mb-4 px-1">
         <Text className="text-xl font-bold text-gray-900">AI Insights</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('AIInsights')}>
+          <Text className="text-indigo-600 font-semibold text-sm">View Full Details</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Loading State */}

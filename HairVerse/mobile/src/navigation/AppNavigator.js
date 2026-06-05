@@ -55,11 +55,14 @@ function MainNavigator() {
           <MainStack.Screen name="MainTabs" component={BottomTabNavigator} />
           <MainStack.Screen name="LiveCamera" component={LiveCameraScreen} />
           <MainStack.Screen name="AIAnalysis" component={require('../screens/AIAnalysisScreen').default} />
+          <MainStack.Screen name="AIInsights" component={require('../screens/AIInsightsScreen').default} />
           <MainStack.Screen name="Recommendations" component={require('../screens/RecommendationsScreen').default} />
           <MainStack.Screen name="HairstyleDetails" component={require('../screens/HairstyleDetailsScreen').default} />
           <MainStack.Screen name="VirtualTryOn" component={require('../screens/VirtualTryOnScreen').default} />
           <MainStack.Screen name="CompareHairstyles" component={require('../screens/CompareHairstylesScreen').default} />
           <MainStack.Screen name="EditProfile" component={require('../screens/EditProfileScreen').default} />
+          <MainStack.Screen name="Notifications" component={require('../screens/NotificationsScreen').default} />
+          <MainStack.Screen name="Settings" component={require('../screens/SettingsScreen').default} />
           <MainStack.Screen name="Placeholder" component={PlaceholderScreen} />
         </>
       )}

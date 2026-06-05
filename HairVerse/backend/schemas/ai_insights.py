@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -11,8 +11,9 @@ class AIInsight(BaseModel):
     hairHealth: Optional[str] = None
     hairTexture: Optional[str] = None
     hairColor: Optional[str] = None
-    confidenceScore: Optional[float] = None
-    generatedAt: datetime
+    beardDensity: Optional[str] = None
+    confidenceScores: Optional[Dict[str, float]] = None
+    analyzedAt: datetime
 
 class AIInsightsResponse(BaseModel):
     insights: List[AIInsight]

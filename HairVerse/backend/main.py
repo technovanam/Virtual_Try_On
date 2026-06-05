@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, recommendations, history, saved_collections, ai_insights, tryon, notifications, search, trending, celebrity_matches, selfie, camera, analysis, hairstyles, compare, profile
+from routers import auth, recommendations, history, saved_collections, ai_insights, tryon, notifications, search, trending, celebrity_matches, selfie, camera, analysis, hairstyles, compare, profile, settings, recommendation_engine
 
 app = FastAPI(title="HairVerse API", description="AI-powered hairstyle virtual try-on API")
 
@@ -33,7 +33,8 @@ app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
 app.include_router(hairstyles.router, prefix="/hairstyles", tags=["hairstyles"])
 app.include_router(compare.router, prefix="/compare", tags=["compare"])
 app.include_router(profile.router, prefix="/profile", tags=["profile"])
-
+app.include_router(settings.router, prefix="/settings", tags=["settings"])
+app.include_router(recommendation_engine.router, prefix="/recommendation", tags=["recommendation-engine"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to HairVerse API"}

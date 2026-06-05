@@ -54,3 +54,29 @@ class NotificationsService:
         except Exception as e:
             print(f"[ERROR] Failed to fetch Notifications for uid {uid}: {e}")
             raise e
+
+    @staticmethod
+    def mark_as_read(uid: str, notification_id: str) -> bool:
+        if db is None:
+            return False
+            
+        try:
+            doc_ref = db.collection("users").document(uid).collection("notifications").document(notification_id)
+            doc_ref.update({"isRead": True})
+            return True
+        except Exception as e:
+            print(f"[ERROR] Failed to mark notification {notification_id} as read for uid {uid}: {e}")
+            raise e
+
+    @staticmethod
+    def delete_notification(uid: str, notification_id: str) -> bool:
+        if db is None:
+            return False
+            
+        try:
+            doc_ref = db.collection("users").document(uid).collection("notifications").document(notification_id)
+            doc_ref.delete()
+            return True
+        except Exception as e:
+            print(f"[ERROR] Failed to delete notification {notification_id} for uid {uid}: {e}")
+            raise e

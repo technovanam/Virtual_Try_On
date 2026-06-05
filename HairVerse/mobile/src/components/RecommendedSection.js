@@ -19,7 +19,7 @@ export default function RecommendedSection() {
   };
 
   const handleCompleteAnalysis = () => {
-    navigation.navigate('ProfileCompletion');
+    navigation.navigate('LiveCamera');
   };
 
   const renderContent = () => {

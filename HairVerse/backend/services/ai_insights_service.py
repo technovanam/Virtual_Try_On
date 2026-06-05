@@ -11,20 +11,20 @@ class AIInsightsService:
             
         try:
             analysis_ref = db.collection("users").document(uid).collection("analysis")
-            docs = analysis_ref.order_by("generatedAt", direction="DESCENDING").limit(1).stream()
+            docs = analysis_ref.order_by("analyzedAt", direction="DESCENDING").limit(1).stream()
             
             insights = []
             for doc in docs:
                 data = doc.to_dict()
                 
                 # Handle possible timestamp types
-                generated_at_raw = data.get("generatedAt")
-                generated_at = datetime.now()
-                if hasattr(generated_at_raw, 'timestamp'):
-                    generated_at = datetime.fromtimestamp(generated_at_raw.timestamp())
-                elif isinstance(generated_at_raw, str):
+                analyzed_at_raw = data.get("analyzedAt") or data.get("generatedAt")
+                analyzed_at = datetime.now()
+                if hasattr(analyzed_at_raw, 'timestamp'):
+                    analyzed_at = datetime.fromtimestamp(analyzed_at_raw.timestamp())
+                elif isinstance(analyzed_at_raw, str):
                     try:
-                        generated_at = datetime.fromisoformat(generated_at_raw.replace('Z', '+00:00'))
+                        analyzed_at = datetime.fromisoformat(analyzed_at_raw.replace('Z', '+00:00'))
                     except ValueError:
                         pass
                 
@@ -37,8 +37,9 @@ class AIInsightsService:
                     hairHealth=data.get("hairHealth"),
                     hairTexture=data.get("hairTexture"),
                     hairColor=data.get("hairColor"),
-                    confidenceScore=data.get("confidenceScore"),
-                    generatedAt=generated_at
+                    beardDensity=data.get("beardDensity"),
+                    confidenceScores=data.get("confidenceScores"),
+                    analyzedAt=analyzed_at
                 )
                 insights.append(insight)
                 

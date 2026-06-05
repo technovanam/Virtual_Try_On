@@ -101,7 +101,7 @@ export default function HairstyleDetailsScreen() {
         {/* Header Image Section */}
         <View className="relative w-full" style={{ height: width * 1.1 }}>
           <Image 
-            source={{ uri: details.imageUrl || 'https://via.placeholder.com/400' }} 
+            source={{ uri: details.imageUrl || 'https://placehold.co/400x400/png' }} 
             className="w-full h-full rounded-b-[40px]"
             resizeMode="cover"
           />

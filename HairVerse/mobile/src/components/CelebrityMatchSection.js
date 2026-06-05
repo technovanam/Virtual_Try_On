@@ -19,7 +19,7 @@ export default function CelebrityMatchSection() {
   };
 
   const handleStartAnalysis = () => {
-    navigation.navigate('ProfileCompletion');
+    navigation.navigate('LiveCamera');
   };
 
   const renderContent = () => {

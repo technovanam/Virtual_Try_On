@@ -19,12 +19,20 @@ const SkeletonNotificationCard = () => (
 );
 
 export default function NotificationsSection() {
-  const { notifications, unreadCount, isLoading, error, fetchNotifications } = useNotificationsStore();
+  const { notifications, unreadCount, isLoading, error, fetchNotifications, markAsRead, deleteNotification } = useNotificationsStore();
   const navigation = useNavigation();
 
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  const handleMarkAllRead = () => {
+    notifications.forEach((n) => {
+      if (!n.isRead) {
+        markAsRead(n.notificationId);
+      }
+    });
+  };
 
   return (
     <View className="mt-6 mb-2">
@@ -37,8 +45,8 @@ export default function NotificationsSection() {
             </View>
           )}
         </View>
-        {(!isLoading && !error && notifications.length > 0) && (
-          <TouchableOpacity onPress={() => console.log('Mark all read')}>
+        {(!isLoading && !error && unreadCount > 0) && (
+          <TouchableOpacity onPress={handleMarkAllRead}>
             <Text className="text-blue-500 font-semibold">Mark all as read</Text>
           </TouchableOpacity>
         )}
@@ -88,15 +96,15 @@ export default function NotificationsSection() {
               key={notification.notificationId} 
               notification={notification} 
               onPress={(n) => {
-                if (n.actionUrl) {
-                  navigation.navigate(n.actionUrl);
-                }
+                if (!n.isRead) markAsRead(n.notificationId);
+                if (n.actionUrl) navigation.navigate(n.actionUrl);
               }}
+              onDelete={(n) => deleteNotification(n.notificationId)}
             />
           ))}
           
           {notifications.length > 3 && (
-            <TouchableOpacity className="py-2 items-center mt-1" onPress={() => console.log('View all notifications')}>
+            <TouchableOpacity className="py-2 items-center mt-1" onPress={() => navigation.navigate('Notifications')}>
               <Text className="text-gray-500 font-semibold text-sm">View All Notifications</Text>
             </TouchableOpacity>
           )}

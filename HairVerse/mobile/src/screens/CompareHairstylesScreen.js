@@ -118,7 +118,7 @@ export default function CompareHairstylesScreen() {
             >
               {/* Image */}
               <Image 
-                source={{ uri: style.imageUrl || 'https://via.placeholder.com/300' }} 
+                source={{ uri: style.imageUrl || 'https://placehold.co/300x300/png' }} 
                 className="w-full h-64 bg-gray-100"
                 resizeMode="cover"
               />

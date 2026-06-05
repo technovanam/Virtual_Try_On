@@ -336,7 +336,8 @@ export const useAuthStore = create((set) => ({
       console.log("TOKEN (completeProfile):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
       
       const response = await axios.put(`${BACKEND_BASE_URL}/auth/profile/complete`, preferences, {
-        headers: { Authorization: `Bearer ${idToken}` }
+        headers: { Authorization: `Bearer ${idToken}` },
+        timeout: 15000
       });
       
       const data = response.data;
@@ -346,8 +347,18 @@ export const useAuthStore = create((set) => ({
       }));
       return { success: true };
     } catch (err) {
-      set({ isLoading: false, error: err.message });
-      return { success: false, error: err.message };
+      let errorMessage = err.message;
+      if (err.response && err.response.data && err.response.data.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0].msg;
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      } else if (err.code === 'ECONNABORTED') {
+        errorMessage = 'The request timed out. Please check your internet connection.';
+      }
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -359,7 +370,8 @@ export const useAuthStore = create((set) => ({
       const idToken = await firebaseUser.getIdToken(true);
       
       const response = await axios.put(`${BACKEND_BASE_URL}/auth/onboarding/complete`, {}, {
-        headers: { Authorization: `Bearer ${idToken}` }
+        headers: { Authorization: `Bearer ${idToken}` },
+        timeout: 15000
       });
       
       const data = response.data;
