@@ -45,13 +45,17 @@ class CelebrityMatchService:
         {json.dumps(analysis_data, indent=2)}
         
         Respond ONLY with a valid JSON object matching the exact structure below. Do not include markdown formatting like ```json.
+        For imageUrl, construct a ui-avatars URL like: https://ui-avatars.com/api/?name=First+Last&background=random
         
         {{
             "matches": [
                 {{
                     "celebrityName": "string",
                     "similarityScore": "float between 0 and 1",
-                    "hairstyleReason": "string describing why their hairstyle and face shape is a good match"
+                    "faceShapeMatch": "string describing face shape similarities",
+                    "hairstyleMatch": "string describing hairstyle similarities",
+                    "reasoning": "string explaining the overall match reasoning",
+                    "imageUrl": "string containing the generated ui-avatars URL"
                 }}
             ]
         }}
@@ -91,7 +95,10 @@ class CelebrityMatchService:
                 "matchId": match_id,
                 "celebrityName": match.get("celebrityName"),
                 "similarityScore": match.get("similarityScore", 0.0),
-                "hairstyleReason": match.get("hairstyleReason", ""),
+                "faceShapeMatch": match.get("faceShapeMatch", ""),
+                "hairstyleMatch": match.get("hairstyleMatch", ""),
+                "reasoning": match.get("reasoning", ""),
+                "imageUrl": match.get("imageUrl", f"https://ui-avatars.com/api/?name={match.get('celebrityName', 'Unknown')}&background=random"),
                 "generatedAt": generated_at
             }
             db.collection("users").document(uid).collection("celebrityMatches").document(match_id).set(db_data)
@@ -136,11 +143,34 @@ class CelebrityMatchService:
                     matchId=data.get("matchId", doc.id),
                     celebrityName=data.get("celebrityName", ""),
                     similarityScore=data.get("similarityScore", 0.0),
-                    hairstyleReason=data.get("hairstyleReason", "")
+                    faceShapeMatch=data.get("faceShapeMatch", ""),
+                    hairstyleMatch=data.get("hairstyleMatch", ""),
+                    reasoning=data.get("reasoning", ""),
+                    imageUrl=data.get("imageUrl", "")
                 )
             )
             
         return CelebrityMatchesResponse(
             matches=matches,
             generatedAt=generated_at or datetime.now()
+        )
+
+    @staticmethod
+    def get_match(uid: str, match_id: str) -> CelebrityMatchItem:
+        if db is None:
+            raise Exception("Firestore not initialized")
+            
+        doc = db.collection("users").document(uid).collection("celebrityMatches").document(match_id).get()
+        if not doc.exists:
+            raise Exception("Match not found")
+            
+        data = doc.to_dict()
+        return CelebrityMatchItem(
+            matchId=data.get("matchId", doc.id),
+            celebrityName=data.get("celebrityName", ""),
+            similarityScore=data.get("similarityScore", 0.0),
+            faceShapeMatch=data.get("faceShapeMatch", ""),
+            hairstyleMatch=data.get("hairstyleMatch", ""),
+            reasoning=data.get("reasoning", ""),
+            imageUrl=data.get("imageUrl", "")
         )

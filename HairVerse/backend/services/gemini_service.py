@@ -63,14 +63,23 @@ class GeminiService:
             
             {
                 "faceShape": "string (e.g. Oval, Round, Square, Heart, Diamond)",
+                "jawlineType": "string (e.g. Strong, Soft, Angular, Rounded)",
+                "foreheadType": "string (e.g. Broad, Narrow, High, Average)",
+                "faceSymmetryScore": "number between 0 and 100",
                 "hairLength": "string (e.g. Short, Medium, Long, Buzz Cut, Bald)",
                 "hairTexture": "string (e.g. Straight, Wavy, Curly, Coily)",
                 "hairDensity": "string (e.g. Fine, Medium, Thick)",
                 "hairColor": "string (e.g. Black, Brown, Blonde, Red, Gray)",
+                "hairHealthScore": "number between 0 and 100",
+                "hairlineType": "string (e.g. Straight, Receding, Widow's Peak, Uneven)",
+                "beardDensity": "string (e.g. Clean Shaven, Stubble, Sparse, Thick)",
+                "beardCompatibility": "string (e.g. High, Medium, Low based on face shape)",
+                "celebrityMatchSummary": "string summarizing top 2-3 celebrity lookalikes and why",
+                "recommendationSummary": "string summarizing 2-3 hairstyle recommendations based on face shape and hair type",
                 "confidence": "number between 0 and 1 representing confidence in analysis",
-                "healthObservations": ["string array of observations about hair health, e.g. 'Appears well-hydrated', 'Some split ends visible'"],
-                "recommendations": ["string array of hairstyle recommendations based on face shape and hair type"],
-                "facialFeatureSummary": "string summarizing key facial features like jawline and cheekbones"
+                "healthObservations": ["string array of observations about hair health"],
+                "recommendations": ["string array of specific hairstyle names recommended"],
+                "facialFeatureSummary": "string summarizing key facial features"
             }
             """
             
@@ -97,10 +106,19 @@ class GeminiService:
                 "analysisId": analysis_id,
                 "status": "completed",
                 "faceShape": analysis_data.get("faceShape"),
+                "jawlineType": analysis_data.get("jawlineType"),
+                "foreheadType": analysis_data.get("foreheadType"),
+                "faceSymmetryScore": analysis_data.get("faceSymmetryScore"),
                 "hairLength": analysis_data.get("hairLength"),
                 "hairTexture": analysis_data.get("hairTexture"),
                 "hairDensity": analysis_data.get("hairDensity"),
                 "hairColor": analysis_data.get("hairColor"),
+                "hairHealthScore": analysis_data.get("hairHealthScore"),
+                "hairlineType": analysis_data.get("hairlineType"),
+                "beardDensity": analysis_data.get("beardDensity"),
+                "beardCompatibility": analysis_data.get("beardCompatibility"),
+                "celebrityMatchSummary": analysis_data.get("celebrityMatchSummary"),
+                "recommendationSummary": analysis_data.get("recommendationSummary"),
                 "confidence": analysis_data.get("confidence"),
                 "healthObservations": analysis_data.get("healthObservations", []),
                 "recommendations": analysis_data.get("recommendations", []),
@@ -108,9 +126,9 @@ class GeminiService:
                 "analyzedAt": analyzed_at
             }
             
-            # 7. Save to Firestore
+            # 7. Save to Firestore under 'analysis' directly
             if db is not None:
-                doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
+                doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
                 doc_ref.set(db_data)
                 
             return GeminiAnalysisResponse(**db_data)
@@ -124,7 +142,7 @@ class GeminiService:
                 "analyzedAt": analyzed_at
             }
             if db is not None:
-                doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
+                doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
                 doc_ref.set(error_data)
                 
             return GeminiAnalysisResponse(**error_data)
@@ -134,7 +152,7 @@ class GeminiService:
         if db is None:
             return GeminiAnalysisResponse(status="error", analysisId=analysis_id, healthObservations=["Firestore not initialized"])
             
-        doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
+        doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
         doc = doc_ref.get()
         
         if not doc.exists:

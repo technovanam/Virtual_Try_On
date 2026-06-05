@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DownloadButton from './DownloadButton';
+import ShareButton from './ShareButton';
 
 export default function RecommendationCard({
   hairstyleId,
@@ -40,6 +42,24 @@ export default function RecommendationCard({
             <Text className="text-white text-[10px] font-bold uppercase">{category}</Text>
           </View>
         )}
+
+        <View className="absolute bottom-3 right-3 flex-row gap-2">
+          <DownloadButton 
+            imageUrl={previewImage} 
+            resourceType="recommendation" 
+            resourceId={hairstyleId} 
+            className="bg-white/90 p-2 rounded-full shadow-sm" 
+            iconSize={16} 
+          />
+          <ShareButton 
+            imageUrl={previewImage} 
+            resourceType="recommendation" 
+            resourceId={hairstyleId} 
+            title={`Check out this recommended hairstyle: ${hairstyleName}`}
+            className="bg-white/90 p-2 rounded-full shadow-sm" 
+            iconSize={16} 
+          />
+        </View>
       </View>
 
       <View className="p-4">

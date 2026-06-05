@@ -23,5 +23,22 @@ export const useCelebrityMatchStore = create((set) => ({
     }
   },
 
+  generateMatches: async (analysisId = null) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await celebrityMatchService.generateMatches(analysisId);
+      set({ 
+        matches: data.matches || [], 
+        isLoading: false,
+        error: null
+      });
+    } catch (error) {
+      set({ 
+        isLoading: false, 
+        error: error.message || 'Failed to generate celebrity matches'
+      });
+    }
+  },
+
   clearError: () => set({ error: null }),
 }));

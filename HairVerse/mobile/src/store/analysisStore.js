@@ -43,5 +43,33 @@ export const useAnalysisStore = create((set, get) => ({
       });
       return { status: 'failed', error };
     }
+  },
+
+  analysisResult: null,
+  isLoadingResult: false,
+  resultError: null,
+
+  fetchAnalysisResult: async (id) => {
+    const analysisId = id || get().analysisId;
+    if (!analysisId) return;
+
+    set({ isLoadingResult: true, resultError: null });
+
+    try {
+      const data = await analysisService.getAnalysisResult(analysisId);
+      
+      set({
+        analysisResult: data,
+        isLoadingResult: false,
+      });
+      
+      return data;
+    } catch (error) {
+      set({ 
+        resultError: error.message || 'Failed to fetch analysis result',
+        isLoadingResult: false 
+      });
+      return { status: 'error', error };
+    }
   }
 }));

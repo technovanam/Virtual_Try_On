@@ -1,10 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+
+class GenerationConfig(BaseModel):
+    provider: str = Field(default="replicate", description="Provider to use for generation (e.g., replicate, mock, imagen)")
+    steps: Optional[int] = 30
+    guidance_scale: Optional[float] = 7.5
 
 class TryOnStartRequest(BaseModel):
     imageId: str
     hairstyleId: str
+
+class GenerateTryOnRequest(BaseModel):
+    imageId: str
+    hairstyleId: str
+    config: Optional[GenerationConfig] = None
 
 class TryOnStartResponse(BaseModel):
     tryOnId: str

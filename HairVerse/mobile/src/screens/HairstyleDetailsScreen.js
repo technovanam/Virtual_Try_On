@@ -45,8 +45,12 @@ export default function HairstyleDetailsScreen() {
   };
 
   const handleTryThisStyle = () => {
-    // Future integration: Try This Style
-    console.log('Try this style pressed');
+    navigation.navigate('VirtualTryOnResultScreen', {
+      hairstyleId: hairstyleId,
+      // Pass a mock imageId or fetch it from the user's profile if available
+      imageId: 'latest_selfie_id', 
+      originalImageUrl: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=600&h=600&fit=crop'
+    });
   };
 
   const handleCompare = () => {

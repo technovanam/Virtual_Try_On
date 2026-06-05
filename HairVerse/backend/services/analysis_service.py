@@ -1,8 +1,62 @@
 from firebase_config import db
-from schemas.analysis import AnalysisStatusResponse
+from schemas.analysis import AnalysisStatusResponse, CompleteAnalysisResultResponse
 from datetime import datetime
 
 class AnalysisService:
+    @staticmethod
+    def get_analysis_result(uid: str, analysis_id: str) -> CompleteAnalysisResultResponse:
+        if db is None:
+            return CompleteAnalysisResultResponse(status="error", analysisId=analysis_id, healthObservations=["Firestore not initialized"])
+            
+        try:
+            doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+            doc = doc_ref.get()
+            
+            if not doc.exists:
+                return CompleteAnalysisResultResponse(status="not_found", analysisId=analysis_id)
+                
+            data = doc.to_dict()
+            
+            def parse_timestamp(ts_raw):
+                if not ts_raw:
+                    return None
+                ts = datetime.now()
+                if hasattr(ts_raw, 'timestamp'):
+                    ts = datetime.fromtimestamp(ts_raw.timestamp())
+                elif isinstance(ts_raw, str):
+                    try:
+                        ts = datetime.fromisoformat(ts_raw.replace('Z', '+00:00'))
+                    except ValueError:
+                        pass
+                return ts
+                
+            return CompleteAnalysisResultResponse(
+                status=data.get("status", "completed"),
+                analysisId=data.get("analysisId", analysis_id),
+                faceShape=data.get("faceShape"),
+                jawlineType=data.get("jawlineType"),
+                foreheadType=data.get("foreheadType"),
+                faceSymmetryScore=data.get("faceSymmetryScore"),
+                hairLength=data.get("hairLength"),
+                hairDensity=data.get("hairDensity"),
+                hairTexture=data.get("hairTexture"),
+                hairColor=data.get("hairColor"),
+                hairHealthScore=data.get("hairHealthScore"),
+                hairlineType=data.get("hairlineType"),
+                beardDensity=data.get("beardDensity"),
+                beardCompatibility=data.get("beardCompatibility"),
+                celebrityMatchSummary=data.get("celebrityMatchSummary"),
+                recommendationSummary=data.get("recommendationSummary"),
+                confidence=data.get("confidence"),
+                healthObservations=data.get("healthObservations", []),
+                recommendations=data.get("recommendations", []),
+                facialFeatureSummary=data.get("facialFeatureSummary"),
+                analyzedAt=parse_timestamp(data.get("analyzedAt"))
+            )
+        except Exception as e:
+            print(f"[ERROR] Failed to fetch complete analysis result for uid {uid}, analysis_id {analysis_id}: {e}")
+            raise e
+
     @staticmethod
     def get_analysis_status(uid: str, analysis_id: str) -> AnalysisStatusResponse:
         if db is None:

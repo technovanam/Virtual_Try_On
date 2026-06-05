@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from middleware.auth_middleware import get_current_user
-from schemas.celebrity_matches import CelebrityMatchesResponse, CelebrityMatchGenerateRequest
+from schemas.celebrity_matches import CelebrityMatchesResponse, CelebrityMatchGenerateRequest, CelebrityMatchItem
 from services.celebrity_match_service import CelebrityMatchService
 
 router = APIRouter()
@@ -34,4 +34,21 @@ async def get_celebrity_matches(current_user: dict = Depends(get_current_user)):
         response = CelebrityMatchService.get_matches(uid)
         return response
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{match_id}", response_model=CelebrityMatchItem)
+async def get_celebrity_match(match_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Get a specific celebrity match by ID.
+    """
+    try:
+        uid = current_user.get("uid")
+        if not uid:
+            raise HTTPException(status_code=401, detail="Invalid user authentication")
+            
+        response = CelebrityMatchService.get_match(uid, match_id)
+        return response
+    except Exception as e:
+        if str(e) == "Match not found":
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=500, detail=str(e))

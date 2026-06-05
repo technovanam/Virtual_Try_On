@@ -6,7 +6,10 @@ class CelebrityMatchItem(BaseModel):
     matchId: str
     celebrityName: str
     similarityScore: float
-    hairstyleReason: str
+    faceShapeMatch: str
+    hairstyleMatch: str
+    reasoning: str
+    imageUrl: str
 
 class CelebrityMatchesResponse(BaseModel):
     matches: List[CelebrityMatchItem]

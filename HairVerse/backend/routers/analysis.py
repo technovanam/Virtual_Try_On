@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from middleware.auth_middleware import get_current_user
-from schemas.analysis import AnalysisStatusResponse
+from schemas.analysis import AnalysisStatusResponse, CompleteAnalysisResultResponse
 from schemas.face_analysis import FaceAnalysisStartRequest, FaceAnalysisResponse
 from schemas.hair_analysis import HairAnalysisStartRequest, HairAnalysisResponse
 from services.analysis_service import AnalysisService
@@ -8,6 +8,21 @@ from services.face_analysis_service import FaceAnalysisService
 from services.hair_analysis_service import HairAnalysisService
 
 router = APIRouter()
+
+@router.get("/result/{analysisId}", response_model=CompleteAnalysisResultResponse)
+async def get_analysis_result(analysisId: str, current_user: dict = Depends(get_current_user)):
+    """
+    Fetch the complete AI analysis result.
+    """
+    try:
+        uid = current_user.get("uid")
+        if not uid:
+            raise HTTPException(status_code=401, detail="Invalid user authentication")
+            
+        result = AnalysisService.get_analysis_result(uid, analysisId)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/status/{analysisId}", response_model=AnalysisStatusResponse)
 async def get_analysis_status(analysisId: str, current_user: dict = Depends(get_current_user)):

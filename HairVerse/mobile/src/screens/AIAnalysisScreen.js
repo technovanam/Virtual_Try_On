@@ -23,7 +23,7 @@ const AIAnalysisScreen = () => {
       const data = await pollStatus(analysisId);
       if (data?.status === 'completed') {
         clearInterval(intervalId);
-        navigation.navigate('Recommendations', { analysisId });
+        navigation.navigate('AIAnalysisResult', { analysisId });
       } else if (data?.status === 'failed') {
         clearInterval(intervalId);
       }
@@ -47,7 +47,7 @@ const AIAnalysisScreen = () => {
       const currentStatus = useAnalysisStore.getState().status;
       if (currentStatus === 'pending' || currentStatus === 'processing') {
         // Automatically navigate to bypass the missing backend implementation
-        navigation.replace('Recommendations', { analysisId });
+        navigation.replace('AIAnalysisResult', { analysisId });
       }
     }, 3000);
 

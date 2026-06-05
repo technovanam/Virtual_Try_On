@@ -46,5 +46,26 @@ export const compareService = {
       console.error('Error getting comparison details:', error);
       throw error;
     }
+  },
+
+  getTryonComparison: async (tryOnId) => {
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
+        throw new Error('User not authenticated');
+      }
+
+      const idToken = await firebaseUser.getIdToken();
+      
+      const response = await axios.get(`${BACKEND_BASE_URL}/compare/tryon/${tryOnId}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+        timeout: 10000
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error getting tryon comparison details:', error);
+      throw error;
+    }
   }
 };

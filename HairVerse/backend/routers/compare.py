@@ -36,3 +36,20 @@ async def get_comparison(
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/tryon/{tryOnId}")
+async def get_tryon_comparison(
+    tryOnId: str,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        uid = current_user.get("uid")
+        if not uid:
+            raise HTTPException(status_code=401, detail="Invalid user authentication")
+            
+        result = CompareService.get_tryon_comparison(uid, tryOnId)
+        return result
+    except Exception as e:
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

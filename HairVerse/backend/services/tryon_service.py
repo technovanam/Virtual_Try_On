@@ -1,7 +1,9 @@
-from typing import List
+from typing import List, Optional, Dict, Any
 from firebase_config import db
 from schemas.tryon_sessions import TryOnSession, TryOnSessionResponse
 from datetime import datetime
+from .generation_queue import queue_manager
+import asyncio
 
 class TryOnService:
     @staticmethod
@@ -55,7 +57,13 @@ class TryOnService:
             raise e
 
     @staticmethod
-    def start_tryon(uid: str, image_id: str, hairstyle_id: str) -> dict:
+    def start_tryon(
+        uid: str, 
+        image_id: str, 
+        hairstyle_id: str, 
+        background_tasks,
+        config: Optional[Dict[str, Any]] = None
+    ) -> dict:
         if db is None:
             raise Exception("Database is not initialized.")
         
@@ -71,10 +79,21 @@ class TryOnService:
             "status": "pending",
             "resultImage": None,
             "createdAt": now,
+            "generationTime": None,
             "completedAt": None
         }
         
         tryon_ref.set(data)
+        
+        # Dispatch the background task
+        background_tasks.add_task(
+            queue_manager.process_tryon_job,
+            uid,
+            tryon_id,
+            image_id,
+            hairstyle_id,
+            config
+        )
         
         return {
             "tryOnId": tryon_id,
@@ -97,5 +116,21 @@ class TryOnService:
         return {
             "tryOnId": data.get("tryOnId", tryon_id),
             "status": data.get("status", "pending"),
-            "resultImage": data.get("resultImage")
+            "resultImage": data.get("resultImage"),
+            "imageId": data.get("imageId"),
+            "hairstyleId": data.get("hairstyleId")
         }
+
+    @staticmethod
+    def delete_tryon(uid: str, tryon_id: str) -> bool:
+        if db is None:
+            raise Exception("Database is not initialized.")
+            
+        tryon_ref = db.collection("users").document(uid).collection("tryons").document(tryon_id)
+        doc = tryon_ref.get()
+        
+        if not doc.exists:
+            raise Exception("TryOn session not found")
+            
+        tryon_ref.delete()
+        return True

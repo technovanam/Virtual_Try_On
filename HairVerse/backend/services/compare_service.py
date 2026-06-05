@@ -69,3 +69,38 @@ class CompareService:
             "createdAt": created_at,
             "updatedAt": updated_at
         }
+
+    @staticmethod
+    def get_tryon_comparison(uid: str, tryon_id: str) -> dict:
+        if db is None:
+            raise Exception("Database is not initialized.")
+            
+        tryon_ref = db.collection("users").document(uid).collection("tryons").document(tryon_id)
+        tryon_doc = tryon_ref.get()
+        
+        if not tryon_doc.exists:
+            raise Exception("TryOn session not found")
+            
+        tryon_data = tryon_doc.to_dict()
+        image_id = tryon_data.get("imageId")
+        generated_image_url = tryon_data.get("resultImage")
+        hairstyle_id = tryon_data.get("hairstyleId")
+        created_at = tryon_data.get("createdAt")
+        
+        original_image_url = ""
+        if image_id:
+            selfie_ref = db.collection("users").document(uid).collection("selfies").document(image_id)
+            selfie_doc = selfie_ref.get()
+            if selfie_doc.exists:
+                original_image_url = selfie_doc.to_dict().get("imageUrl", "")
+                
+        if hasattr(created_at, 'timestamp'):
+            created_at = datetime.fromtimestamp(created_at.timestamp())
+
+        return {
+            "tryOnId": tryon_id,
+            "originalImageUrl": original_image_url,
+            "generatedImageUrl": generated_image_url,
+            "hairstyleId": hairstyle_id,
+            "generatedAt": created_at
+        }
