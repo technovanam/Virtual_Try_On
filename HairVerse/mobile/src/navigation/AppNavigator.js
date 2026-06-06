@@ -79,18 +79,17 @@ function MainNavigator() {
 // ═══════════════════════════════════════════════════════════════════════════════
 // Root Navigator — conditionally renders auth vs main based on session
 // ═══════════════════════════════════════════════════════════════════════════════
+import { useState } from 'react';
+import SplashScreen from '../screens/SplashScreen';
+
 export default function AppNavigator() {
   const { isAuthenticated, authChecked } = useAuthStore();
+  const [isSplashAnimationDone, setIsSplashAnimationDone] = useState(false);
 
-  // While Firebase is checking session persistence, show a branded splash
-  if (!authChecked) {
+  // While Firebase is checking session persistence or animation is running, show our custom splash screen
+  if (!isSplashAnimationDone || !authChecked) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-5xl font-bold text-primary">HairVerse</Text>
-        <Text className="text-lg text-secondary mt-2">Try Before You Cut.</Text>
-        <ActivityIndicator size="large" color="#0F172A" className="mt-10" />
-        <Text className="text-textSecondary text-sm mt-5">Initializing AI Engine...</Text>
-      </View>
+      <SplashScreen onAnimationComplete={() => setIsSplashAnimationDone(true)} />
     );
   }
 
