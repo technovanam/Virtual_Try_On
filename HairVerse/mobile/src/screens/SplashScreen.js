@@ -43,7 +43,8 @@ export default function SplashScreen({ onAnimationComplete }) {
   // Shared values for the multi-stage animation
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.6);
-  const waveTranslateY = useSharedValue(height * 1.5); // Start far below
+  const waveTranslateY = useSharedValue(height + 500); // Start way below
+  const waveTranslateX = useSharedValue(300); // Start far right
   const whiteLogoOpacity = useSharedValue(0);
   
   const logoTranslateX = useSharedValue(0);
@@ -66,16 +67,20 @@ export default function SplashScreen({ onAnimationComplete }) {
       withDelay(2500, withTiming(0.8, { duration: 1000, easing: Easing.inOut(Easing.cubic) }))
     );
 
-    // Diagonal Wave sequence: Stage 2 (rise up) -> Stage 5 (slide down)
+    // Organic Wave sequence: Stage 2 (rise up from bottom right) -> Stage 5 (slide down)
     waveTranslateY.value = withSequence(
-      withDelay(1600, withTiming(-height * 1.5, { duration: 1400, easing: Easing.inOut(Easing.cubic) })),
-      withDelay(3500, withTiming(height * 1.5, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
+      withDelay(1600, withTiming(-height, { duration: 1600, easing: Easing.out(Easing.cubic) })),
+      withDelay(3300, withTiming(height + 500, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
+    );
+    waveTranslateX.value = withSequence(
+      withDelay(1600, withTiming(-200, { duration: 1600, easing: Easing.out(Easing.cubic) })),
+      withDelay(3300, withTiming(300, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
     );
 
     // White Logo Opacity sequence: Stage 2 (crossfade as wave hits) -> Stage 5 (fade out)
     whiteLogoOpacity.value = withSequence(
-      withDelay(2100, withTiming(1, { duration: 400 })), // Turns white midway through the wave rising
-      withDelay(4000, withTiming(0, { duration: 1000 }))
+      withDelay(2200, withTiming(1, { duration: 400 })), // Turns white exactly when the wave washes over it
+      withDelay(3900, withTiming(0, { duration: 800 }))
     );
 
     // Logo translation sequence: Stage 4 (move left/up) -> Stage 5 (move to center top)
@@ -121,16 +126,17 @@ export default function SplashScreen({ onAnimationComplete }) {
     };
   });
 
-  const WAVE_SIZE = Math.max(width, height) * 3;
+  const scaleFactor = Math.max(width / 430, height / 932) * 1.2; // Extra 20% to prevent edge clipping
 
   const waveStyle = useAnimatedStyle(() => ({
     position: 'absolute',
-    width: WAVE_SIZE,
-    height: WAVE_SIZE,
-    left: (width - WAVE_SIZE) / 2,
-    top: (height - WAVE_SIZE) / 2,
+    width: 430,
+    height: 932,
+    left: (width - 430) / 2, // perfectly center the viewBox 
+    top: (height - 932) / 2,
     transform: [
-      { rotate: '-35deg' }, // Slant it so it comes from bottom-right
+      { scale: scaleFactor },
+      { translateX: waveTranslateX.value },
       { translateY: waveTranslateY.value }
     ],
   }));
@@ -185,17 +191,17 @@ export default function SplashScreen({ onAnimationComplete }) {
         <Particle key={p.id} particle={p} />
       ))}
 
-      {/* Diagonal Liquid Wave Overlay (Stage 2) */}
+      {/* Organic Liquid Wave Overlay (Stage 2) */}
       <Animated.View style={waveStyle}>
-        <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+        {/* Using the exact SVG path and coordinates from Figma to perfectly match the design */}
+        <Svg width="100%" height="100%" viewBox="0 0 430 932" fill="none" style={{ overflow: 'visible' }}>
           <Path 
-            d="M 0,35 C 20,45 40,15 60,35 C 80,55 95,25 100,30 L 100,100 L 0,100 Z" 
+            d="M-1710.03 459.114C-2049.33 516.895 -2046 3000 -2046 3000L1497 3000V-120.111C1497 -120.111 1196.95 -430.071 947.224 -305.463C761.059 -212.57 854.657 -40.6756 672.336 18.9032C467.688 85.7783 401.148 -190.751 122.561 -96.9417C-147.139 -6.12494 48.8052 189.492 -182.87 273.762C-420.948 360.36 -470.226 116.186 -763.189 204.255C-1054.26 291.755 -888.704 486.072 -1129.71 551.789C-1401.19 625.82 -1470.1 418.256 -1710.03 459.114Z" 
             fill="url(#wave_grad)"
           />
           <Defs>
-            <SvgLinearGradient id="wave_grad" x1="50" y1="20" x2="50" y2="100" gradientUnits="userSpaceOnUse">
-              <Stop stopColor="#8B5CF6"/> {/* Lighter purple at the crest of the wave */}
-              <Stop offset="0.3" stopColor="#6C29D9"/>
+            <SvgLinearGradient id="wave_grad" x1="-274.5" y1="-335" x2="-274.5" y2="3000" gradientUnits="userSpaceOnUse">
+              <Stop stopColor="#6C29D9"/>
               <Stop offset="1" stopColor="#391673"/>
             </SvgLinearGradient>
           </Defs>
