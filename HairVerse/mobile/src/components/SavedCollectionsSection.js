@@ -39,7 +39,7 @@ export default function SavedCollectionsSection() {
           <Text className="text-gray-500 font-medium text-center mb-4 text-base">
             No saved styles yet.
           </Text>
-          <TouchableOpacity className="bg-blue-600 py-3 px-6 rounded-xl" onPress={() => navigation.navigate('SavedCollections')}>
+          <TouchableOpacity className="bg-blue-600 py-3 px-6 rounded-xl" onPress={() => navigation.navigate('Saved')}>
             <Text className="text-white font-bold">Go to Collections</Text>
           </TouchableOpacity>
         </View>
@@ -52,7 +52,7 @@ export default function SavedCollectionsSection() {
             <TouchableOpacity 
               key={item.savedId}
               className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 mb-3 flex-row items-center"
-              onPress={() => navigation.navigate('SavedCollections')}
+              onPress={() => navigation.navigate('Saved')}
             >
               {item.imageUrl ? (
                 <Image source={{ uri: item.imageUrl }} className="w-12 h-12 rounded-lg mr-3 bg-gray-100" />

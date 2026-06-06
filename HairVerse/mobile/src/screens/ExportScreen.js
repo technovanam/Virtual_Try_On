@@ -139,7 +139,7 @@ export default function ExportScreen() {
 
            <TouchableOpacity 
               className="mt-4 py-4 rounded-2xl flex-row items-center justify-center bg-white border border-gray-200"
-              onPress={() => navigation.navigate('SavedCollections', { saveUrl: imageUrl })}
+              onPress={() => navigation.navigate('Saved', { saveUrl: imageUrl })}
            >
               <Ionicons name="bookmark-outline" size={20} color="#4B5563" className="mr-2" />
               <Text className="text-gray-700 font-bold ml-2">Save to Collection</Text>

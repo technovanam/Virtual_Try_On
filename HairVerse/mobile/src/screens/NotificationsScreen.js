@@ -37,7 +37,7 @@ export default function NotificationsScreen() {
     } else if (notification.actionType === 'view_insight') {
       navigation.navigate('AIInsights');
     } else if (notification.actionType === 'view_saved') {
-      navigation.navigate('SavedCollections');
+      navigation.navigate('Saved');
     } else if (notification.actionType === 'view_tryon' && notification.actionId) {
       navigation.navigate('VirtualTryOn', { sessionId: notification.actionId });
     }

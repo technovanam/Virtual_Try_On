@@ -99,6 +99,8 @@ class ProfileService:
             userBadge=badge,
             profileCompletion=base_profile.get("profileCompletion", {}),
             completionPercentage=base_profile.get("completionPercentage", 0),
+            onboarding_completed=base_profile.get("onboarding_completed", False),
+            profile_completed=base_profile.get("profile_completed", False),
             stats=stats,
             aiStyleProfile=ai_profile,
             hairInsightsSummary=insights_summary

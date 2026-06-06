@@ -8,7 +8,8 @@ const AIAnalysisScreen = () => {
   const route = useRoute();
   const { analysisId } = route.params || {};
 
-  const { status, progress, error, pollStatus, reset, setAnalysisId } = useAnalysisStore();
+  const { status, progress, error, pollStatus, reset, setAnalysisId, analysisId: storeAnalysisId } = useAnalysisStore();
+  const activeAnalysisId = analysisId || storeAnalysisId;
 
   useEffect(() => {
     if (analysisId) {
@@ -17,46 +18,14 @@ const AIAnalysisScreen = () => {
   }, [analysisId, setAnalysisId]);
 
   useEffect(() => {
-    let intervalId;
-
-    const checkStatus = async () => {
-      const data = await pollStatus(analysisId);
-      if (data?.status === 'completed') {
-        clearInterval(intervalId);
-        navigation.navigate('AIAnalysisResult', { analysisId });
-      } else if (data?.status === 'failed') {
-        clearInterval(intervalId);
-      }
-    };
-
-    if (analysisId && status !== 'completed' && status !== 'failed') {
-      // Poll every 2 seconds
-      checkStatus(); // Initial check
-      intervalId = setInterval(checkStatus, 2000);
+    if (status === 'completed' && activeAnalysisId) {
+      navigation.replace('AIAnalysisResult', { analysisId: activeAnalysisId });
     }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [analysisId, status, pollStatus, navigation]);
-
-  // MVP Timeout Protection: Since real AI analysis is not yet implemented,
-  // enforce a max 3-second wait before moving to recommendations.
-  useEffect(() => {
-    const mvpTimeoutId = setTimeout(() => {
-      const currentStatus = useAnalysisStore.getState().status;
-      if (currentStatus === 'pending' || currentStatus === 'processing') {
-        // Automatically navigate to bypass the missing backend implementation
-        navigation.replace('AIAnalysisResult', { analysisId });
-      }
-    }, 3000);
-
-    return () => clearTimeout(mvpTimeoutId);
-  }, [analysisId, navigation]);
+  }, [status, activeAnalysisId, navigation]);
 
   const handleRetry = () => {
     reset();
-    setAnalysisId(analysisId);
+    navigation.goBack();
   };
 
   const renderContent = () => {

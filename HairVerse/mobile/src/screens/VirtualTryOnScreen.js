@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions, Activity
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { virtualTryonService } from '../services/virtualTryonService';
+import { useSelfieStore } from '../store/uploadStore';
 
 const { width } = Dimensions.get('window');
 
@@ -25,7 +26,12 @@ const BEARD_STYLES = [
 export default function VirtualTryOnScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { imageId, hairstyleId, originalImageUrl } = route.params || {};
+  const activeSelfie = useSelfieStore(state => state.activeSelfie);
+  
+  const params = route.params || {};
+  const imageId = params.imageId || activeSelfie?.imageId;
+  const hairstyleId = params.hairstyleId;
+  const originalImageUrl = params.originalImageUrl || activeSelfie?.imageUrl;
 
   const [status, setStatus] = useState('idle'); // idle, loading, pending, processing, completed, failed
   const [tryOnId, setTryOnId] = useState(null);

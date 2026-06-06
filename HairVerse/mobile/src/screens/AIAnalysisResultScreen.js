@@ -32,7 +32,7 @@ const AIAnalysisResultScreen = () => {
   };
 
   const handleReanalyze = () => {
-    navigation.navigate('VirtualTryOn');
+    navigation.navigate('Try-On');
   };
 
   const handleSaveAnalysis = () => {

@@ -149,7 +149,7 @@ async def complete_onboarding(user: dict = Depends(get_current_user)):
     """
     uid = user["uid"]
     from firebase_config import db as _db
-    from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+    from firebase_admin import firestore
 
     if not _db:
         user_profile = get_user_profile(uid)
@@ -162,7 +162,7 @@ async def complete_onboarding(user: dict = Depends(get_current_user)):
         update_data = {
             "onboardingCompleted": True,
             "onboardingVersion": 1,
-            "onboardingCompletedAt": SERVER_TIMESTAMP
+            "onboardingCompletedAt": firestore.SERVER_TIMESTAMP
         }
         doc_ref.set(update_data, merge=True)
         

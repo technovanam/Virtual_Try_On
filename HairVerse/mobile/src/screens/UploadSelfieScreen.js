@@ -4,6 +4,7 @@ import { handleOpenCamera, handleOpenGallery } from '../services/imagePickerServ
 import { useUploadStore } from '../store/uploadStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useAnalysisStore } from '../store/analysisStore';
 
 export default function UploadSelfieScreen() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -70,7 +71,10 @@ export default function UploadSelfieScreen() {
                 Your selfie has been securely uploaded and is ready for AI try-on and analysis.
               </Text>
               <TouchableOpacity 
-                onPress={() => navigation.navigate('AIAnalysis', { analysisId: 'new_analysis_123' })}
+                onPress={() => {
+                  useAnalysisStore.getState().startAnalysis(imageUrl || selectedImage);
+                  navigation.navigate('AIAnalysis');
+                }}
                 className="w-full bg-primary py-4 rounded-xl items-center"
               >
                 <Text className="text-white font-semibold text-lg">Start AI Analysis</Text>

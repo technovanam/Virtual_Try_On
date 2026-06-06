@@ -112,8 +112,8 @@ export default function ProfileScreen() {
         <View className="mt-8 px-5">
            <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Quick Access</Text>
            <View className="flex-row flex-wrap">
-              <QuickAccessCard icon="bookmark" label="Saved" color="#4F46E5" onPress={() => navigation.navigate('SavedCollections')} />
-              <QuickAccessCard icon="time" label="History" color="#10B981" onPress={() => navigation.navigate('StyleHistory')} />
+              <QuickAccessCard icon="bookmark" label="Saved" color="#4F46E5" onPress={() => navigation.navigate('Saved')} />
+              <QuickAccessCard icon="time" label="History" color="#10B981" onPress={() => navigation.navigate('StyleHistoryScreen')} />
               <QuickAccessCard icon="bulb" label="Insights" color="#F59E0B" onPress={() => navigation.navigate('AIInsights')} />
            </View>
         </View>

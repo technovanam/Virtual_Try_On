@@ -6,6 +6,7 @@ import { useAuthStore } from './src/store/authStore';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   useEffect(() => {
@@ -22,8 +23,10 @@ export default function App() {
 
   return (
     <Container style={{ flex: 1 }}>
-      <AppNavigator />
-      <StatusBar style="light" />
+      <SafeAreaProvider>
+        <AppNavigator />
+        <StatusBar style="light" />
+      </SafeAreaProvider>
     </Container>
   );
 }

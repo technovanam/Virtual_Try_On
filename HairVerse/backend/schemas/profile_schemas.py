@@ -31,6 +31,8 @@ class ComprehensiveProfileResponse(BaseModel):
     # Existing data
     profileCompletion: Dict[str, Any]
     completionPercentage: int
+    onboarding_completed: bool = False
+    profile_completed: bool = False
     
     # New aggregated data
     stats: ProfileStats

@@ -18,6 +18,34 @@ export const useAnalysisStore = create((set, get) => ({
     isPolling: false,
   }),
   
+  startAnalysis: async (imageUrl) => {
+    set({ status: 'processing', error: null, progress: 10 });
+    try {
+      const data = await analysisService.startAnalysis(imageUrl);
+      if (data.status === 'error') {
+        set({ 
+          status: 'failed', 
+          error: data.healthObservations?.[0] || 'Analysis failed on the server',
+          progress: 0
+        });
+        return data;
+      }
+      set({
+        analysisId: data.analysisId,
+        status: data.status,
+        progress: 100,
+      });
+      return data;
+    } catch (error) {
+      set({ 
+        status: 'failed', 
+        error: error.message || 'Failed to start analysis',
+        progress: 0
+      });
+      throw error;
+    }
+  },
+  
   pollStatus: async (id) => {
     const analysisId = id || get().analysisId;
     if (!analysisId) return;
