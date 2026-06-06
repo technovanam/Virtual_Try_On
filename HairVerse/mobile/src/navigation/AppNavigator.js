@@ -81,15 +81,24 @@ function MainNavigator() {
 // ═══════════════════════════════════════════════════════════════════════════════
 import { useState } from 'react';
 import SplashScreen from '../screens/SplashScreen';
+import LandingScreen from '../screens/LandingScreen';
 
 export default function AppNavigator() {
   const { isAuthenticated, authChecked } = useAuthStore();
   const [isSplashAnimationDone, setIsSplashAnimationDone] = useState(false);
+  const [isLandingDone, setIsLandingDone] = useState(false);
 
-  // While Firebase is checking session persistence or animation is running, show our custom splash screen
-  if (!isSplashAnimationDone || !authChecked) {
+  // Show splash screen animation first
+  if (!isSplashAnimationDone) {
     return (
       <SplashScreen onAnimationComplete={() => setIsSplashAnimationDone(true)} />
+    );
+  }
+
+  // Then show the Landing page with loading indicator
+  if (!isLandingDone || !authChecked) {
+    return (
+      <LandingScreen onComplete={() => setIsLandingDone(true)} />
     );
   }
 

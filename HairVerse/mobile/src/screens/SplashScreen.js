@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import Animated, {
@@ -51,63 +51,34 @@ export default function SplashScreen({ onAnimationComplete }) {
   const logoTranslateY = useSharedValue(0);
   const findStyleOpacity = useSharedValue(0);
 
-  // Stage 5 values
-  const brandOpacity = useSharedValue(0);
-  const taglineOpacity = useSharedValue(0);
-  const loadingOpacity = useSharedValue(0);
-
   useEffect(() => {
     // Stage 1: Colored logo fades in
     logoOpacity.value = withDelay(400, withTiming(1, { duration: 1000, easing: Easing.out(Easing.exp) }));
     
-    // Scale sequence: Stage 1 (scale to 1) -> Stage 3 (scale to 0.25) -> Stage 5 (scale to 0.8)
+    // Scale sequence: Stage 1 (scale to 1) -> Stage 3 (scale to 0.25)
     logoScale.value = withSequence(
       withDelay(400, withTiming(1, { duration: 1200, easing: Easing.out(Easing.exp) })),
-      withDelay(1200, withTiming(0.25, { duration: 1200, easing: Easing.inOut(Easing.cubic) })),
-      withDelay(2500, withTiming(0.8, { duration: 1000, easing: Easing.inOut(Easing.cubic) }))
+      withDelay(1200, withTiming(0.25, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
     );
 
-    // Organic Wave sequence: Stage 2 (rise up from bottom right) -> Stage 5 (slide down)
-    waveTranslateY.value = withSequence(
-      withDelay(1600, withTiming(-height, { duration: 1600, easing: Easing.out(Easing.cubic) })),
-      withDelay(3300, withTiming(height + 500, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
-    );
-    waveTranslateX.value = withSequence(
-      withDelay(1600, withTiming(-200, { duration: 1600, easing: Easing.out(Easing.cubic) })),
-      withDelay(3300, withTiming(300, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
-    );
+    // Organic Wave sequence: Stage 2 (rise up from bottom right)
+    waveTranslateY.value = withDelay(1600, withTiming(-height, { duration: 1600, easing: Easing.out(Easing.cubic) }));
+    waveTranslateX.value = withDelay(1600, withTiming(-200, { duration: 1600, easing: Easing.out(Easing.cubic) }));
 
-    // White Logo Opacity sequence: Stage 2 (crossfade as wave hits) -> Stage 5 (fade out)
-    whiteLogoOpacity.value = withSequence(
-      withDelay(2200, withTiming(1, { duration: 400 })), // Turns white exactly when the wave washes over it
-      withDelay(3900, withTiming(0, { duration: 800 }))
-    );
+    // White Logo Opacity sequence: Stage 2 (crossfade as wave hits)
+    whiteLogoOpacity.value = withDelay(2200, withTiming(1, { duration: 400 }));
 
-    // Logo translation sequence: Stage 4 (move left/up) -> Stage 5 (move to center top)
-    logoTranslateX.value = withSequence(
-      withDelay(4300, withTiming(60 - width / 2, { duration: 1200, easing: Easing.inOut(Easing.cubic) })),
-      withDelay(1000, withTiming(0, { duration: 1000, easing: Easing.inOut(Easing.cubic) }))
-    );
-    logoTranslateY.value = withSequence(
-      withDelay(4300, withTiming(-50, { duration: 1200, easing: Easing.inOut(Easing.cubic) })),
-      withDelay(1000, withTiming(-80, { duration: 1000, easing: Easing.inOut(Easing.cubic) }))
-    );
+    // Logo translation sequence: Stage 4 (move left/up)
+    logoTranslateX.value = withDelay(4300, withTiming(60 - width / 2, { duration: 1200, easing: Easing.inOut(Easing.cubic) }));
+    logoTranslateY.value = withDelay(4300, withTiming(-50, { duration: 1200, easing: Easing.inOut(Easing.cubic) }));
 
-    // Find Style Text sequence: Stage 4 (fade in) -> Stage 5 (fade out)
-    findStyleOpacity.value = withSequence(
-      withDelay(4700, withTiming(1, { duration: 800 })),
-      withDelay(1000, withTiming(0, { duration: 500 }))
-    );
+    // Find Style Text sequence: Stage 4 (fade in)
+    findStyleOpacity.value = withDelay(4700, withTiming(1, { duration: 800 }));
 
-    // Stage 5 Final Elements (Only fade in once, so delay is enough)
-    const tFinalStart = 6500;
-    brandOpacity.value = withDelay(tFinalStart + 400, withTiming(1, { duration: 600 }));
-    taglineOpacity.value = withDelay(tFinalStart + 600, withTiming(1, { duration: 600 }));
-    loadingOpacity.value = withDelay(tFinalStart + 800, withTiming(1, { duration: 600 }, (finished) => {
-      if (finished) {
-        runOnJS(setAnimationFinished)(true);
-      }
-    }));
+    // Complete Animation after Stage 4
+    setTimeout(() => {
+      runOnJS(setAnimationFinished)(true);
+    }, 6500);
   }, []);
 
   const logoAnimatedStyle = useAnimatedStyle(() => {
@@ -148,27 +119,11 @@ export default function SplashScreen({ onAnimationComplete }) {
     height: '100%',
   }));
 
-  const textBlockStyle = useAnimatedStyle(() => ({
+  const findStyleStyle = useAnimatedStyle(() => ({
     opacity: findStyleOpacity.value,
     position: 'absolute',
-    left: 40, 
-    top: height / 2 - 10, 
-  }));
-
-  const brandStyle = useAnimatedStyle(() => ({
-    opacity: brandOpacity.value,
-    position: 'absolute',
-    top: height / 2 - 10, 
-  }));
-
-  const taglineStyle = useAnimatedStyle(() => ({
-    opacity: taglineOpacity.value,
-    position: 'absolute',
-    top: height / 2 + 55, 
-  }));
-
-  const loadingAreaStyle = useAnimatedStyle(() => ({
-    opacity: loadingOpacity.value,
+    left: 40,
+    top: height / 2 - 10,
   }));
 
   return (
@@ -193,7 +148,6 @@ export default function SplashScreen({ onAnimationComplete }) {
 
       {/* Organic Liquid Wave Overlay (Stage 2) */}
       <Animated.View style={waveStyle}>
-        {/* Using the exact SVG path and coordinates from Figma to perfectly match the design */}
         <Svg width="100%" height="100%" viewBox="0 0 430 932" fill="none" style={{ overflow: 'visible' }}>
           <Path 
             d="M-1710.03 459.114C-2049.33 516.895 -2046 3000 -2046 3000L1497 3000V-120.111C1497 -120.111 1196.95 -430.071 947.224 -305.463C761.059 -212.57 854.657 -40.6756 672.336 18.9032C467.688 85.7783 401.148 -190.751 122.561 -96.9417C-147.139 -6.12494 48.8052 189.492 -182.87 273.762C-420.948 360.36 -470.226 116.186 -763.189 204.255C-1054.26 291.755 -888.704 486.072 -1129.71 551.789C-1401.19 625.82 -1470.1 418.256 -1710.03 459.114Z" 
@@ -210,13 +164,11 @@ export default function SplashScreen({ onAnimationComplete }) {
 
       {/* Logos Container */}
       <Animated.View style={logoAnimatedStyle}>
-        {/* Colored Logo (Base) */}
         <Animated.Image 
           source={require('../../assets/logo.png')} 
           style={{ width: '100%', height: '100%', position: 'absolute' }}
           resizeMode="contain"
         />
-        {/* White Logo (Crossfades in) */}
         <Animated.Image 
           source={require('../../assets/whitelogo.png')} 
           style={whiteLogoStyle}
@@ -225,27 +177,10 @@ export default function SplashScreen({ onAnimationComplete }) {
       </Animated.View>
 
       {/* Text Block (Stage 4) */}
-      <Animated.View style={textBlockStyle}>
-        <Animated.Text style={styles.findStyleText}>
-          Find Your{'\n'}Signature Style<Animated.Text style={styles.purpleDot}>.</Animated.Text>
-        </Animated.Text>
-      </Animated.View>
-
-      {/* Brand Text (Stage 5) */}
-      <Animated.View style={[styles.brandContainer, brandStyle]}>
-        <Animated.Text style={styles.brandTextWhite}>Hair</Animated.Text>
-        <Animated.Text style={styles.brandTextPurple}>Verse</Animated.Text>
-      </Animated.View>
-
-      {/* Tagline Text (Stage 5) */}
-      <Animated.Text style={[styles.taglineText, taglineStyle]}>
-        Try Before You Cut
-      </Animated.Text>
-
-      {/* Loading Area (Stage 5) */}
-      <Animated.View style={[styles.loadingArea, loadingAreaStyle]}>
-        <LoadingDots />
-        <Animated.Text style={styles.loadingMessage}>Loading AI models...</Animated.Text>
+      <Animated.View style={findStyleStyle}>
+        <Text style={styles.findStyleText}>
+          Find Your{'\n'}Signature Style<Text style={styles.purpleDot}>.</Text>
+        </Text>
       </Animated.View>
     </View>
   );
@@ -284,32 +219,6 @@ const Particle = ({ particle }) => {
         animatedStyle,
       ]}
     />
-  );
-};
-
-// Animated Dots Component
-const LoadingDots = () => {
-  const dot1 = useSharedValue(0.3);
-  const dot2 = useSharedValue(0.3);
-  const dot3 = useSharedValue(0.3);
-
-  useEffect(() => {
-    const duration = 600;
-    dot1.value = withRepeat(withTiming(1, { duration }), -1, true);
-    setTimeout(() => {
-      dot2.value = withRepeat(withTiming(1, { duration }), -1, true);
-    }, 200);
-    setTimeout(() => {
-      dot3.value = withRepeat(withTiming(1, { duration }), -1, true);
-    }, 400);
-  }, []);
-
-  return (
-    <View style={styles.dotsContainer}>
-      <Animated.View style={[styles.dot, { backgroundColor: '#5721AE', opacity: dot1 }]} />
-      <Animated.View style={[styles.dot, { backgroundColor: '#7A36E5', opacity: dot2 }]} />
-      <Animated.View style={[styles.dot, { backgroundColor: '#7A67F4', opacity: dot3 }]} />
-    </View>
   );
 };
 
