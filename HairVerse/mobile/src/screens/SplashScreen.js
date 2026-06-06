@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   findStyleText: {
     fontFamily: 'CocogoosePro-Regular', // Requires custom font loaded in App
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#FFFFFF',
     lineHeight: 40,

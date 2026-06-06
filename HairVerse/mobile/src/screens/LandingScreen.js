@@ -160,13 +160,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   hairText: {
-    fontSize: 48,
+    fontSize: 64,
     color: '#FFFFFF',
     fontFamily: 'NCLGasdrifo', // Fallback to serif if custom font not loaded
     fontWeight: 'bold',
   },
   verseText: {
-    fontSize: 48,
+    fontSize: 64,
     color: '#8B5CF6', // Purple
     fontFamily: 'NCLGasdrifo',
     fontWeight: 'bold',

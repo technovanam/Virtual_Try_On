@@ -8,7 +8,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useFonts } from 'expo-font';
+
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'NCLGasdrifo': require('./assets/NCLGasdrifo.otf'),
+    'CocogoosePro-Regular': require('./assets/CocogoosePro-Regular.ttf'),
+  });
+
   useEffect(() => {
     // Start the Firebase auth state listener at app startup.
     // This checks if a user is already signed in (persistent session)
@@ -18,6 +25,11 @@ export default function App() {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // Wait for fonts to load before rendering anything
+  if (!fontsLoaded) {
+    return null;
+  }
 
   const Container = Platform.OS === 'web' ? View : GestureHandlerRootView;
 
