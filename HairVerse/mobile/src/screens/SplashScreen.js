@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -42,7 +43,7 @@ export default function SplashScreen({ onAnimationComplete }) {
   // Shared values for the multi-stage animation
   const logoOpacity = useSharedValue(0);
   const logoScale = useSharedValue(0.6);
-  const bgPurpleOpacity = useSharedValue(0);
+  const waveTranslateY = useSharedValue(height * 1.5); // Start far below
   const whiteLogoOpacity = useSharedValue(0);
   
   const logoTranslateX = useSharedValue(0);
@@ -65,14 +66,16 @@ export default function SplashScreen({ onAnimationComplete }) {
       withDelay(2500, withTiming(0.8, { duration: 1000, easing: Easing.inOut(Easing.cubic) }))
     );
 
-    // Background & White Logo Opacity sequence: Stage 2 (crossfade in) -> Stage 5 (fade out)
-    bgPurpleOpacity.value = withSequence(
-      withDelay(1600, withTiming(1, { duration: 800 })),
-      withDelay(4100, withTiming(0, { duration: 1000 }))
+    // Diagonal Wave sequence: Stage 2 (rise up) -> Stage 5 (slide down)
+    waveTranslateY.value = withSequence(
+      withDelay(1600, withTiming(-height * 1.5, { duration: 1400, easing: Easing.inOut(Easing.cubic) })),
+      withDelay(3500, withTiming(height * 1.5, { duration: 1200, easing: Easing.inOut(Easing.cubic) }))
     );
+
+    // White Logo Opacity sequence: Stage 2 (crossfade as wave hits) -> Stage 5 (fade out)
     whiteLogoOpacity.value = withSequence(
-      withDelay(1600, withTiming(1, { duration: 800 })),
-      withDelay(4100, withTiming(0, { duration: 1000 }))
+      withDelay(2100, withTiming(1, { duration: 400 })), // Turns white midway through the wave rising
+      withDelay(4000, withTiming(0, { duration: 1000 }))
     );
 
     // Logo translation sequence: Stage 4 (move left/up) -> Stage 5 (move to center top)
@@ -118,10 +121,18 @@ export default function SplashScreen({ onAnimationComplete }) {
     };
   });
 
-  const solidBgStyle = useAnimatedStyle(() => ({
-    opacity: bgPurpleOpacity.value,
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#4C1D95', // Solid purple color matching design
+  const WAVE_SIZE = Math.max(width, height) * 3;
+
+  const waveStyle = useAnimatedStyle(() => ({
+    position: 'absolute',
+    width: WAVE_SIZE,
+    height: WAVE_SIZE,
+    left: (width - WAVE_SIZE) / 2,
+    top: (height - WAVE_SIZE) / 2,
+    transform: [
+      { rotate: '-35deg' }, // Slant it so it comes from bottom-right
+      { translateY: waveTranslateY.value }
+    ],
   }));
 
   const whiteLogoStyle = useAnimatedStyle(() => ({
@@ -174,8 +185,22 @@ export default function SplashScreen({ onAnimationComplete }) {
         <Particle key={p.id} particle={p} />
       ))}
 
-      {/* Solid Purple Overlay (Stage 2) */}
-      <Animated.View style={solidBgStyle} />
+      {/* Diagonal Liquid Wave Overlay (Stage 2) */}
+      <Animated.View style={waveStyle}>
+        <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+          <Path 
+            d="M 0,35 C 20,45 40,15 60,35 C 80,55 95,25 100,30 L 100,100 L 0,100 Z" 
+            fill="url(#wave_grad)"
+          />
+          <Defs>
+            <SvgLinearGradient id="wave_grad" x1="50" y1="20" x2="50" y2="100" gradientUnits="userSpaceOnUse">
+              <Stop stopColor="#8B5CF6"/> {/* Lighter purple at the crest of the wave */}
+              <Stop offset="0.3" stopColor="#6C29D9"/>
+              <Stop offset="1" stopColor="#391673"/>
+            </SvgLinearGradient>
+          </Defs>
+        </Svg>
+      </Animated.View>
 
       {/* Logos Container */}
       <Animated.View style={logoAnimatedStyle}>
