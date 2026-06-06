@@ -127,7 +127,7 @@ export default function SplashScreen({ onAnimationComplete }) {
   }));
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 items-center justify-center bg-[#05030D]">
       {/* Background Gradient */}
       <LinearGradient
         colors={['#05030D', '#221044', '#352554', '#221044']}
@@ -136,9 +136,15 @@ export default function SplashScreen({ onAnimationComplete }) {
       />
 
       {/* Subtle Glow Layers */}
-      <View style={styles.glowContainer}>
-        <View style={[styles.glow, { backgroundColor: '#5721AE', opacity: 0.12, width: width * 1.5, height: width * 1.5, top: -width * 0.2 }]} />
-        <View style={[styles.glow, { backgroundColor: '#7A36E5', opacity: 0.08, width: width * 2, height: width * 2, bottom: -width * 0.5 }]} />
+      <View className="absolute inset-0 items-center justify-center overflow-hidden">
+        <View 
+          className="absolute rounded-full" 
+          style={{ backgroundColor: '#5721AE', opacity: 0.12, width: width * 1.5, height: width * 1.5, top: -width * 0.2, filter: 'blur(60px)', shadowColor: '#5721AE', shadowOpacity: 1, shadowRadius: 100, elevation: 20 }} 
+        />
+        <View 
+          className="absolute rounded-full" 
+          style={{ backgroundColor: '#7A36E5', opacity: 0.08, width: width * 2, height: width * 2, bottom: -width * 0.5, filter: 'blur(60px)', shadowColor: '#5721AE', shadowOpacity: 1, shadowRadius: 100, elevation: 20 }} 
+        />
       </View>
 
       {/* Particle System */}
@@ -178,8 +184,8 @@ export default function SplashScreen({ onAnimationComplete }) {
 
       {/* Text Block (Stage 4) */}
       <Animated.View style={findStyleStyle}>
-        <Text style={styles.findStyleText}>
-          Find Your{'\n'}Signature Style<Text style={styles.purpleDot}>.</Text>
+        <Text className="text-[36px] font-bold text-white leading-[40px] font-cocogoose">
+          Find Your{'\n'}Signature Style<Text className="text-[#C084FC]">.</Text>
         </Text>
       </Animated.View>
     </View>
@@ -206,8 +212,8 @@ const Particle = ({ particle }) => {
 
   return (
     <Animated.View
+      className="absolute bg-white"
       style={[
-        styles.particle,
         {
           left: particle.x,
           top: particle.y,
@@ -215,6 +221,9 @@ const Particle = ({ particle }) => {
           height: particle.size,
           opacity: particle.opacity,
           borderRadius: particle.size / 2,
+          shadowColor: '#FFFFFF',
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
         },
         animatedStyle,
       ]}
@@ -222,84 +231,3 @@ const Particle = ({ particle }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#05030D',
-  },
-  glowContainer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  glow: {
-    position: 'absolute',
-    borderRadius: 9999,
-    filter: 'blur(60px)', 
-    shadowColor: '#5721AE',
-    shadowOpacity: 1,
-    shadowRadius: 100,
-    elevation: 20,
-  },
-  particle: {
-    position: 'absolute',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#FFFFFF',
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-  },
-  findStyleText: {
-    fontFamily: 'CocogoosePro-Regular', // Requires custom font loaded in App
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    lineHeight: 40,
-  },
-  purpleDot: {
-    color: '#C084FC',
-  },
-  brandContainer: {
-    flexDirection: 'row',
-  },
-  brandTextWhite: {
-    fontFamily: 'NCLGasdrifo-Regular', 
-    fontSize: 64,
-    color: '#F7F6F6',
-    fontWeight: '300',
-  },
-  brandTextPurple: {
-    fontFamily: 'NCLGasdrifo-Regular', 
-    fontSize: 64,
-    color: '#7A36E5',
-    fontWeight: '300',
-  },
-  taglineText: {
-    fontFamily: 'sans-serif', 
-    fontSize: 16,
-    color: '#F7F6F6',
-    fontWeight: '600',
-  },
-  loadingArea: {
-    position: 'absolute',
-    bottom: '10%',
-    alignItems: 'center',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  loadingMessage: {
-    color: '#F7F6F6',
-    opacity: 0.7,
-    fontSize: 13,
-  },
-});

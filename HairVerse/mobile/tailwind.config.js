@@ -24,6 +24,8 @@ module.exports = {
         regular: ['System'],
         medium: ['System'],
         bold: ['System'],
+        ncl: ['NCLGasdrifo'],
+        cocogoose: ['CocogoosePro-Regular'],
       },
       fontSize: {
         display: ['28px', '34px'],

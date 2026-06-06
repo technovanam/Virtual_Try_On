@@ -93,7 +93,7 @@ export default function LandingScreen({ onComplete }) {
   const dot3Style = useAnimatedStyle(() => ({ opacity: dot3.value * 0.5 + 0.5, transform: [{ scale: dot3.value * 0.2 + 0.8 }] }));
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#11052C] items-center justify-center">
       {/* Background Gradient */}
       <LinearGradient
         colors={['#170A30', '#2E125E', '#170A30']}
@@ -106,97 +106,33 @@ export default function LandingScreen({ onComplete }) {
       ))}
 
       {/* Main Content */}
-      <View style={styles.centerContent}>
+      <View className="items-center justify-center -mt-[50px]">
         {/* Logo */}
         <Image 
           source={require('../../assets/logo.png')} 
-          style={styles.logo} 
+          className="w-[140px] h-[140px] mb-5"
           resizeMode="contain"
         />
 
         {/* Brand Name */}
-        <View style={styles.brandRow}>
-          <Text style={styles.hairText}>Hair</Text>
-          <Text style={styles.verseText}>Verse</Text>
+        <View className="flex-row items-baseline mb-2">
+          <Text className="text-[64px] text-white font-bold font-ncl">Hair</Text>
+          <Text className="text-[64px] text-[#8B5CF6] font-bold font-ncl">Verse</Text>
         </View>
 
         {/* Tagline */}
-        <Text style={styles.tagline}>Try Before You Cut</Text>
+        <Text className="text-[14px] text-white font-semibold tracking-[0.5px] font-cocogoose">Try Before You Cut</Text>
       </View>
 
       {/* Loading Indicator at Bottom */}
-      <View style={styles.bottomContent}>
-        <View style={styles.dotsContainer}>
-          <Animated.View style={[styles.dot, dot1Style]} />
-          <Animated.View style={[styles.dot, dot2Style]} />
-          <Animated.View style={[styles.dot, dot3Style]} />
+      <View className="absolute bottom-[60px] items-center">
+        <View className="flex-row mb-3">
+          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot1Style} />
+          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot2Style} />
+          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot3Style} />
         </View>
-        <Text style={styles.loadingText}>Loading AI models...</Text>
+        <Text className="text-[#A78BFA] text-[13px] tracking-[0.5px]">Loading AI models...</Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#11052C', // Deep purple-black
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -50,
-  },
-  logo: {
-    width: 140,
-    height: 140,
-    marginBottom: 20,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 8,
-  },
-  hairText: {
-    fontSize: 64,
-    color: '#FFFFFF',
-    fontFamily: 'NCLGasdrifo', // Fallback to serif if custom font not loaded
-    fontWeight: 'bold',
-  },
-  verseText: {
-    fontSize: 64,
-    color: '#8B5CF6', // Purple
-    fontFamily: 'NCLGasdrifo',
-    fontWeight: 'bold',
-  },
-  tagline: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontFamily: 'CocogoosePro-Regular',
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  bottomContent: {
-    position: 'absolute',
-    bottom: 60,
-    alignItems: 'center',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#8B5CF6',
-    marginHorizontal: 4,
-  },
-  loadingText: {
-    color: '#A78BFA',
-    fontSize: 13,
-    letterSpacing: 0.5,
-  },
-});
