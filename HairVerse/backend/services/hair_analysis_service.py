@@ -220,19 +220,6 @@ class HairAnalysisService:
         
         # Write to hairAnalysis
         db.collection("users").document(uid).collection("hairAnalysis").document(analysis_id).set(data)
-        
-        # Write to AI Insights (users/{uid}/analysis)
-        insights_data = {
-            "analysisId": analysis_id,
-            "hairDensity": results["density"],
-            "hairThickness": results["thickness"],
-            "hairLength": results["length"],
-            "hairTexture": results["texture"],
-            "hairColor": results["color"],
-            "hairHealth": "Healthy" if results["healthScore"] > 80 else ("Moderate" if results["healthScore"] > 60 else "Needs Attention"),
-            "analyzedAt": now
-        }
-        db.collection("users").document(uid).collection("analysis").document(analysis_id).set(insights_data)
             
         return HairAnalysisResponse(
             status="completed",

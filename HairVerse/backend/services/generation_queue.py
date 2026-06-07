@@ -49,7 +49,7 @@ class GenerationQueue:
             if not selfie_doc.exists:
                 raise Exception(f"Source image {image_id} not found.")
                 
-            source_image_url = selfie_doc.to_dict().get("url")
+            source_image_url = selfie_doc.to_dict().get("imageUrl")
             if not source_image_url:
                 raise Exception(f"Source image URL is missing.")
 

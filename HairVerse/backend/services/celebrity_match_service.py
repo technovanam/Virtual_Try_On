@@ -37,12 +37,35 @@ class CelebrityMatchService:
         if not analysis_data:
             raise Exception("No Gemini Analysis found for the user. Please run analysis first.")
             
+        # Fetch Face Analysis
+        face_analysis_data = {}
+        faces = db.collection("users").document(uid).collection("faceAnalysis").order_by("analyzedAt", direction="DESCENDING").limit(1).stream()
+        for doc in faces:
+            face_analysis_data = doc.to_dict()
+            break
+            
+        # Convert datetime to string for JSON serialization
+        def make_serializable(obj):
+            if isinstance(obj, dict):
+                return {k: make_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_serializable(v) for v in obj]
+            elif hasattr(obj, 'timestamp'):
+                return datetime.fromtimestamp(obj.timestamp()).isoformat()
+            return obj
+            
+        serializable_analysis = make_serializable(analysis_data)
+        serializable_face_analysis = make_serializable(face_analysis_data)
+        
         # Construct Prompt
         prompt = f"""
         You are an expert celebrity stylist and facial profiling AI. Based on the user's facial and hair analysis, find 3 to 5 celebrities that share similar face shapes, hair characteristics, and facial structures.
         
-        USER FACE & HAIR ANALYSIS:
-        {json.dumps(analysis_data, indent=2)}
+        DETERMINISTIC FACE MORPHOLOGY:
+        {json.dumps(serializable_face_analysis, indent=2)}
+        
+        GEMINI VISUAL INFERENCE & HAIR ANALYSIS:
+        {json.dumps(serializable_analysis, indent=2)}
         
         Respond ONLY with a valid JSON object matching the exact structure below. Do not include markdown formatting like ```json.
         For imageUrl, construct a ui-avatars URL like: https://ui-avatars.com/api/?name=First+Last&background=random

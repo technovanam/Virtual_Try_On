@@ -45,15 +45,38 @@ class RecommendationService:
         if not analysis_data:
             raise Exception("No Gemini Analysis found for the user. Please run analysis first.")
             
-        # 3. Construct Prompt
+        # 3. Fetch Face Analysis
+        face_analysis_data = {}
+        faces = db.collection("users").document(uid).collection("faceAnalysis").order_by("analyzedAt", direction="DESCENDING").limit(1).stream()
+        for doc in faces:
+            face_analysis_data = doc.to_dict()
+            break
+            
+        # Convert datetime to string for JSON serialization
+        def make_serializable(obj):
+            if isinstance(obj, dict):
+                return {k: make_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_serializable(v) for v in obj]
+            elif hasattr(obj, 'timestamp'): # Handles DatetimeWithNanoseconds
+                return datetime.fromtimestamp(obj.timestamp()).isoformat()
+            return obj
+            
+        serializable_profile = make_serializable(profile_completion)
+        serializable_analysis = make_serializable(analysis_data)
+        serializable_face_analysis = make_serializable(face_analysis_data)
+        
         prompt = f"""
         You are an expert AI hairstylist. Based on the user's profile and their facial/hair analysis, generate comprehensive and personalized hairstyle recommendations.
         
         USER PROFILE:
-        {json.dumps(profile_completion, indent=2)}
+        {json.dumps(serializable_profile, indent=2)}
         
-        USER FACE & HAIR ANALYSIS:
-        {json.dumps(analysis_data, indent=2)}
+        DETERMINISTIC FACE MORPHOLOGY:
+        {json.dumps(serializable_face_analysis, indent=2)}
+        
+        GEMINI VISUAL INFERENCE & HAIR ANALYSIS:
+        {json.dumps(serializable_analysis, indent=2)}
         
         Respond ONLY with a valid JSON object matching the exact structure below. Do not include markdown formatting like ```json.
         Generate a summary, 4-6 recommended hairstyles, 3 hair colors, 3 beard styles (if male, otherwise empty), 3 celebrity matches, and 3 trending matches.

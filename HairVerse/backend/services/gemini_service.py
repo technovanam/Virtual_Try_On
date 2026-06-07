@@ -126,9 +126,9 @@ class GeminiService:
                 "analyzedAt": analyzed_at
             }
             
-            # 7. Save to Firestore under 'analysis' directly
+            # 7. Save to Firestore under 'geminiAnalysis' directly
             if db is not None:
-                doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+                doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
                 doc_ref.set(db_data)
                 
             return GeminiAnalysisResponse(**db_data)
@@ -142,7 +142,7 @@ class GeminiService:
                 "analyzedAt": analyzed_at
             }
             if db is not None:
-                doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+                doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
                 doc_ref.set(error_data)
                 
             return GeminiAnalysisResponse(**error_data)
@@ -152,7 +152,7 @@ class GeminiService:
         if db is None:
             return GeminiAnalysisResponse(status="error", analysisId=analysis_id, healthObservations=["Firestore not initialized"])
             
-        doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+        doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
         doc = doc_ref.get()
         
         if not doc.exists:

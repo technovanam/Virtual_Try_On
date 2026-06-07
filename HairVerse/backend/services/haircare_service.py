@@ -73,12 +73,24 @@ class HairCareService:
         # Configure Gemini Model
         model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
         
+        # Convert datetime to string for JSON serialization
+        def make_serializable(obj):
+            if isinstance(obj, dict):
+                return {k: make_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_serializable(v) for v in obj]
+            elif hasattr(obj, 'timestamp'):
+                return datetime.fromtimestamp(obj.timestamp()).isoformat()
+            return obj
+            
+        serializable_context = make_serializable(context)
+        
         prompt = f"""
         You are an expert AI hair care professional. Based on the user's data provided below, generate a highly personalized, actionable hair care and growth plan.
         Do NOT provide generic tips (e.g. "drink water", "use conditioner"). Every single suggestion must directly relate to their specific profile, analysis, or goals.
 
         User Context:
-        {json.dumps(context, indent=2)}
+        {json.dumps(serializable_context, indent=2)}
 
         Categories must include (but are not limited to): 
         - Hair Growth
