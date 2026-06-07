@@ -21,7 +21,6 @@ export const useAuthStore = create((set) => ({
         try {
           // Get a fresh Firebase ID token
           const idToken = await firebaseUser.getIdToken();
-          console.log("TOKEN (restoreSession):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
           
           // Load profile from backend using the Bearer token standard
           const response = await axios.get(`${BACKEND_BASE_URL}/profile`, {
@@ -97,7 +96,6 @@ export const useAuthStore = create((set) => ({
 
       // 2. Get a fresh Firebase ID token
       const idToken = await userCredential.user.getIdToken();
-      console.log("TOKEN (login):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
 
       // 3. Get Firestore profile via standardized Bearer token
       const response = await axios.get(`${BACKEND_BASE_URL}/profile`, {
@@ -333,7 +331,6 @@ export const useAuthStore = create((set) => ({
       if (!firebaseUser) throw new Error('Not logged into Firebase');
       // Force refresh the token to prevent 401 errors if it expired during setup
       const idToken = await firebaseUser.getIdToken(true);
-      console.log("TOKEN (completeProfile):", idToken.substring(0, 15) + "..." + idToken.substring(idToken.length - 10));
       
       const response = await axios.put(`${BACKEND_BASE_URL}/auth/profile/complete`, preferences, {
         headers: { Authorization: `Bearer ${idToken}` },
