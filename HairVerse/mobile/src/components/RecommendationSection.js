@@ -6,42 +6,18 @@ export default function RecommendationSection({ title, subtitle, data, renderIte
   if (!data || data.length === 0) return null;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+    <View className="mb-8">
+      <View className="px-5 mb-4">
+        <Text className="text-[#f8fafc] text-[22px] font-bold">{title}</Text>
+        {subtitle && <Text className="text-[#94a3b8] text-[14px] mt-1">{subtitle}</Text>}
       </View>
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerClassName="px-5 gap-4"
       >
         {data.map((item, index) => renderItem(item, index))}
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 32,
-  },
-  header: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  title: {
-    color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    color: '#94a3b8',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    gap: 16,
-  }
-});

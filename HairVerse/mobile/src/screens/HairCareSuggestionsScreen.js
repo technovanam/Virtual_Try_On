@@ -47,9 +47,9 @@ export default function HairCareSuggestionsScreen({ navigation }) {
 
   if (isLoading || isGenerating) {
     return (
-      <View style={styles.centerContainer}>
+      <View className="flex-1 bg-[#0f172a] justify-center items-center p-5">
         <ActivityIndicator size="large" color="#ec4899" />
-        <Text style={styles.loadingText}>
+        <Text className="text-[#cbd5e1] mt-4 text-[16px] text-center font-['Inter']">
           {isGenerating ? "Analyzing your profile & generating custom suggestions..." : "Loading your hair care plan..."}
         </Text>
       </View>
@@ -58,11 +58,15 @@ export default function HairCareSuggestionsScreen({ navigation }) {
 
   if (status === 'error') {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Oops! Something went wrong.</Text>
-        <Text style={styles.errorSubText}>{error}</Text>
-        <TouchableOpacity style={styles.primaryButton} onPress={fetchSuggestions}>
-          <Text style={styles.primaryButtonText}>Retry</Text>
+      <View className="flex-1 bg-[#0f172a] justify-center items-center p-5">
+        <Text className="text-[#ef4444] text-[20px] font-bold mb-2">Oops! Something went wrong.</Text>
+        <Text className="text-[#94a3b8] text-center mb-6">{error}</Text>
+        <TouchableOpacity 
+          className="bg-[#ec4899] py-[14px] px-8 rounded-[30px] elevation-5" 
+          style={{ shadowColor: '#ec4899', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }}
+          onPress={fetchSuggestions}
+        >
+          <Text className="text-white text-[16px] font-bold text-center">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -70,15 +74,16 @@ export default function HairCareSuggestionsScreen({ navigation }) {
 
   if (status === 'empty' || suggestions.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.emptyIcon}>🧪</Text>
-        <Text style={styles.emptyTitle}>No personalized suggestions available yet.</Text>
-        <Text style={styles.emptySubTitle}>Let our AI build a custom hair care & growth plan tailored specifically for your hair type and goals.</Text>
+      <View className="flex-1 bg-[#0f172a] justify-center items-center p-5">
+        <Text className="text-[64px] mb-6">🧪</Text>
+        <Text className="text-[#f8fafc] text-[20px] font-bold mb-2 text-center">No personalized suggestions available yet.</Text>
+        <Text className="text-[#94a3b8] text-center mb-8 text-[15px]">Let our AI build a custom hair care & growth plan tailored specifically for your hair type and goals.</Text>
         <TouchableOpacity 
-          style={styles.primaryButton} 
+          className="bg-[#ec4899] py-[14px] px-8 rounded-[30px] elevation-5" 
+          style={{ shadowColor: '#ec4899', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }}
           onPress={handleGenerate}
         >
-          <Text style={styles.primaryButtonText}>Analyze Hair & Generate</Text>
+          <Text className="text-white text-[16px] font-bold text-center">Analyze Hair & Generate</Text>
         </TouchableOpacity>
       </View>
     );
@@ -95,21 +100,21 @@ export default function HairCareSuggestionsScreen({ navigation }) {
   const categories = Object.keys(groupedSuggestions).sort();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView className="flex-1 bg-[#0f172a]">
+      <ScrollView contentContainerClassName="p-5 pb-10">
         
-        <View style={styles.summarySection}>
-          <Text style={styles.headerTitle}>Your Custom Hair Care Plan</Text>
-          <Text style={styles.headerSubtitle}>
+        <View className="mb-6">
+          <Text className="text-[#f8fafc] text-[28px] font-extrabold mb-2">Your Custom Hair Care Plan</Text>
+          <Text className="text-[#94a3b8] text-[15px] leading-[22px]">
             Fully personalized AI-generated routine and suggestions based on your recent analysis.
           </Text>
         </View>
 
         {categories.map((category) => (
-          <View key={category} style={styles.categorySection}>
-            <View style={styles.categoryHeader}>
-              <Text style={styles.categoryIcon}>{getCategoryIcon(category)}</Text>
-              <Text style={styles.categoryTitle}>{category}</Text>
+          <View key={category} className="mb-6">
+            <View className="flex-row items-center mb-3">
+              <Text className="text-[24px] mr-2">{getCategoryIcon(category)}</Text>
+              <Text className="text-[#f8fafc] text-[20px] font-bold">{category}</Text>
             </View>
             
             {groupedSuggestions[category].map((item, index) => (
@@ -118,173 +123,32 @@ export default function HairCareSuggestionsScreen({ navigation }) {
                 colors={getCategoryColor(category)}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.suggestionCard}
+                className="p-4 rounded-[16px] mb-3 elevation-3"
+                style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }}
               >
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>{item.title}</Text>
+                <View className="flex-row justify-between items-start mb-2">
+                  <Text className="text-white text-[18px] font-bold flex-1 mr-2">{item.title}</Text>
                   {item.priority === 'High' && (
-                    <View style={styles.priorityBadge}>
-                      <Text style={styles.priorityText}>Crucial</Text>
+                    <View className="bg-[rgba(255,255,255,0.2)] px-2 py-1 rounded-lg">
+                      <Text className="text-white text-[10px] font-bold uppercase">Crucial</Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.cardDescription}>{item.description}</Text>
+                <Text className="text-[rgba(255,255,255,0.9)] text-[14px] leading-5">{item.description}</Text>
               </LinearGradient>
             ))}
           </View>
         ))}
 
-        <TouchableOpacity style={[styles.primaryButton, styles.refreshButton]} onPress={handleGenerate}>
-          <Text style={styles.primaryButtonText}>Regenerate Plan</Text>
+        <TouchableOpacity 
+          className="bg-[#3b82f6] mt-[30px] py-[14px] px-8 rounded-[30px] elevation-5" 
+          style={{ shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }}
+          onPress={handleGenerate}
+        >
+          <Text className="text-white text-[16px] font-bold text-center">Regenerate Plan</Text>
         </TouchableOpacity>
         
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-  },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  loadingText: {
-    color: '#cbd5e1',
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: 'Inter',
-    textAlign: 'center',
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  errorSubText: {
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 24,
-  },
-  emptyTitle: {
-    color: '#f8fafc',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubTitle: {
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginBottom: 32,
-    fontSize: 15,
-  },
-  primaryButton: {
-    backgroundColor: '#ec4899',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 30,
-    shadowColor: '#ec4899',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  refreshButton: {
-    marginTop: 30,
-    backgroundColor: '#3b82f6',
-    shadowColor: '#3b82f6',
-  },
-  summarySection: {
-    marginBottom: 24,
-  },
-  headerTitle: {
-    color: '#f8fafc',
-    fontSize: 28,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    color: '#94a3b8',
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  categorySection: {
-    marginBottom: 24,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  categoryIcon: {
-    fontSize: 24,
-    marginRight: 8,
-  },
-  categoryTitle: {
-    color: '#f8fafc',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  suggestionCard: {
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  cardTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
-    marginRight: 8,
-  },
-  priorityBadge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  priorityText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  cardDescription: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 14,
-    lineHeight: 20,
-  }
-});

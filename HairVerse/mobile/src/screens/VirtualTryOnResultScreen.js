@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions, ActivityIndicator, Animated, PanResponder, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions, ActivityIndicator, Animated, PanResponder, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { virtualTryonService } from '../services/virtualTryonService';
@@ -186,7 +186,8 @@ export default function VirtualTryOnResultScreen() {
         {/* Slider Handle */}
         <Animated.View 
           {...panResponder.panHandlers}
-          style={[styles.sliderHandle, { transform: [{ translateX: sliderPosition }] }]}
+          className="absolute top-0 bottom-0 w-[2px] -ml-[1px] z-30"
+          style={{ transform: [{ translateX: sliderPosition }] }}
         >
           <View className="w-1 h-full bg-white shadow-lg" />
           <View className="absolute w-8 h-8 bg-white rounded-full shadow-lg items-center justify-center border border-gray-200" style={{ top: '50%', marginTop: -16, left: -14 }}>
@@ -316,13 +317,3 @@ export default function VirtualTryOnResultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  sliderHandle: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 2,
-    marginLeft: -1, // center it
-    zIndex: 30,
-  }
-});
