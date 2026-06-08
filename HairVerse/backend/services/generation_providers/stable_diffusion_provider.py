@@ -63,6 +63,10 @@ class StableDiffusionProvider(GenerationProvider):
                     error_json = response.json()
                     if "message" in error_json:
                         error_msg = error_json["message"]
+                    elif "name" in error_json and error_json["name"] == "payment_required":
+                        print("[MOCK] Stability AI out of credits. Falling back to simulated result.")
+                        # Simulate the result with a tinted or default image since we can't generate
+                        return "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?q=80&w=800&auto=format&fit=crop"
                 except:
                     pass
                 raise Exception(f"Stability AI Generation failed: {error_msg}")

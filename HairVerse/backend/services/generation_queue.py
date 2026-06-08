@@ -12,7 +12,7 @@ def get_provider(provider_name: str):
     # Check what keys are available
     has_sd = bool(os.getenv("STABLE_DIFFUSION_API_KEY"))
     
-    if provider_name == "stability" or (has_sd and provider_name != "replicate"):
+    if has_sd or provider_name == "stability":
         return StableDiffusionProvider()
         
     return ReplicateProvider() # Default back to replicate (which has our mock fallback)
@@ -58,11 +58,17 @@ class GenerationQueue:
             if not source_image_url:
                 raise Exception(f"Source image URL is missing.")
 
-            # Fetch hairstyle prompt
-            hairstyle_ref = db.collection("hairstyles").document(hairstyle_id)
-            hairstyle_doc = hairstyle_ref.get()
+            # Fetch hairstyle prompt safely (hairstyle_id might contain slashes from AI recommendations)
+            hairstyle_doc = None
+            try:
+                # If hairstyle_id contains a slash, it will throw ValueError: A document must have an even number of path elements
+                if "/" not in hairstyle_id:
+                    hairstyle_ref = db.collection("hairstyles").document(hairstyle_id)
+                    hairstyle_doc = hairstyle_ref.get()
+            except ValueError:
+                pass
             
-            if not hairstyle_doc.exists:
+            if not hairstyle_doc or not hairstyle_doc.exists:
                 # If not in catalog (e.g. AI recommendation), use the ID string as the name itself
                 hairstyle_name = hairstyle_id
                 hairstyle_desc = ""
