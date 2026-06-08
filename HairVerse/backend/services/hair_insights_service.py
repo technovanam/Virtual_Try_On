@@ -108,7 +108,7 @@ class HairInsightsService:
             tmp_image_path = HairInsightsService._download_image(image_url)
             sample_file = genai.upload_file(path=tmp_image_path)
             
-            model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
+            model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
             
             prompt = """
             Analyze the provided user selfie to extract deep, detailed hair intelligence.

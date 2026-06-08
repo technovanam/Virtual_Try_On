@@ -11,41 +11,37 @@ class SearchService:
             
         try:
             hairstyles_ref = db.collection("hairstyles")
-            query_ref = hairstyles_ref
-            
-            # Apply equality filters first (Firestore requirement)
-            if category:
-                query_ref = query_ref.where("category", "==", category)
-            if gender:
-                query_ref = query_ref.where("gender", "==", gender)
-                
-            # Then apply range filters or orderings
-            query_str = query.strip() if query else ""
-            if query_str:
-                query_ref = query_ref.where("hairstyleName", ">=", query_str)\
-                                     .where("hairstyleName", "<=", query_str + '\uf8ff')
-            else:
-                # If no query, order by popularityScore descending
-                query_ref = query_ref.order_by("popularityScore", direction="DESCENDING")
-
-            # Note: For simple implementation without cursor, we fetch all and paginate in memory
-            # For production with millions of docs, cursor pagination must be implemented
-            # Let's fetch a reasonable maximum and paginate in memory to allow combined filtering properly
-            docs = query_ref.limit(200).stream()
+            docs = hairstyles_ref.stream()
             
             all_results = []
+            query_str = query.strip().lower() if query else ""
+
             for doc in docs:
                 data = doc.to_dict()
+                
+                # In-memory filters to avoid Firestore composite index requirements
+                if category and data.get("category") != category:
+                    continue
+                if gender and data.get("gender") != gender:
+                    continue
+                    
+                name = data.get("hairstyleName", data.get("name", "Unknown Hairstyle"))
+                if query_str and query_str not in name.lower():
+                    continue
+
                 result = SearchResult(
                     id=doc.id,
                     type="hairstyle",
-                    title=data.get("hairstyleName", data.get("name", "Unknown Hairstyle")),
+                    title=name,
                     image=data.get("imageUrl"),
                     category=data.get("category", "General"),
                     tags=data.get("tags", []),
                     popularityScore=data.get("popularityScore", 0)
                 )
                 all_results.append(result)
+                
+            # Sort all_results by popularity score descending
+            all_results.sort(key=lambda x: x.popularityScore, reverse=True)
                 
             total = len(all_results)
             total_pages = math.ceil(total / limit) if limit > 0 else 1

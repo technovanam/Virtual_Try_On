@@ -3,7 +3,7 @@ from typing import List, Optional, Literal
 from datetime import datetime
 
 class SavedItemCreate(BaseModel):
-    itemType: Literal["hairstyle", "tryon", "comparison", "haircolor", "beardstyle"]
+    itemType: Literal["hairstyle", "tryon", "comparison", "haircolor", "beardstyle", "analysis"]
     referenceId: str
     title: str
     imageUrl: str

@@ -15,7 +15,8 @@ const getPlaceholderImage = (category, fallback) => {
   return fallback || 'https://images.unsplash.com/photo-1560060141-7b9018741cb7?q=80&w=400&auto=format&fit=crop';
 };
 
-export default function RecommendationResultsScreen({ navigation }) {
+export default function RecommendationResultsScreen({ route, navigation }) {
+  const { analysisId } = route?.params || {};
   const { 
     summary,
     recommendations,
@@ -36,8 +37,15 @@ export default function RecommendationResultsScreen({ navigation }) {
   } = useRecommendationStore();
 
   useEffect(() => {
-    fetchRecommendations();
-  }, []);
+    const init = async () => {
+      if (analysisId) {
+        await generateRecommendations(analysisId);
+      } else {
+        await fetchRecommendations();
+      }
+    };
+    init();
+  }, [analysisId]);
 
   const handleRefresh = async () => {
     await generateRecommendations();
@@ -96,7 +104,7 @@ export default function RecommendationResultsScreen({ navigation }) {
         />
         <Text className="text-[#f8fafc] text-[20px] font-bold mb-2">No recommendations available yet.</Text>
         <Text className="text-[#94a3b8] text-center mb-8 text-[15px]">Let our AI analyze your features to find your perfect hairstyle.</Text>
-        <TouchableOpacity className="bg-[#ec4899] py-[14px] px-8 rounded-[30px] items-center" onPress={() => navigation.navigate('SelfieUpload')}>
+        <TouchableOpacity className="bg-[#ec4899] py-[14px] px-8 rounded-[30px] items-center" onPress={() => navigation.navigate('MainTabs', { screen: 'Try-On' })}>
           <Text className="text-white text-[16px] font-bold">Analyze Selfie</Text>
         </TouchableOpacity>
       </View>
@@ -104,7 +112,7 @@ export default function RecommendationResultsScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0f172a]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a' }}>
       {/* Sticky Header with Search and Filters */}
       <View className="px-5 pt-2.5 pb-2.5 bg-[rgba(15,23,42,0.95)] border-b border-[#1e293b] z-10">
         <Text className="text-[#f8fafc] text-[28px] font-extrabold mb-4">Your AI Stylist</Text>
@@ -118,7 +126,7 @@ export default function RecommendationResultsScreen({ navigation }) {
             onChangeText={setSearchQuery}
           />
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
           {categories.map(cat => (
             <TouchableOpacity 
               key={cat} 
@@ -131,7 +139,7 @@ export default function RecommendationResultsScreen({ navigation }) {
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerClassName="p-5 pb-[60px]">
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
         
         {/* AI Summary Card */}
         {summary ? (
@@ -164,13 +172,9 @@ export default function RecommendationResultsScreen({ navigation }) {
                   <Text className="text-[#94a3b8] text-[13px] leading-[18px] mb-2" numberOfLines={2}>{item.recommendationReason}</Text>
 
                   <View className="flex-row gap-2.5 mt-2">
-                    <TouchableOpacity className="flex-[1.5] bg-[rgba(255,255,255,0.15)] py-3 rounded-[20px] items-center justify-center flex-row gap-1.5" onPress={() => Alert.alert('Saved', 'Saved to Collections')}>
+                    <TouchableOpacity className="flex-[1] bg-[rgba(255,255,255,0.15)] py-3 rounded-[20px] items-center justify-center flex-row gap-1.5" onPress={() => Alert.alert('Saved', 'Saved to Collections')}>
                       <Ionicons name="bookmark-outline" size={18} color="white" />
                       <Text className="text-white font-bold text-[13px]">Save</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="flex-[1.5] bg-[rgba(255,255,255,0.15)] py-3 rounded-[20px] items-center justify-center flex-row gap-1.5" onPress={() => navigation.navigate('CompareHairstyles')}>
-                      <Ionicons name="git-compare-outline" size={18} color="white" />
-                      <Text className="text-white font-bold text-[13px]">Compare</Text>
                     </TouchableOpacity>
                     <TouchableOpacity className="flex-[2] bg-[#ec4899] py-3 rounded-[20px] items-center justify-center" onPress={() => navigation.navigate('VirtualTryOn', { hairstyle: item })}>
                       <Text className="text-white font-bold text-[14px]">Try Now</Text>

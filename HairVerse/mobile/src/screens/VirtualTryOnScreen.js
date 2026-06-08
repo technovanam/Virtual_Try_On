@@ -3,7 +3,8 @@ import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions, Activity
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { virtualTryonService } from '../services/virtualTryonService';
-import { useSelfieStore } from '../store/uploadStore';
+import { useSelfieStore } from '../store/selfieStore';
+import { useUploadStore } from '../store/uploadStore';
 
 const { width } = Dimensions.get('window');
 
@@ -27,11 +28,14 @@ export default function VirtualTryOnScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const activeSelfie = useSelfieStore(state => state.activeSelfie);
+  const uploadedImageId = useUploadStore(state => state.imageId);
+  const uploadedImageUrl = useUploadStore(state => state.imageUrl);
   
   const params = route.params || {};
-  const imageId = params.imageId || activeSelfie?.imageId;
-  const hairstyleId = params.hairstyleId;
-  const originalImageUrl = params.originalImageUrl || activeSelfie?.imageUrl;
+  const imageId = params.imageId || activeSelfie?.imageId || uploadedImageId;
+  // Support both direct ID and full hairstyle object (from recommendations)
+  const hairstyleId = params.hairstyleId || params.hairstyle?.hairstyleId || params.hairstyle?.hairstyleName;
+  const originalImageUrl = params.originalImageUrl || activeSelfie?.imageUrl || uploadedImageUrl;
 
   const [status, setStatus] = useState('idle'); // idle, loading, pending, processing, completed, failed
   const [tryOnId, setTryOnId] = useState(null);
@@ -60,7 +64,15 @@ export default function VirtualTryOnScreen() {
 
   useEffect(() => {
     // Start initial try-on on mount
-    handleGenerate();
+    const init = async () => {
+      let currentImageId = imageId;
+      if (!currentImageId) {
+        await useSelfieStore.getState().fetchSelfies();
+        currentImageId = useSelfieStore.getState().activeSelfie?.imageId;
+      }
+      handleGenerate(currentImageId);
+    };
+    init();
   }, []);
 
   useEffect(() => {
@@ -73,8 +85,10 @@ export default function VirtualTryOnScreen() {
     };
   }, [tryOnId, status]);
 
-  const handleGenerate = async () => {
-    if (!imageId || !hairstyleId) {
+  const handleGenerate = async (forceImageId) => {
+    const targetImageId = typeof forceImageId === 'string' ? forceImageId : imageId;
+    
+    if (!targetImageId || !hairstyleId) {
       setError('Missing image or hairstyle selection.');
       setStatus('failed');
       return;
@@ -89,7 +103,7 @@ export default function VirtualTryOnScreen() {
         beardStyle: selectedBeard.name !== 'None' ? selectedBeard.name : undefined,
       };
 
-      const data = await virtualTryonService.generate(imageId, hairstyleId, config);
+      const data = await virtualTryonService.generate(targetImageId, hairstyleId, config);
       setTryOnId(data.tryOnId);
       setStatus(data.status || 'pending');
       setSliderPosition(100); // Snap to result by default
@@ -155,7 +169,7 @@ export default function VirtualTryOnScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0F172A]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0F172A' }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4">
         <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 bg-white/10 rounded-full items-center justify-center">
@@ -167,7 +181,7 @@ export default function VirtualTryOnScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1">
+      <ScrollView style={{ flex: 1 }}>
         {/* Main Image Comparison Area */}
         <View className="px-4 py-2">
           <View className="w-full aspect-[3/4] bg-gray-900 rounded-[32px] overflow-hidden relative border border-gray-800">
@@ -271,7 +285,7 @@ export default function VirtualTryOnScreen() {
 
           {/* Apply Changes Button */}
           <TouchableOpacity 
-            onPress={handleGenerate}
+            onPress={() => handleGenerate()}
             disabled={status === 'loading' || status === 'pending' || status === 'processing'}
             className={`w-full py-4 rounded-xl items-center shadow-lg ${(status === 'loading' || status === 'pending' || status === 'processing') ? 'bg-gray-700 opacity-50' : 'bg-[#ec4899] shadow-pink-500/30'}`}
           >

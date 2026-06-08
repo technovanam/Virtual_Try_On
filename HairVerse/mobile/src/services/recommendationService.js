@@ -18,7 +18,7 @@ export const recommendationService = {
         timeout: 10000
       });
       
-      return response.data.recommendations || [];
+      return response.data;
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       throw error;
@@ -42,7 +42,7 @@ export const recommendationService = {
         }
       );
       
-      return response.data.recommendations || [];
+      return response.data;
     } catch (error) {
       console.error('Error generating recommendations:', error);
       throw error;

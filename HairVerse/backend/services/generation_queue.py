@@ -3,14 +3,19 @@ import traceback
 from datetime import datetime
 from typing import Dict, Any, Optional
 from firebase_config import db
-from .generation_providers import ReplicateProvider
+import os
+from .generation_providers import ReplicateProvider, StableDiffusionProvider
+from .tryon_prompt_builder import build_tryon_prompt
 
 # Provider factory
 def get_provider(provider_name: str):
-    # In a real system, we'd have a registry or factory
-    if provider_name == "replicate":
-        return ReplicateProvider()
-    return ReplicateProvider() # Default
+    # Check what keys are available
+    has_sd = bool(os.getenv("STABLE_DIFFUSION_API_KEY"))
+    
+    if provider_name == "stability" or (has_sd and provider_name != "replicate"):
+        return StableDiffusionProvider()
+        
+    return ReplicateProvider() # Default back to replicate (which has our mock fallback)
 
 class GenerationQueue:
     """
@@ -58,15 +63,54 @@ class GenerationQueue:
             hairstyle_doc = hairstyle_ref.get()
             
             if not hairstyle_doc.exists:
-                raise Exception(f"Hairstyle {hairstyle_id} not found.")
+                # If not in catalog (e.g. AI recommendation), use the ID string as the name itself
+                hairstyle_name = hairstyle_id
+                hairstyle_desc = ""
+            else:
+                hairstyle_data = hairstyle_doc.to_dict()
+                hairstyle_name = hairstyle_data.get("name", hairstyle_data.get("hairstyleName", "new hairstyle"))
+                hairstyle_desc = hairstyle_data.get("description", "")
+            
+            # Fetch user analysis data
+            face_shape, hair_density, hair_texture, hair_color = "", "", "", ""
+            
+            # Try getting face analysis
+            try:
+                # Some implementations might save without 'latest' or query the most recent
+                face_analysis_ref = db.collection("users").document(uid).collection("faceAnalysis").order_by("timestamp", direction="DESCENDING").limit(1)
+                face_docs = face_analysis_ref.get()
+                if face_docs:
+                    face_shape = face_docs[0].to_dict().get("faceShape", "")
+            except Exception:
+                pass
                 
-            hairstyle_prompt = hairstyle_doc.to_dict().get("name", "new hairstyle")
+            # Try getting hair analysis
+            try:
+                hair_analysis_ref = db.collection("users").document(uid).collection("hairAnalysis").order_by("timestamp", direction="DESCENDING").limit(1)
+                hair_docs = hair_analysis_ref.get()
+                if hair_docs:
+                    hair_data = hair_docs[0].to_dict()
+                    hair_density = hair_data.get("density", "")
+                    hair_texture = hair_data.get("texture", "")
+                    hair_color = hair_data.get("color", "")
+            except Exception:
+                pass
+                
+            # Use tryon_prompt_builder
+            prompt = build_tryon_prompt(
+                face_shape=face_shape,
+                hair_density=hair_density,
+                hair_texture=hair_texture,
+                hair_color=hair_color,
+                hairstyle_name=hairstyle_name,
+                hairstyle_description=hairstyle_desc
+            )
             
             # 2. Get provider and generate
             provider_name = config.get("provider", "replicate") if config else "replicate"
             provider = get_provider(provider_name)
             
-            result_url = await provider.generate_tryon(source_image_url, hairstyle_prompt, config)
+            result_url = await provider.generate_tryon(source_image_url, prompt, config)
             
             # 3. Mark as completed
             tryon_ref.update({

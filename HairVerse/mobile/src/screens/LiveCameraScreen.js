@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, S
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import { useCameraStore } from '../store/useCameraStore';
+import { useAnalysisStore } from '../store/analysisStore';
 
 export default function LiveCameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -85,9 +86,10 @@ export default function LiveCameraScreen() {
   const handleUsePhoto = async () => {
     if (!capturedImage) return;
     try {
-      await uploadImage(capturedImage);
-      // Navigation would typically go to a processing or preview screen here
-      navigation.replace('Placeholder', { title: 'Analysis Pending' });
+      const result = await uploadImage(capturedImage);
+      // Start the analysis pipeline and navigate to the actual screen instead of a placeholder
+      useAnalysisStore.getState().startAnalysis(result.imageUrl || capturedImage);
+      navigation.replace('AIAnalysis');
     } catch (err) {
       // Error is handled in the store and displayed below
     }

@@ -79,6 +79,8 @@ export default function SavedCollectionsScreen() {
       navigation.navigate('VirtualTryOn', { sessionId: item.referenceId });
     } else if (item.itemType === 'comparison') {
       navigation.navigate('Comparison', { comparisonId: item.referenceId });
+    } else if (item.itemType === 'analysis') {
+      navigation.navigate('AIAnalysisResult', { analysisId: item.referenceId });
     }
   };
 

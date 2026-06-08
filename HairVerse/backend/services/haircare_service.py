@@ -71,7 +71,7 @@ class HairCareService:
         }
 
         # Configure Gemini Model
-        model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
+        model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
         
         # Convert datetime to string for JSON serialization
         def make_serializable(obj):

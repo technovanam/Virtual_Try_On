@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAnalysisStore } from '../store/analysisStore';
+import { useSavedStore } from '../store/savedStore';
 import { Ionicons } from '@expo/vector-icons';
 import InsightCard from '../components/InsightCard';
 
@@ -17,6 +18,8 @@ const AIAnalysisResultScreen = () => {
     fetchAnalysisResult 
   } = useAnalysisStore();
 
+  const { saveItem } = useSavedStore();
+
   useEffect(() => {
     if (analysisId) {
       fetchAnalysisResult(analysisId);
@@ -24,7 +27,8 @@ const AIAnalysisResultScreen = () => {
   }, [analysisId]);
 
   const handleStartVirtualTryOn = () => {
-    navigation.navigate('VirtualTryOn', { analysisId });
+    // Navigates to the search catalog so the user can pick a specific style to try on
+    navigation.navigate('MainTabs', { screen: 'Search' });
   };
 
   const handleViewRecommendations = () => {
@@ -32,12 +36,23 @@ const AIAnalysisResultScreen = () => {
   };
 
   const handleReanalyze = () => {
-    navigation.navigate('Try-On');
+    navigation.navigate('MainTabs', { screen: 'Try-On' });
   };
 
-  const handleSaveAnalysis = () => {
-    // Implement save logic, maybe show a toast
-    console.log('Analysis saved!');
+  const handleSaveAnalysis = async () => {
+    try {
+      await saveItem({
+        itemType: 'analysis',
+        referenceId: analysisId,
+        title: 'AI Face & Hair Analysis',
+        imageUrl: '', // Backend handles empty URL gracefully
+        category: 'History',
+        matchScore: 0
+      });
+      Alert.alert('Success', 'Analysis saved to your collections!');
+    } catch (e) {
+      Alert.alert('Error', 'Failed to save analysis. It might already be saved.');
+    }
   };
 
   const renderContent = () => {
@@ -100,9 +115,9 @@ const AIAnalysisResultScreen = () => {
 
     return (
       <ScrollView 
-        className="flex-1"
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 60 }}
+        showsVerticalScrollIndicator={true}
       >
         <Text className="text-gray-500 mb-6 text-sm">
           Analyzed at: {analyzedAt ? new Date(analyzedAt).toLocaleString() : 'Just now'}
@@ -202,7 +217,7 @@ const AIAnalysisResultScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FAFAFA]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-100">
         <TouchableOpacity 
           className="w-10 h-10 items-center justify-center rounded-full bg-gray-50"
@@ -213,7 +228,9 @@ const AIAnalysisResultScreen = () => {
         <Text className="text-lg font-bold text-gray-900">AI Analysis Results</Text>
         <View className="w-10 h-10" />
       </View>
-      {renderContent()}
+      <View style={{ flex: 1 }}>
+        {renderContent()}
+      </View>
     </SafeAreaView>
   );
 };

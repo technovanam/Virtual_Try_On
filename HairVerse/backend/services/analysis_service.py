@@ -9,7 +9,7 @@ class AnalysisService:
             return CompleteAnalysisResultResponse(status="error", analysisId=analysis_id, healthObservations=["Firestore not initialized"])
             
         try:
-            doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+            doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
             doc = doc_ref.get()
             
             if not doc.exists:
@@ -69,7 +69,7 @@ class AnalysisService:
             )
             
         try:
-            doc_ref = db.collection("users").document(uid).collection("analysis").document(analysis_id)
+            doc_ref = db.collection("users").document(uid).collection("geminiAnalysis").document(analysis_id)
             doc = doc_ref.get()
             
             if not doc.exists:

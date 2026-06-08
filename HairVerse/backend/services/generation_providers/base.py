@@ -10,7 +10,7 @@ class GenerationProvider(ABC):
     async def generate_tryon(
         self, 
         source_image_url: str, 
-        hairstyle_prompt: str, 
+        prompt: str, 
         config: Optional[Dict[str, Any]] = None
     ) -> str:
         """
@@ -18,7 +18,7 @@ class GenerationProvider(ABC):
         
         Args:
             source_image_url: URL of the user's selfie.
-            hairstyle_prompt: Description or ID of the hairstyle to apply.
+            prompt: Provider-ready generation prompt.
             config: Optional configuration for the specific provider.
             
         Returns:

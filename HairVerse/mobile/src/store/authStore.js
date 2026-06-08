@@ -42,10 +42,10 @@ export const useAuthStore = create((set) => ({
             user: {
               uid: data.uid,
               email: data.email,
-              displayName: data.display_name || data.email,
-              subscriptionStatus: data.subscription_status || 'free',
-              profileCompleted: data.profile_completed ?? false,
-              onboardingCompleted: data.onboarding_completed ?? false,
+              displayName: data.displayName || data.display_name || data.email,
+              subscriptionStatus: data.subscriptionStatus || data.subscription_status || 'free',
+              profileCompleted: data.profileCompleted ?? data.profile_completed ?? false,
+              onboardingCompleted: data.onboardingCompleted ?? data.onboarding_completed ?? false,
             },
             isAuthenticated: true,
             isInitializing: false,
@@ -54,6 +54,8 @@ export const useAuthStore = create((set) => ({
             error: null,
           });
         } catch (err) {
+          const isNetworkError = err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout')) || err.message === 'Network Error';
+          
           // Backend profile load failed — still restore basic auth from Firebase
           set({
             user: {
@@ -61,14 +63,14 @@ export const useAuthStore = create((set) => ({
               email: firebaseUser.email || '',
               displayName: firebaseUser.email || '',
               subscriptionStatus: 'free',
-              profileCompleted: false,
-              onboardingCompleted: false,
+              profileCompleted: isNetworkError ? true : false,
+              onboardingCompleted: isNetworkError ? true : false,
             },
             isAuthenticated: true,
             isInitializing: false,
             authChecked: true,
             isLoading: false,
-            error: null,
+            error: isNetworkError ? 'Network error. Some features may be unavailable.' : null,
           });
         }
       } else {
@@ -118,10 +120,10 @@ export const useAuthStore = create((set) => ({
         user: {
           uid: data.uid,
           email: data.email,
-          displayName: data.display_name || data.email,
-          subscriptionStatus: data.subscription_status || 'free',
-          profileCompleted: data.profile_completed ?? false,
-          onboardingCompleted: data.onboarding_completed ?? false,
+          displayName: data.displayName || data.display_name || data.email,
+          subscriptionStatus: data.subscriptionStatus || data.subscription_status || 'free',
+          profileCompleted: data.profileCompleted ?? data.profile_completed ?? false,
+          onboardingCompleted: data.onboardingCompleted ?? data.onboarding_completed ?? false,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -130,23 +132,25 @@ export const useAuthStore = create((set) => ({
 
       return { success: true };
     } catch (err) {
-      if (auth.currentUser && (err.response || err.message === 'profile_unavailable')) {
+      if (auth.currentUser && (err.response || err.message === 'profile_unavailable' || err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout')) || err.message === 'Network Error')) {
         const firebaseUser = auth.currentUser;
+        const isNetworkError = err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout')) || err.message === 'Network Error';
+        
         set({
           user: {
             uid: firebaseUser.uid,
             email: firebaseUser.email || '',
             displayName: firebaseUser.email || '',
             subscriptionStatus: 'free',
-            profileCompleted: false,
-            onboardingCompleted: false,
+            profileCompleted: isNetworkError ? true : false,
+            onboardingCompleted: isNetworkError ? true : false,
           },
           isAuthenticated: true,
           isLoading: false,
-          error: null,
+          error: isNetworkError ? 'Network error. Some features may be unavailable.' : null,
         });
 
-        return { success: true, warning: 'profile_unavailable' };
+        return { success: true, warning: isNetworkError ? 'network_error' : 'profile_unavailable' };
       }
 
       let errorMessage;
@@ -250,10 +254,10 @@ export const useAuthStore = create((set) => ({
         user: {
           uid: data.uid,
           email: data.email,
-          displayName: data.display_name || data.email,
-          subscriptionStatus: data.subscription_status || 'free',
-          profileCompleted: data.profile_completed ?? false,
-          onboardingCompleted: data.onboarding_completed ?? false,
+          displayName: data.displayName || data.display_name || data.email,
+          subscriptionStatus: data.subscriptionStatus || data.subscription_status || 'free',
+          profileCompleted: data.profileCompleted ?? data.profile_completed ?? false,
+          onboardingCompleted: data.onboardingCompleted ?? data.onboarding_completed ?? false,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -339,7 +343,7 @@ export const useAuthStore = create((set) => ({
       
       const data = response.data;
       set((state) => ({
-        user: { ...state.user, profileCompleted: data.profile_completed ?? true },
+        user: { ...state.user, profileCompleted: data.profileCompleted ?? data.profile_completed ?? true },
         isLoading: false
       }));
       return { success: true };
@@ -373,7 +377,7 @@ export const useAuthStore = create((set) => ({
       
       const data = response.data;
       set((state) => ({
-        user: { ...state.user, onboardingCompleted: data.onboarding_completed ?? true },
+        user: { ...state.user, onboardingCompleted: data.onboardingCompleted ?? data.onboarding_completed ?? true },
         isLoading: false
       }));
       return { success: true };

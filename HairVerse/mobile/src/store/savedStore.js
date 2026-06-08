@@ -47,6 +47,17 @@ export const useSavedStore = create((set, get) => ({
     }
   },
 
+  saveItem: async (itemData) => {
+    try {
+      const data = await savedService.createSavedItem(itemData);
+      set(state => ({ items: [data, ...state.items] }));
+      return data;
+    } catch (error) {
+      console.error('Failed to save item', error);
+      throw error;
+    }
+  },
+
   // Getters for computed state
   getFilteredItems: () => {
     const { items, searchQuery, sortBy, activeTab, activeCategory } = get();
@@ -55,7 +66,7 @@ export const useSavedStore = create((set, get) => ({
 
     // 1. Tab Filtering
     if (activeTab === 'history') {
-      result = result.filter(i => i.itemType === 'tryon');
+      result = result.filter(i => i.itemType === 'tryon' || i.itemType === 'analysis');
     } else if (activeTab === 'comparison') {
       result = result.filter(i => i.itemType === 'comparison');
     } else if (activeTab === 'haircolor') {

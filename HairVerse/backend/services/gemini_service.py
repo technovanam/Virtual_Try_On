@@ -53,8 +53,8 @@ class GeminiService:
             sample_file = genai.upload_file(path=tmp_image_path)
             
             # 3. Configure Gemini Model
-            # Use gemini-1.5-flash for faster image analysis, ensuring JSON output
-            model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
+            # Use gemini-2.5-flash for faster image analysis, ensuring JSON output
+            model = genai.GenerativeModel('gemini-2.5-flash', generation_config={"response_mime_type": "application/json"})
             
             # 4. Prompt for analysis
             prompt = """

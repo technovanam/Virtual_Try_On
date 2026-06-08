@@ -3,6 +3,8 @@ import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions, Activity
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { virtualTryonService } from '../services/virtualTryonService';
+import { savedService } from '../services/savedService';
+import { useCompareStore } from '../store/compareStore';
 import DownloadButton from '../components/DownloadButton';
 import ShareButton from '../components/ShareButton';
 
@@ -97,8 +99,34 @@ export default function VirtualTryOnResultScreen() {
     }
   };
 
-  const handleSaveResult = () => {
-    Alert.alert('Success', 'Try-On result saved to your collections!');
+  const { createComparison } = useCompareStore();
+
+  const handleSaveResult = async () => {
+    try {
+      await savedService.createSavedItem({
+        type: 'tryon',
+        tryOnId: tryOnId,
+        hairstyleId: hairstyleId,
+        imageUrl: resultImage,
+        title: `Try-On: ${hairstyleId}`,
+        createdAt: new Date().toISOString()
+      });
+      Alert.alert('Success', 'Try-On result saved to your collections!');
+    } catch (e) {
+      Alert.alert('Error', 'Failed to save Try-On result.');
+    }
+  };
+
+  const handleFullCompare = async () => {
+    try {
+      await createComparison('before_after', [
+        { id: 'original', name: 'Original', imageUrl: originalImageUrl },
+        { id: 'generated', name: 'Generated', imageUrl: resultImage }
+      ]);
+      navigation.navigate('Comparison');
+    } catch (e) {
+      Alert.alert('Error', 'Failed to add to comparison system');
+    }
   };
 
   const handleRegenerate = () => {
@@ -292,6 +320,12 @@ export default function VirtualTryOnResultScreen() {
 
           {status === 'completed' && resultImage && (
             <>
+              <TouchableOpacity
+                onPress={handleFullCompare}
+                className="flex-1 py-4 rounded-xl bg-white/10 border-0 items-center justify-center flex-row"
+              >
+                <Ionicons name="git-compare" size={20} color="#fff" />
+              </TouchableOpacity>
               <DownloadButton 
                 imageUrl={resultImage} 
                 resourceType="tryon" 

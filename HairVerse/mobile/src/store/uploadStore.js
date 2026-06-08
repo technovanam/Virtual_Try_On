@@ -15,12 +15,13 @@ export const useUploadStore = create((set) => ({
       const data = await uploadService.uploadSelfie(imageUri, (progress) => {
         set({ progress });
       });
+      const result = data.data || data;
       set({
         isUploading: false,
         progress: 100,
         success: true,
-        imageId: data.imageId,
-        imageUrl: data.imageUrl,
+        imageId: result.imageId,
+        imageUrl: result.imageUrl,
       });
     } catch (error) {
       const errorMsg = error.response?.data?.detail || error.message || 'Failed to upload image';
