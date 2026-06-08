@@ -13,11 +13,11 @@ const { width } = Dimensions.get('window');
 export default function VirtualTryOnResultScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { imageId, hairstyleId, originalImageUrl } = route.params || {};
+  const { imageId, hairstyleId, originalImageUrl, tryOnId: passedTryOnId, tryOnImage: passedTryOnImage } = route.params || {};
 
-  const [status, setStatus] = useState('loading');
-  const [tryOnId, setTryOnId] = useState(null);
-  const [resultImage, setResultImage] = useState(null);
+  const [status, setStatus] = useState(passedTryOnId ? 'completed' : 'loading');
+  const [tryOnId, setTryOnId] = useState(passedTryOnId || null);
+  const [resultImage, setResultImage] = useState(passedTryOnImage || null);
   const [error, setError] = useState(null);
   const [isComparing, setIsComparing] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
@@ -44,7 +44,9 @@ export default function VirtualTryOnResultScreen() {
   ).current;
 
   useEffect(() => {
-    startTryOnProcess();
+    if (!passedTryOnId) {
+      startTryOnProcess();
+    }
   }, []);
 
   useEffect(() => {
@@ -227,7 +229,7 @@ export default function VirtualTryOnResultScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0F172A]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0F172A' }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4">
         <TouchableOpacity 
@@ -330,7 +332,8 @@ export default function VirtualTryOnResultScreen() {
                 imageUrl={resultImage} 
                 resourceType="tryon" 
                 resourceId={tryOnId} 
-                className="flex-1 rounded-xl bg-white/10 border-0" 
+                className="flex-1 rounded-xl" 
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 0 }}
                 iconSize={20}
                 iconColor="#fff" 
               />
@@ -339,7 +342,8 @@ export default function VirtualTryOnResultScreen() {
                 resourceType="tryon" 
                 resourceId={tryOnId} 
                 title="Check out my new hairstyle on HairVerse!"
-                className="flex-1 rounded-xl bg-white/10 border-0" 
+                className="flex-1 rounded-xl" 
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 0 }}
                 iconSize={20}
                 iconColor="#fff" 
               />

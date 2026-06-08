@@ -91,14 +91,30 @@ class ProfileService:
             topRecommendationCategory="Trending Styles"
         )
         
+        # Calculate Profile Completion
+        profile_data = base_profile.get("profileCompletion", {}) or {}
+        total_fields = 9
+        filled_fields = 0
+        for key in ["gender", "age", "country", "hairLength", "hairType", "hairColor"]:
+            if profile_data.get(key): filled_fields += 1
+        for key in ["hairConcerns", "preferredStyles", "goals"]:
+            if profile_data.get(key) and len(profile_data.get(key)) > 0: filled_fields += 1
+            
+        if profile_data.get("gender") != "Female":
+            total_fields += 2
+            if profile_data.get("beardStatus"): filled_fields += 1
+            if profile_data.get("beardPreference"): filled_fields += 1
+            
+        calculated_percentage = int((filled_fields / total_fields) * 100) if total_fields > 0 else 0
+
         return ComprehensiveProfileResponse(
             uid=base_profile.get("uid"),
             email=base_profile.get("email"),
             displayName=base_profile.get("display_name"),
             joinedDate="Joined Recently", # Assuming timestamp not historically stored in auth profile
             userBadge=badge,
-            profileCompletion=base_profile.get("profileCompletion", {}),
-            completionPercentage=base_profile.get("completionPercentage", 0),
+            profileCompletion=profile_data,
+            completionPercentage=calculated_percentage,
             onboarding_completed=base_profile.get("onboarding_completed", False),
             profile_completed=base_profile.get("profile_completed", False),
             stats=stats,

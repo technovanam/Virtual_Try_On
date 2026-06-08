@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Activity
 import { useSavedStore } from '../store/savedStore';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useProfileSetupStore } from '../store/useProfileSetupStore';
 
 const SavedItemCard = ({ item, onOpenMenu }) => {
   return (
@@ -61,13 +62,18 @@ export default function SavedCollectionsScreen() {
     fetchSavedItems();
   }, []);
 
+  const { data: userProfile } = useProfileSetupStore();
+  
   const tabs = [
     { id: 'favorites', label: 'Favorites', icon: 'heart' },
     { id: 'history', label: 'History', icon: 'time' },
     { id: 'comparison', label: 'Comparisons', icon: 'git-compare' },
-    { id: 'haircolor', label: 'Hair Colors', icon: 'color-palette' },
-    { id: 'beardstyle', label: 'Beards', icon: 'cut' }
+    { id: 'haircolor', label: 'Hair Colors', icon: 'color-palette' }
   ];
+
+  if (userProfile?.gender !== 'Female') {
+    tabs.push({ id: 'beardstyle', label: 'Beards', icon: 'cut' });
+  }
 
   const filteredItems = getFilteredItems();
   const uniqueCategories = getUniqueCategories();

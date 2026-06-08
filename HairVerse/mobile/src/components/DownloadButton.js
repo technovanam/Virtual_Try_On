@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { downloadService } from '../services/downloadService';
 import { useShareStore } from '../store/shareStore';
 
-export default function DownloadButton({ imageUrl, resourceType, resourceId, className, iconSize = 24, iconColor = "#0F172A", showText = false }) {
+export default function DownloadButton({ imageUrl, resourceType, resourceId, className, style, iconSize = 24, iconColor = "#0F172A", showText = false }) {
   const { isDownloading, error, successMessage, clearStatus } = useShareStore();
 
   useEffect(() => {
@@ -24,6 +24,7 @@ export default function DownloadButton({ imageUrl, resourceType, resourceId, cla
   return (
     <TouchableOpacity 
       className={`flex-row items-center justify-center p-3 rounded-full bg-surface border border-borderLight shadow-sm ${className || ''}`}
+      style={style}
       onPress={handleDownload}
       disabled={isDownloading}
     >

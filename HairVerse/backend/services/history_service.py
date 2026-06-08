@@ -24,8 +24,8 @@ class HistoryService:
             return {"items": [], "total": 0}
             
         try:
-            sessions_ref = db.collection("users").document(uid).collection("tryonSessions")
-            docs = sessions_ref.order_by("updatedAt", direction="DESCENDING").limit(20).stream()
+            sessions_ref = db.collection("users").document(uid).collection("tryons")
+            docs = sessions_ref.order_by("createdAt", direction="DESCENDING").limit(20).stream()
             
             items = []
             for doc in docs:
@@ -34,15 +34,26 @@ class HistoryService:
                     continue
                 
                 created_at = parse_timestamp(data.get("createdAt"))
-                selected_hairstyle = data.get("selectedHairstyle", {})
-                if not isinstance(selected_hairstyle, dict):
-                    selected_hairstyle = {}
+                hairstyle_id = data.get("hairstyleId", "unknown")
+                
+                hairstyle_name = "Unknown Style"
+                hairstyle_category = "General"
+                
+                if hairstyle_id != "unknown":
+                    try:
+                        hs_doc = db.collection("hairstyles").document(hairstyle_id).get()
+                        if hs_doc.exists:
+                            hs_data = hs_doc.to_dict()
+                            hairstyle_name = hs_data.get("name", "Unknown Style")
+                            hairstyle_category = hs_data.get("category", "General")
+                    except Exception:
+                        pass
                 
                 items.append({
-                    "historyId": data.get("sessionId", doc.id),
-                    "hairstyleId": selected_hairstyle.get("id", "unknown"),
-                    "hairstyleName": selected_hairstyle.get("name", "Unknown Style"),
-                    "hairstyleCategory": selected_hairstyle.get("category", "General"),
+                    "historyId": data.get("tryOnId", doc.id),
+                    "hairstyleId": hairstyle_id,
+                    "hairstyleName": hairstyle_name,
+                    "hairstyleCategory": hairstyle_category,
                     "tryOnImage": data.get("resultImage") or data.get("uploadedImage"),
                     "createdAt": created_at.isoformat()
                 })

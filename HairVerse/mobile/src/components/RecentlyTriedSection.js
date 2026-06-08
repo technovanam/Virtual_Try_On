@@ -19,7 +19,7 @@ export default function RecentlyTriedSection() {
   };
 
   const handleStartTryOn = () => {
-    navigation.navigate('Try-On');
+    navigation.navigate('VirtualTryOn');
   };
 
   const renderContent = () => {
@@ -61,7 +61,7 @@ export default function RecentlyTriedSection() {
 
     return (
       <View className="w-full">
-        {historyItems.map((item, index) => (
+        {historyItems.slice(0, 2).map((item, index) => (
           <HistoryCard
             key={item.historyId || index}
             historyId={item.historyId}
@@ -70,7 +70,11 @@ export default function RecentlyTriedSection() {
             hairstyleCategory={item.hairstyleCategory}
             tryOnImage={item.tryOnImage}
             createdAt={item.createdAt}
-            onPress={() => navigation.navigate('CompareHairstyles', { historyId: item.historyId })}
+            onPress={() => navigation.navigate('VirtualTryOnResultScreen', { 
+              tryOnId: item.historyId,
+              hairstyleId: item.hairstyleId,
+              tryOnImage: item.tryOnImage
+            })}
           />
         ))}
       </View>
@@ -82,7 +86,7 @@ export default function RecentlyTriedSection() {
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-xl font-bold text-[#0F172A]">Recently Tried</Text>
         {historyItems && historyItems.length > 0 && (
-          <TouchableOpacity onPress={() => console.log('View All History')}>
+          <TouchableOpacity onPress={() => navigation.navigate('StyleHistoryScreen')}>
             <Text className="text-[#6366F1] text-sm font-semibold">View All</Text>
           </TouchableOpacity>
         )}

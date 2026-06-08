@@ -115,7 +115,12 @@ export default function RecommendationResultsScreen({ route, navigation }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a' }}>
       {/* Sticky Header with Search and Filters */}
       <View className="px-5 pt-2.5 pb-2.5 bg-[rgba(15,23,42,0.95)] border-b border-[#1e293b] z-10">
-        <Text className="text-[#f8fafc] text-[28px] font-extrabold mb-4">Your AI Stylist</Text>
+        <View className="flex-row items-center mb-4">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
+            <Ionicons name="arrow-back" size={28} color="#f8fafc" />
+          </TouchableOpacity>
+          <Text className="text-[#f8fafc] text-[28px] font-extrabold">Your AI Stylist</Text>
+        </View>
         <View className="flex-row items-center bg-[#1e293b] rounded-xl px-3 py-2.5 mb-4">
           <Ionicons name="search" size={20} color="#94a3b8" />
           <TextInput

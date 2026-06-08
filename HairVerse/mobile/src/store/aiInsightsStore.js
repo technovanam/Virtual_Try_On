@@ -3,6 +3,7 @@ import { aiInsightsService } from '../services/aiInsightsService';
 
 export const useAIInsightsStore = create((set) => ({
   insights: [],
+  fullData: null,
   status: 'pending',
   isLoading: false,
   error: null,
@@ -11,8 +12,18 @@ export const useAIInsightsStore = create((set) => ({
     try {
       set({ isLoading: true, error: null });
       const data = await aiInsightsService.fetchAIInsights();
+      
+      const faceShape = data.combinedInsights?.faceProfile || data.faceAnalysis?.faceShape || data.geminiAnalysis?.faceShape || 'Unknown';
+      const hairDensity = data.hairAnalysis?.density || 'Unknown';
+      const hairHealth = data.hairAnalysis?.healthScore ? `${data.hairAnalysis.healthScore}/100` : 'Unknown';
+      const hairTexture = data.hairAnalysis?.texture || 'Unknown';
+      
+      const hasData = data.status === 'completed';
+      const insightObj = { faceShape, hairDensity, hairHealth, hairTexture };
+
       set({ 
-        insights: data.insights || [], 
+        insights: hasData ? [insightObj] : [], 
+        fullData: data,
         status: data.status || 'pending',
         isLoading: false 
       });
@@ -25,6 +36,6 @@ export const useAIInsightsStore = create((set) => ({
   },
   
   clearStore: () => {
-    set({ insights: [], status: 'pending', isLoading: false, error: null });
+    set({ insights: [], fullData: null, status: 'pending', isLoading: false, error: null });
   }
 }));

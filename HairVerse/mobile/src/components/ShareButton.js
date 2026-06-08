@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ShareSheetModal from './ShareSheetModal';
 import { useShareStore } from '../store/shareStore';
 
-export default function ShareButton({ imageUrl, resourceType, resourceId, title, className, iconSize = 24, iconColor = "#0F172A", showText = false }) {
+export default function ShareButton({ imageUrl, resourceType, resourceId, title, className, style, iconSize = 24, iconColor = "#0F172A", showText = false }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { isSharing } = useShareStore();
 
@@ -17,6 +17,7 @@ export default function ShareButton({ imageUrl, resourceType, resourceId, title,
     <>
       <TouchableOpacity 
         className={`flex-row items-center justify-center p-3 rounded-full bg-surface border border-borderLight shadow-sm ${className || ''}`}
+        style={style}
         onPress={handlePress}
         disabled={isSharing}
       >

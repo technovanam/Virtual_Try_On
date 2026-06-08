@@ -15,7 +15,7 @@ export const historyService = {
       
       const response = await axios.get(`${BACKEND_BASE_URL}/history/recent`, {
         headers: { Authorization: `Bearer ${idToken}` },
-        timeout: 10000
+        timeout: 60000
       });
       
       return response.data;

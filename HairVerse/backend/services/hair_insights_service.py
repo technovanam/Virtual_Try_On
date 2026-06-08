@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import google.generativeai as genai
 from fastapi import HTTPException
 from firebase_config import db
+from google.cloud import firestore
 from schemas.hair_insights import HairInsightsResponse, HairInsightsHistoryResponse, HairInsights
 from dotenv import load_dotenv
 
@@ -99,7 +100,10 @@ class HairInsightsService:
             active_selfies = selfies_ref.where("isActive", "==", True).limit(1).get()
             
             if not active_selfies:
-                raise HTTPException(status_code=404, detail="No active selfie found. Please upload a selfie first.")
+                active_selfies = selfies_ref.order_by("uploadedAt", direction=firestore.Query.DESCENDING).limit(1).get()
+
+            if not active_selfies:
+                raise HTTPException(status_code=404, detail="No selfie found. Please upload a selfie first.")
                 
             image_url = active_selfies[0].to_dict().get("imageUrl")
             if not image_url:

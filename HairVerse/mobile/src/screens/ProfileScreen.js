@@ -65,7 +65,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC]">
       <View className="bg-white px-5 pt-2 pb-4 flex-row items-center justify-between border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">Dashboard</Text>
+        <Text className="text-2xl font-bold text-gray-900">Profile</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} className="w-10 h-10 items-center justify-center rounded-full bg-gray-50">
           <Ionicons name="settings-outline" size={20} color="#000" />
         </TouchableOpacity>
@@ -98,9 +98,9 @@ export default function ProfileScreen() {
         </View>
 
         {/* Dynamic Profile Stats */}
-        <View className="mt-6 px-5">
-           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Your Activity</Text>
-           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="overflow-visible">
+        <View className="mt-6">
+           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 px-5">Your Activity</Text>
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
              <StatCard value={stats?.hairstylesTried || 0} label="Try-Ons" />
              <StatCard value={stats?.savedStyles || 0} label="Saved" />
              <StatCard value={stats?.comparisonsCreated || 0} label="Compared" />

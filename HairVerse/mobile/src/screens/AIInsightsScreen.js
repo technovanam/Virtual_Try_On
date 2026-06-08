@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useHairInsightsStore } from '../store/hairInsightsStore';
+import { useAIInsightsStore } from '../store/aiInsightsStore';
 import { Ionicons } from '@expo/vector-icons';
 
 const ProgressBar = ({ label, value, colorClass, bgClass }) => (
@@ -19,10 +20,12 @@ const ProgressBar = ({ label, value, colorClass, bgClass }) => (
 const HairInsightsScreen = () => {
   const navigation = useNavigation();
   const { insights, history, status, error, fetchInsights, fetchHistory, generateInsights } = useHairInsightsStore();
+  const { fullData, fetchInsights: fetchBaseInsights } = useAIInsightsStore();
 
   useEffect(() => {
     fetchInsights();
     fetchHistory();
+    fetchBaseInsights();
   }, []);
 
   const handleStartAnalysis = () => {
@@ -68,24 +71,69 @@ const HairInsightsScreen = () => {
     }
 
     if (status === 'empty' || !insights) {
+      const hasBaseData = fullData && fullData.status === 'completed';
+      
       return (
-        <View className="flex-1 justify-center items-center px-6">
-          <View className="w-24 h-24 bg-indigo-50 rounded-full items-center justify-center mb-6 shadow-inner">
-            <Ionicons name="analytics" size={48} color="#4F46E5" />
-          </View>
-          <Text className="text-2xl font-bold text-gray-900 mb-2">No hair insights available yet.</Text>
-          <Text className="text-gray-500 text-center mb-8 text-base">
-            Upload a selfie to unlock your personalized hair intelligence profile and product recommendations.
-          </Text>
-          <TouchableOpacity className="bg-indigo-600 px-8 py-4 rounded-full w-full shadow-lg shadow-indigo-200" onPress={handleStartAnalysis}>
-            <Text className="text-white text-center font-bold text-lg">Start Analysis</Text>
-          </TouchableOpacity>
-        </View>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+          {hasBaseData ? (
+            <View className="mb-8">
+              <Text className="text-2xl font-bold text-gray-900 mb-6">Basic AI Profile</Text>
+              
+              <View className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
+                 {fullData.faceAnalysis?.faceShape && (
+                   <View className="flex-row items-center justify-between py-3 border-b border-gray-50">
+                     <Text className="text-gray-500 font-medium">Face Shape</Text>
+                     <Text className="text-indigo-600 font-bold text-lg">{fullData.faceAnalysis.faceShape}</Text>
+                   </View>
+                 )}
+                 {fullData.hairAnalysis?.density && (
+                   <View className="flex-row items-center justify-between py-3 border-b border-gray-50">
+                     <Text className="text-gray-500 font-medium">Hair Density</Text>
+                     <Text className="text-indigo-600 font-bold text-lg">{fullData.hairAnalysis.density}</Text>
+                   </View>
+                 )}
+                 {fullData.hairAnalysis?.healthScore && (
+                   <View className="flex-row items-center justify-between py-3">
+                     <Text className="text-gray-500 font-medium">Hair Health</Text>
+                     <Text className="text-indigo-600 font-bold text-lg">{fullData.hairAnalysis.healthScore}/100</Text>
+                   </View>
+                 )}
+                 {(!fullData.faceAnalysis?.faceShape && !fullData.hairAnalysis?.density) && (
+                   <Text className="text-gray-500 text-center py-4">Some basic traits have been identified, but a full analysis is recommended.</Text>
+                 )}
+              </View>
+
+              <View className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 items-center">
+                <Ionicons name="sparkles" size={32} color="#4F46E5" className="mb-3" />
+                <Text className="text-xl font-bold text-indigo-900 mb-2 text-center">Unlock Full Intelligence</Text>
+                <Text className="text-indigo-600 text-center mb-6 leading-5">
+                  Generate your comprehensive Hair Profile, Health Analysis, and Product Routine using your latest selfie.
+                </Text>
+                <TouchableOpacity className="bg-indigo-600 px-8 py-4 rounded-xl w-full shadow-md shadow-indigo-200" onPress={handleStartAnalysis}>
+                  <Text className="text-white text-center font-bold text-base">Generate Detailed Analysis</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View className="flex-1 justify-center items-center py-20">
+              <View className="w-24 h-24 bg-indigo-50 rounded-full items-center justify-center mb-6 shadow-inner">
+                <Ionicons name="analytics" size={48} color="#4F46E5" />
+              </View>
+              <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">No insights available yet.</Text>
+              <Text className="text-gray-500 text-center mb-8 text-base px-4">
+                Upload a selfie to unlock your personalized hair intelligence profile and product recommendations.
+              </Text>
+              <TouchableOpacity className="bg-indigo-600 px-8 py-4 rounded-full w-full shadow-lg shadow-indigo-200" onPress={handleStartAnalysis}>
+                <Text className="text-white text-center font-bold text-lg">Start Analysis</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
       );
     }
 
     return (
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         
         {/* Actions Row */}
         <View className="flex-row justify-between items-center mb-6">
@@ -234,7 +282,7 @@ const HairInsightsScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F8FAFC]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-100 z-10 shadow-sm">
         <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-full bg-gray-50" onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />

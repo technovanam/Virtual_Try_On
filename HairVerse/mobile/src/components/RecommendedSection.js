@@ -59,7 +59,7 @@ export default function RecommendedSection() {
 
     return (
       <View className="w-full">
-        {recommendations.map((rec, index) => (
+        {recommendations.slice(0, 2).map((rec, index) => (
           <RecommendationCard
             key={rec.hairstyleId || index}
             hairstyleId={rec.hairstyleId}
@@ -78,7 +78,14 @@ export default function RecommendedSection() {
 
   return (
     <View className="w-full my-6">
-      <Text className="text-xl font-bold text-[#0F172A] mb-4">Recommended For You</Text>
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-xl font-bold text-[#0F172A]">Recommended For You</Text>
+        {recommendations && recommendations.length > 0 && (
+          <TouchableOpacity onPress={() => navigation.navigate('Recommendations')}>
+            <Text className="text-[#6366F1] text-sm font-semibold">View All</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       {renderContent()}
     </View>
   );
