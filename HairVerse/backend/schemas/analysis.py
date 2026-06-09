@@ -20,7 +20,9 @@ class CompleteAnalysisResultResponse(BaseModel):
     faceSymmetryScore: Optional[int] = None
     hairLength: Optional[str] = None
     hairDensity: Optional[str] = None
+    hairVolume: Optional[str] = None
     hairTexture: Optional[str] = None
+    hairType: Optional[str] = None
     hairColor: Optional[str] = None
     hairHealthScore: Optional[int] = None
     hairlineType: Optional[str] = None
@@ -30,6 +32,11 @@ class CompleteAnalysisResultResponse(BaseModel):
     recommendationSummary: Optional[str] = None
     confidence: Optional[float] = None
     healthObservations: List[str] = []
+    bestHairstyles: List[str] = []
+    bestHairColors: List[str] = []
+    bestBeardStyles: List[str] = []
     recommendations: List[str] = []
+    recommendedStylesDetailed: List[dict] = []
     facialFeatureSummary: Optional[str] = None
     analyzedAt: Optional[datetime] = None
+    analysisVersion: Optional[int] = 1

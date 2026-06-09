@@ -39,7 +39,9 @@ class AnalysisService:
                 faceSymmetryScore=data.get("faceSymmetryScore"),
                 hairLength=data.get("hairLength"),
                 hairDensity=data.get("hairDensity"),
+                hairVolume=data.get("hairVolume"),
                 hairTexture=data.get("hairTexture"),
+                hairType=data.get("hairType"),
                 hairColor=data.get("hairColor"),
                 hairHealthScore=data.get("hairHealthScore"),
                 hairlineType=data.get("hairlineType"),
@@ -49,9 +51,14 @@ class AnalysisService:
                 recommendationSummary=data.get("recommendationSummary"),
                 confidence=data.get("confidence"),
                 healthObservations=data.get("healthObservations", []),
+                bestHairstyles=data.get("bestHairstyles", []),
+                bestHairColors=data.get("bestHairColors", []),
+                bestBeardStyles=data.get("bestBeardStyles", []),
                 recommendations=data.get("recommendations", []),
+                recommendedStylesDetailed=data.get("recommendedStylesDetailed", []),
                 facialFeatureSummary=data.get("facialFeatureSummary"),
-                analyzedAt=parse_timestamp(data.get("analyzedAt"))
+                analyzedAt=parse_timestamp(data.get("analyzedAt")),
+                analysisVersion=data.get("analysisVersion", 1)
             )
         except Exception as e:
             print(f"[ERROR] Failed to fetch complete analysis result for uid {uid}, analysis_id {analysis_id}: {e}")

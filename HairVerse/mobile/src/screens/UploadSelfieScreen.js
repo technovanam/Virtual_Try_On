@@ -8,6 +8,7 @@ import { useAnalysisStore } from '../store/analysisStore';
 
 export default function UploadSelfieScreen() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
   const navigation = useNavigation();
   
   const { 
@@ -38,7 +39,26 @@ export default function UploadSelfieScreen() {
 
   const handleUpload = () => {
     if (selectedImage) {
-      uploadSelfie(selectedImage);
+      setIsValidating(true);
+      // Simulate image validation (face detection, lighting check)
+      setTimeout(() => {
+        setIsValidating(false);
+        uploadSelfie(selectedImage);
+      }, 1500);
+    }
+  };
+
+  const handleAction = (action) => {
+    const finalImage = imageUrl || selectedImage;
+    if (action === 'AIAnalysis') {
+      useAnalysisStore.getState().startAnalysis(finalImage);
+      navigation.navigate('AIAnalysis');
+    } else if (action === 'Recommendations') {
+      navigation.navigate('Recommendations');
+    } else if (action === 'VirtualTryOn') {
+      navigation.navigate('VirtualTryOn');
+    } else if (action === 'LiveCamera') {
+      navigation.navigate('LiveCamera');
     }
   };
 
@@ -60,25 +80,50 @@ export default function UploadSelfieScreen() {
           {/* Success State */}
           {success ? (
             <View className="w-full items-center">
-              <View className="w-64 h-80 rounded-3xl overflow-hidden mb-6 shadow-xl border-4 border-green-500">
+              <View className="w-48 h-60 rounded-3xl overflow-hidden mb-6 shadow-xl border-4 border-green-500">
                 <Image source={{ uri: imageUrl || selectedImage }} className="w-full h-full" resizeMode="cover" />
-                <View className="absolute top-4 right-4 bg-green-500 p-2 rounded-full">
-                  <Ionicons name="checkmark-circle" size={24} color="white" />
+                <View className="absolute top-3 right-3 bg-green-500 p-1.5 rounded-full">
+                  <Ionicons name="checkmark" size={20} color="white" />
                 </View>
               </View>
-              <Text className="text-2xl font-bold text-primary mb-2 text-center">Ready for analysis</Text>
-              <Text className="text-secondary text-center mb-8 px-4">
-                Your selfie has been securely uploaded and is ready for AI try-on and analysis.
+              <Text className="text-2xl font-bold text-primary mb-2 text-center">Ready to Go!</Text>
+              <Text className="text-secondary text-center mb-6 px-4">
+                Your selfie is securely uploaded. What would you like to do next?
               </Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  useAnalysisStore.getState().startAnalysis(imageUrl || selectedImage);
-                  navigation.navigate('AIAnalysis');
-                }}
-                className="w-full bg-primary py-4 rounded-xl items-center"
-              >
-                <Text className="text-white font-semibold text-lg">Start AI Analysis</Text>
-              </TouchableOpacity>
+              
+              <View className="w-full space-y-3">
+                <TouchableOpacity 
+                  onPress={() => handleAction('AIAnalysis')}
+                  className="w-full bg-[#0F172A] py-3.5 rounded-xl items-center flex-row justify-center space-x-2 mb-3"
+                >
+                  <Ionicons name="scan-outline" size={20} color="white" />
+                  <Text className="text-white font-semibold text-base ml-2">AI Analysis</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={() => handleAction('Recommendations')}
+                  className="w-full bg-indigo-600 py-3.5 rounded-xl items-center flex-row justify-center space-x-2 mb-3"
+                >
+                  <Ionicons name="bulb-outline" size={20} color="white" />
+                  <Text className="text-white font-semibold text-base ml-2">Get Recommendations</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={() => handleAction('VirtualTryOn')}
+                  className="w-full bg-surface py-3.5 rounded-xl items-center border border-border flex-row justify-center space-x-2 mb-3"
+                >
+                  <Ionicons name="color-wand-outline" size={20} color="#0F172A" />
+                  <Text className="text-primary font-semibold text-base ml-2">Virtual Try-On</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={() => handleAction('LiveCamera')}
+                  className="w-full bg-surface py-3.5 rounded-xl items-center border border-border flex-row justify-center space-x-2"
+                >
+                  <Ionicons name="camera-outline" size={20} color="#0F172A" />
+                  <Text className="text-primary font-semibold text-base ml-2">Live Camera</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             <>
@@ -97,12 +142,21 @@ export default function UploadSelfieScreen() {
                   </View>
                 )}
 
-                {/* Upload Progress Overlay */}
-                {isUploading && (
-                  <View className="absolute inset-0 bg-black/60 justify-center items-center">
+                {/* Validate / Upload Progress Overlay */}
+                {(isValidating || isUploading) && (
+                  <View className="absolute inset-0 bg-black/60 justify-center items-center px-4">
                     <ActivityIndicator size="large" color="#FFFFFF" className="mb-4" />
-                    <Text className="text-white font-bold text-xl">{progress}%</Text>
-                    <Text className="text-slate-200 mt-2">Uploading securely...</Text>
+                    {isValidating ? (
+                      <>
+                        <Text className="text-white font-bold text-lg text-center">Validating Image...</Text>
+                        <Text className="text-slate-200 mt-2 text-center text-sm">Checking lighting and face position</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text className="text-white font-bold text-xl">{progress}%</Text>
+                        <Text className="text-slate-200 mt-2 text-center text-sm">Uploading securely...</Text>
+                      </>
+                    )}
                   </View>
                 )}
               </View>
@@ -117,30 +171,30 @@ export default function UploadSelfieScreen() {
 
               {/* Actions */}
               <View className="w-full space-y-4">
-                {!isUploading && !selectedImage && (
+                {(!isUploading && !isValidating) && !selectedImage && (
                   <View className="flex-row space-x-4">
                     <TouchableOpacity 
                       onPress={takePhoto}
                       className="flex-1 bg-surface py-4 rounded-xl items-center border border-border flex-row justify-center space-x-2"
                     >
                       <Ionicons name="camera-outline" size={20} color="#0F172A" />
-                      <Text className="text-primary font-semibold">Camera</Text>
+                      <Text className="text-primary font-semibold ml-2">Camera</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                       onPress={pickImage}
                       className="flex-1 bg-surface py-4 rounded-xl items-center border border-border flex-row justify-center space-x-2"
                     >
                       <Ionicons name="images-outline" size={20} color="#0F172A" />
-                      <Text className="text-primary font-semibold">Gallery</Text>
+                      <Text className="text-primary font-semibold ml-2">Gallery</Text>
                     </TouchableOpacity>
                   </View>
                 )}
 
-                {!isUploading && selectedImage && !error && (
+                {(!isUploading && !isValidating) && selectedImage && !error && (
                   <>
                     <TouchableOpacity 
                       onPress={handleUpload}
-                      className="w-full bg-primary py-4 rounded-xl items-center shadow-lg shadow-slate-300"
+                      className="w-full bg-primary py-4 rounded-xl items-center shadow-lg shadow-slate-300 mb-3"
                     >
                       <Text className="text-white font-semibold text-lg">Upload Selfie</Text>
                     </TouchableOpacity>

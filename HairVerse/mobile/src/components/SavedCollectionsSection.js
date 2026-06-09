@@ -12,6 +12,10 @@ export default function SavedCollectionsSection() {
     fetchSavedItems();
   }, []);
 
+  if (!isLoading && !error && items.length === 0) {
+    return null;
+  }
+
   return (
     <View className="mt-6 mb-2">
       <View className="flex-row justify-between items-end mb-4 px-1">
@@ -30,18 +34,6 @@ export default function SavedCollectionsSection() {
       {!isLoading && error && (
         <View className="bg-red-50 p-4 rounded-xl items-center justify-center border border-red-100">
           <Text className="text-red-500">{error || 'Failed to load collections'}</Text>
-        </View>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && !error && items.length === 0 && (
-        <View className="bg-gray-50 p-8 rounded-2xl items-center justify-center border border-gray-200 border-dashed">
-          <Text className="text-gray-500 font-medium text-center mb-4 text-base">
-            No saved styles yet.
-          </Text>
-          <TouchableOpacity className="bg-blue-600 py-3 px-6 rounded-xl" onPress={() => navigation.navigate('Saved')}>
-            <Text className="text-white font-bold">Go to Collections</Text>
-          </TouchableOpacity>
         </View>
       )}
 

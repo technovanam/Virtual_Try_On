@@ -25,6 +25,10 @@ export default function ContinueTryOnSection() {
     fetchSessions();
   }, []);
 
+  if (!isLoading && !error && sessions.length === 0) {
+    return null;
+  }
+
   return (
     <View className="mt-6 mb-2">
       <View className="flex-row justify-between items-end mb-4 px-1">
@@ -50,21 +54,6 @@ export default function ContinueTryOnSection() {
             onPress={fetchSessions}
           >
             <Text className="text-white font-bold">Retry</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && !error && sessions.length === 0 && (
-        <View className="bg-gray-50 p-8 rounded-2xl items-center justify-center border border-gray-200 border-dashed mb-4">
-          <Text className="text-gray-500 font-medium text-center mb-4 text-base">
-            No unfinished try-ons.
-          </Text>
-          <TouchableOpacity 
-            className="bg-indigo-600 py-3 px-6 rounded-xl"
-            onPress={() => navigation.navigate('Try-On')}
-          >
-            <Text className="text-white font-bold">Start New Try-On</Text>
           </TouchableOpacity>
         </View>
       )}

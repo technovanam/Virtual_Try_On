@@ -46,15 +46,7 @@ export default function RecommendedSection() {
     }
 
     if (!recommendations || recommendations.length === 0) {
-      return (
-        <View className="bg-[#F8FAFC] rounded-2xl p-6 items-center border border-[#E2E8F0]">
-          <Ionicons name="sparkles-outline" size={48} color="#6366F1" className="mb-4" />
-          <Text className="text-lg font-semibold text-[#0F172A] mb-4 text-center">No personalized recommendations available yet.</Text>
-          <TouchableOpacity className="bg-[#0F172A] px-6 py-3 rounded-lg" onPress={handleCompleteAnalysis}>
-            <Text className="text-white text-sm font-semibold">Start Analysis</Text>
-          </TouchableOpacity>
-        </View>
-      );
+      return null;
     }
 
     return (
@@ -76,6 +68,9 @@ export default function RecommendedSection() {
     );
   };
 
+  const content = renderContent();
+  if (!content) return null;
+
   return (
     <View className="w-full my-6">
       <View className="flex-row justify-between items-center mb-4">
@@ -86,7 +81,7 @@ export default function RecommendedSection() {
           </TouchableOpacity>
         )}
       </View>
-      {renderContent()}
+      {content}
     </View>
   );
 }

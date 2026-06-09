@@ -19,6 +19,65 @@ export default function AIInsightsSection() {
     fetchInsights();
   }, []);
 
+  if (!isLoading && !error && insights.length === 0) {
+    return null;
+  }
+
+  const recentInsight = insights[0];
+  const validInsights = [];
+  
+  if (recentInsight) {
+    if (recentInsight.faceShape && recentInsight.faceShape !== 'Unknown') {
+      validInsights.push(
+        <InsightCard 
+          key="faceShape"
+          title="Face Shape" 
+          value={recentInsight.faceShape} 
+          colorClass="bg-purple-50 border-purple-100" 
+          textColorClass="text-purple-800" 
+        />
+      );
+    }
+    if (recentInsight.hairDensity && recentInsight.hairDensity !== 'Unknown') {
+      validInsights.push(
+        <InsightCard 
+          key="hairDensity"
+          title="Hair Density" 
+          value={recentInsight.hairDensity} 
+          colorClass="bg-blue-50 border-blue-100" 
+          textColorClass="text-blue-800" 
+        />
+      );
+    }
+    if (recentInsight.hairHealth && recentInsight.hairHealth !== 'Unknown') {
+      validInsights.push(
+        <InsightCard 
+          key="hairHealth"
+          title="Hair Health" 
+          value={recentInsight.hairHealth} 
+          colorClass="bg-emerald-50 border-emerald-100" 
+          textColorClass="text-emerald-800" 
+        />
+      );
+    }
+    if (recentInsight.hairTexture && recentInsight.hairTexture !== 'Unknown') {
+      validInsights.push(
+        <InsightCard 
+          key="hairTexture"
+          title="Hair Texture" 
+          value={recentInsight.hairTexture} 
+          colorClass="bg-amber-50 border-amber-100" 
+          textColorClass="text-amber-800" 
+        />
+      );
+    }
+  }
+
+  // If no valid insights to show and it's not loading/error, hide the section
+  if (!isLoading && !error && validInsights.length === 0) {
+    return null;
+  }
+
   return (
     <View className="mt-6 mb-2">
       <View className="flex-row justify-between items-end mb-4 px-1">
@@ -52,52 +111,10 @@ export default function AIInsightsSection() {
         </View>
       )}
 
-      {/* Empty State */}
-      {!isLoading && !error && insights.length === 0 && (
-        <View className="bg-gradient-to-r from-indigo-50 to-purple-50 p-8 rounded-2xl items-center justify-center border border-indigo-100">
-          <Text className="text-indigo-900 font-semibold text-center mb-2 text-lg">
-            No Insights Yet
-          </Text>
-          <Text className="text-indigo-600 font-medium text-center mb-6 text-sm">
-            Complete your first AI analysis to unlock personalized insights.
-          </Text>
-          <TouchableOpacity 
-            className="bg-indigo-600 py-3 px-8 rounded-xl shadow-sm"
-            onPress={() => navigation.navigate('Try-On')}
-          >
-            <Text className="text-white font-bold text-base">Start Analysis</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
       {/* Success State */}
-      {!isLoading && !error && insights.length > 0 && (
+      {!isLoading && !error && validInsights.length > 0 && (
         <View>
-          {/* Display the most recent analysis */}
-          <InsightCard 
-            title="Face Shape" 
-            value={insights[0].faceShape} 
-            colorClass="bg-purple-50 border-purple-100" 
-            textColorClass="text-purple-800" 
-          />
-          <InsightCard 
-            title="Hair Density" 
-            value={insights[0].hairDensity} 
-            colorClass="bg-blue-50 border-blue-100" 
-            textColorClass="text-blue-800" 
-          />
-          <InsightCard 
-            title="Hair Health" 
-            value={insights[0].hairHealth} 
-            colorClass="bg-emerald-50 border-emerald-100" 
-            textColorClass="text-emerald-800" 
-          />
-          <InsightCard 
-            title="Hair Texture" 
-            value={insights[0].hairTexture} 
-            colorClass="bg-amber-50 border-amber-100" 
-            textColorClass="text-amber-800" 
-          />
+          {validInsights}
         </View>
       )}
     </View>

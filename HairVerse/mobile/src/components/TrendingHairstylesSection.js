@@ -43,12 +43,7 @@ export default function TrendingHairstylesSection() {
     }
 
     if (!hairstyles || hairstyles.length === 0) {
-      return (
-        <View className="bg-[#F8FAFC] rounded-2xl p-6 items-center border border-[#E2E8F0] mx-0">
-          <Ionicons name="trending-up-outline" size={48} color="#94A3B8" className="mb-4" />
-          <Text className="text-base font-semibold text-[#64748B] text-center">No trending hairstyles available yet.</Text>
-        </View>
-      );
+      return null;
     }
 
     return (
@@ -69,12 +64,15 @@ export default function TrendingHairstylesSection() {
     );
   };
 
+  const content = renderContent();
+  if (!content) return null;
+
   return (
     <View className="w-full my-6">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-xl font-bold text-[#0F172A]">Trending Hairstyles</Text>
       </View>
-      {renderContent()}
+      {content}
     </View>
   );
 }

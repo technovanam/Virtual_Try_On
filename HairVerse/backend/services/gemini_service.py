@@ -60,7 +60,6 @@ class GeminiService:
             prompt = """
             Analyze the provided user selfie. Extract and estimate the following attributes related to their face and hair.
             Respond ONLY with a valid JSON object matching the exact structure below. Do not include any markdown formatting like ```json.
-            
             {
                 "faceShape": "string (e.g. Oval, Round, Square, Heart, Diamond)",
                 "jawlineType": "string (e.g. Strong, Soft, Angular, Rounded)",
@@ -68,7 +67,9 @@ class GeminiService:
                 "faceSymmetryScore": "number between 0 and 100",
                 "hairLength": "string (e.g. Short, Medium, Long, Buzz Cut, Bald)",
                 "hairTexture": "string (e.g. Straight, Wavy, Curly, Coily)",
+                "hairType": "string (e.g. Type 1A, Type 2B, Type 4C)",
                 "hairDensity": "string (e.g. Fine, Medium, Thick)",
+                "hairVolume": "string (e.g. Flat, Average, Voluminous)",
                 "hairColor": "string (e.g. Black, Brown, Blonde, Red, Gray)",
                 "hairHealthScore": "number between 0 and 100",
                 "hairlineType": "string (e.g. Straight, Receding, Widow's Peak, Uneven)",
@@ -78,7 +79,18 @@ class GeminiService:
                 "recommendationSummary": "string summarizing 2-3 hairstyle recommendations based on face shape and hair type",
                 "confidence": "number between 0 and 1 representing confidence in analysis",
                 "healthObservations": ["string array of observations about hair health"],
+                "bestHairstyles": ["string array of recommended hairstyles"],
+                "bestHairColors": ["string array of recommended hair colors"],
+                "bestBeardStyles": ["string array of recommended beard styles"],
                 "recommendations": ["string array of specific hairstyle names recommended"],
+                "recommendedStylesDetailed": [
+                    {
+                        "styleName": "string",
+                        "matchPercentage": "number between 0 and 100",
+                        "reason": "string",
+                        "maintenanceLevel": "string (e.g. Low, Medium, High)"
+                    }
+                ],
                 "facialFeatureSummary": "string summarizing key facial features"
             }
             """
@@ -111,7 +123,9 @@ class GeminiService:
                 "faceSymmetryScore": analysis_data.get("faceSymmetryScore"),
                 "hairLength": analysis_data.get("hairLength"),
                 "hairTexture": analysis_data.get("hairTexture"),
+                "hairType": analysis_data.get("hairType"),
                 "hairDensity": analysis_data.get("hairDensity"),
+                "hairVolume": analysis_data.get("hairVolume"),
                 "hairColor": analysis_data.get("hairColor"),
                 "hairHealthScore": analysis_data.get("hairHealthScore"),
                 "hairlineType": analysis_data.get("hairlineType"),
@@ -121,9 +135,14 @@ class GeminiService:
                 "recommendationSummary": analysis_data.get("recommendationSummary"),
                 "confidence": analysis_data.get("confidence"),
                 "healthObservations": analysis_data.get("healthObservations", []),
+                "bestHairstyles": analysis_data.get("bestHairstyles", []),
+                "bestHairColors": analysis_data.get("bestHairColors", []),
+                "bestBeardStyles": analysis_data.get("bestBeardStyles", []),
                 "recommendations": analysis_data.get("recommendations", []),
+                "recommendedStylesDetailed": analysis_data.get("recommendedStylesDetailed", []),
                 "facialFeatureSummary": analysis_data.get("facialFeatureSummary"),
-                "analyzedAt": analyzed_at
+                "analyzedAt": analyzed_at,
+                "analysisVersion": 2
             }
             
             # 7. Save to Firestore under 'geminiAnalysis' directly
@@ -135,10 +154,14 @@ class GeminiService:
 
         except Exception as e:
             # Handle failure cases
+            error_msg = str(e)
+            if "429" in error_msg or "credits are depleted" in error_msg.lower() or "quota" in error_msg.lower():
+                error_msg = "The AI service is currently unavailable due to high demand or billing limits. Please try again later."
+            
             error_data = {
                 "status": "error",
                 "analysisId": analysis_id,
-                "healthObservations": [f"Analysis failed: {str(e)}"],
+                "healthObservations": [f"Analysis failed: {error_msg}"],
                 "analyzedAt": analyzed_at
             }
             if db is not None:
@@ -179,11 +202,18 @@ class GeminiService:
             faceShape=data.get("faceShape"),
             hairLength=data.get("hairLength"),
             hairTexture=data.get("hairTexture"),
+            hairType=data.get("hairType"),
             hairDensity=data.get("hairDensity"),
+            hairVolume=data.get("hairVolume"),
             hairColor=data.get("hairColor"),
             confidence=data.get("confidence"),
             healthObservations=data.get("healthObservations", []),
+            bestHairstyles=data.get("bestHairstyles", []),
+            bestHairColors=data.get("bestHairColors", []),
+            bestBeardStyles=data.get("bestBeardStyles", []),
             recommendations=data.get("recommendations", []),
+            recommendedStylesDetailed=data.get("recommendedStylesDetailed", []),
             facialFeatureSummary=data.get("facialFeatureSummary"),
-            analyzedAt=parse_timestamp(data.get("analyzedAt"))
+            analyzedAt=parse_timestamp(data.get("analyzedAt")),
+            analysisVersion=data.get("analysisVersion", 1)
         )
