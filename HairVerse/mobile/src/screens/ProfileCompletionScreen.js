@@ -20,6 +20,7 @@ import { useProfileSetupStore } from '../store/useProfileSetupStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COUNTRIES } from '../constants/countries';
+import Svg, { Path, Circle, Line } from 'react-native-svg';
 
 const HAIR_LENGTH_AVATARS_MALE = {
   'Bald': require('../../assets/hair_bald.png'),
@@ -53,6 +54,104 @@ const HAIR_COLORS = [
   { name: 'Grey', colors: ['#A5ADB5', '#495057'] },
   { name: 'Other', colors: ['#A88DFE', '#3F2C80'] },
 ];
+
+const ConcernIcon = ({ name, color }) => {
+  switch (name) {
+    case 'brush':
+      return (
+        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <Path 
+            d="M4.5 19.5L9 15" 
+            stroke={color} 
+            strokeWidth="2.2" 
+            strokeLinecap="round" 
+          />
+          <Path 
+            d="M8.5 15.5C7.2 14.2 7.2 11.2 9.5 8.9C11.8 6.6 14.8 6.6 16.1 7.9C17.4 9.2 17.4 12.2 15.1 14.5C12.8 16.8 9.8 16.8 8.5 15.5Z" 
+            stroke={color} 
+            strokeWidth="2" 
+            fill="none" 
+          />
+          <Path 
+            d="M13.5 6L15 4.5M16.5 9L18 7.5M11.5 8L13 6.5M15 11.5L16.5 10M10 10.5L11.5 9M13.5 13L15 11.5" 
+            stroke={color} 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+          />
+        </Svg>
+      );
+    case 'dryer':
+      return (
+        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <Path 
+            d="M16 6H11.5C9.5 6 8 7.5 8 9.5V11.5C8 13.5 9.5 15 11.5 15H16V6Z" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinejoin="round" 
+          />
+          <Path 
+            d="M8 8.5H5.5V12.5H8" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
+          <Path 
+            d="M13.5 15V19.5C13.5 20.3 12.8 21 12 21" 
+            stroke={color} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+          />
+          <Path 
+            d="M13 21C14.5 21 15.5 19.5 15.5 18" 
+            stroke={color} 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+          />
+        </Svg>
+      );
+    case 'comb':
+      return (
+        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <Path 
+            d="M4 6H20C21.1 6 22 6.9 22 8V9H2V8C2 6.9 2.9 6 4 6Z" 
+            fill={color} 
+          />
+          <Line x1="4" y1="9" x2="4" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          <Line x1="7.6" y1="9" x2="7.6" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          <Line x1="11.2" y1="9" x2="11.2" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          <Line x1="14.8" y1="9" x2="14.8" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          <Line x1="18.4" y1="9" x2="18.4" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          <Line x1="22" y1="9" x2="22" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        </Svg>
+      );
+    case 'scalp':
+      return (
+        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <Path 
+            d="M12 3C12 3 9.5 6 9.5 7.8C9.5 9.2 10.6 10.3 12 10.3C13.4 10.3 14.5 9.2 14.5 7.8C14.5 6 12 3 12 3Z" 
+            stroke={color} 
+            strokeWidth="1.8" 
+            strokeLinejoin="round" 
+          />
+          <Path 
+            d="M3 14C8 12.5 16 12.5 21 14" 
+            stroke={color} 
+            strokeWidth="1.8" 
+            strokeLinecap="round" 
+          />
+          <Path d="M7 14.5L6 17" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+          <Circle cx="5.5" cy="18" r="0.8" fill={color} />
+          <Path d="M12 14.2V17" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+          <Circle cx="12" cy="18.5" r="0.8" fill={color} />
+          <Path d="M17 14.5L18 17" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+          <Circle cx="18.5" cy="18" r="0.8" fill={color} />
+        </Svg>
+      );
+    default:
+      return null;
+  }
+};
 
 export default function ProfileCompletionScreen({ navigation }) {
   const { user, completeProfile } = useAuthStore();
@@ -378,16 +477,70 @@ export default function ProfileCompletionScreen({ navigation }) {
     </View>
   );
 
-  const renderStep3 = () => (
-    <View className="mt-2">
-      <Text className="text-white text-base font-medium mt-4 mb-3">Select your main concerns</Text>
-      {renderMultiSelect(
-        ['Hair Fall', 'Thin Hair', 'Dandruff', 'Dry Hair', 'Oily Hair', 'Split Ends', 'None'],
-        data.hairConcerns,
-        'hairConcerns'
-      )}
-    </View>
-  );
+  const renderStep3 = () => {
+    const concerns = [
+      { name: 'Hair Loss', icon: 'brush' },
+      { name: 'Dandruff', icon: 'brush' },
+      { name: 'Dull Hair', icon: 'dryer' },
+      { name: 'Frizzy Hair', icon: 'dryer' },
+      { name: 'Split Ends', icon: 'comb' },
+      { name: 'Breakage', icon: 'comb' },
+      { name: 'Oily Scalp', icon: 'scalp' },
+      { name: 'Heat Damage', icon: 'scalp' },
+    ];
+
+    const toggleSelection = (opt) => {
+      let newValues = [...(data.hairConcerns || [])];
+      if (newValues.includes(opt)) {
+        newValues = newValues.filter((v) => v !== opt);
+      } else {
+        newValues.push(opt);
+      }
+      updateData({ hairConcerns: newValues });
+    };
+
+    return (
+      <View className="mt-2">
+        <View className="flex-row flex-wrap justify-between gap-y-4 my-2">
+          {concerns.map((item) => {
+            const isSelected = (data.hairConcerns || []).includes(item.name);
+            return (
+              <TouchableOpacity
+                key={item.name}
+                onPress={() => toggleSelection(item.name)}
+                style={{ width: '48%' }}
+                className={`flex-row items-center py-4 px-4 rounded-[20px] border ${
+                  isSelected ? 'border-[#8A4FFF] bg-[#2A243D]/50' : 'border-[#3C3454] bg-[#221D33]/40'
+                }`}
+              >
+                <ConcernIcon name={item.icon} color={isSelected ? '#8A4FFF' : '#A19DB4'} />
+                <Text 
+                  className={`text-sm font-medium ml-3 flex-1 ${
+                    isSelected ? 'text-[#FFFFFF]' : 'text-[#A19DB4]'
+                  }`}
+                  numberOfLines={1}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View className="flex-row items-start mt-6 mb-2 px-1">
+          <Ionicons 
+            name="warning" 
+            size={18} 
+            color="#FF4D4D" 
+            style={{ marginRight: 8, marginTop: 1 }} 
+          />
+          <Text className="text-[#A19DB4] text-xs leading-4 flex-1">
+            This helps us provide better recommendations tailored for you.
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   const renderStep4 = () => (
     <View className="mt-2">
@@ -438,7 +591,7 @@ export default function ProfileCompletionScreen({ navigation }) {
     switch(currentStep) {
       case 1: return { title: 'Basic Information', subtitle: 'Tell us a bit about yourself.' };
       case 2: return { title: 'Hair Profile', subtitle: 'Help us understand your hair type.' };
-      case 3: return { title: 'Hair Concerns', subtitle: 'What are your main hair concerns?' };
+      case 3: return { title: 'Hair Concerns', subtitle: 'Select all that apply.' };
       case 4: return { title: 'Style Preferences', subtitle: 'What kind of styles do you prefer?' };
       case 5: return { title: 'Personalization', subtitle: 'A few more details to customize your experience.' };
       default: return { title: 'Basic Information', subtitle: 'Tell us a bit about yourself.' };
@@ -549,11 +702,23 @@ export default function ProfileCompletionScreen({ navigation }) {
             <View className="flex-row items-center justify-between w-[80%] mx-auto mb-8">
               {[...Array(displayTotal)].map((_, idx) => {
                 const step = idx + 1;
+                const isActive = step <= displayStep;
+                const isCompleted = step < displayStep;
+                
                 return (
                   <React.Fragment key={step}>
-                    <View className={`w-[18px] h-[18px] rounded-full ${step <= displayStep ? 'bg-[#8A4FFF]' : 'bg-[#2F2B43]'}`} />
+                    {isCompleted ? (
+                      <View className="w-[18px] h-[18px] rounded-full bg-[#8A4FFF] items-center justify-center">
+                        <View className="w-[6px] h-[6px] rounded-full bg-white" />
+                      </View>
+                    ) : isActive ? (
+                      <View className="w-[18px] h-[18px] rounded-full bg-[#8A4FFF]" />
+                    ) : (
+                      <View className="w-[18px] h-[18px] rounded-full bg-[#2A2C26]" />
+                    )}
+                    
                     {idx < displayTotal - 1 && (
-                      <View className={`flex-1 h-[4px] ${step < displayStep ? 'bg-[#8A4FFF]' : 'bg-[#2F2B43]'}`} />
+                      <View className={`flex-1 h-[3px] ${step < displayStep ? 'bg-[#8A4FFF]' : 'bg-[#2A2C26]'}`} />
                     )}
                   </React.Fragment>
                 );

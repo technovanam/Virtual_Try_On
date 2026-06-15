@@ -149,7 +149,7 @@ export default function EditProfileScreen() {
         {renderSingleSelect(['Black', 'Brown', 'Blonde', 'Red', 'Grey', 'Other'], formData.hairColor, 'hairColor')}
 
         <Label text="Hair Concerns" />
-        {renderMultiSelect(['Hair Fall', 'Thin Hair', 'Dandruff', 'Dry Hair', 'Oily Hair', 'Split Ends', 'None'], formData.hairConcerns, 'hairConcerns')}
+        {renderMultiSelect(['Hair Loss', 'Dandruff', 'Dull Hair', 'Frizzy Hair', 'Split Ends', 'Breakage', 'Oily Scalp', 'Heat Damage', 'None'], formData.hairConcerns, 'hairConcerns')}
 
         <Label text="Preferred Styles" />
         {renderMultiSelect(['Korean', 'Professional', 'Trendy', 'Celebrity', 'Classic', 'Modern'], formData.preferredStyles, 'preferredStyles')}
