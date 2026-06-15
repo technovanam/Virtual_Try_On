@@ -49,7 +49,11 @@ function MainNavigator() {
       }}
     >
       {!user?.profileCompleted ? (
-        <MainStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
+        <MainStack.Screen 
+          name="ProfileCompletion" 
+          component={ProfileCompletionScreen} 
+          options={{ cardStyle: { backgroundColor: '#0D0914' } }}
+        />
       ) : (
         <>
           <MainStack.Screen name="MainTabs" component={BottomTabNavigator} />
