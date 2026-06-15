@@ -294,7 +294,7 @@ export default function ProfileCompletionScreen({ navigation }) {
 
     return (
       <View className="mt-2">
-        <Text className="text-white text-base font-medium mb-3">Gender</Text>
+        <Text className="text-white text-lg font-medium font-['Inter-Medium'] mb-3">Gender</Text>
         <View className="flex-row gap-4 mb-6">
           {['Male', 'Female'].map((opt) => {
             const isSelected = data.gender === opt;
@@ -310,7 +310,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   color={isSelected ? '#8A4FFF' : '#A19DB4'} 
                   style={{ marginBottom: 8 }}
                 />
-                <Text className={`text-sm ${isSelected ? 'text-[#8A4FFF]' : 'text-[#A19DB4]'}`}>
+                <Text className={`text-base font-normal font-['Roboto'] ${isSelected ? 'text-[#8A4FFF]' : 'text-white/70'}`}>
                   {opt}
                 </Text>
               </TouchableOpacity>
@@ -318,10 +318,10 @@ export default function ProfileCompletionScreen({ navigation }) {
           })}
         </View>
 
-        <Text className="text-white text-base font-medium mb-3">Age</Text>
+        <Text className="text-white text-lg font-medium font-['Inter-Medium'] mb-3">Age</Text>
         <View className="relative mb-6">
           <TextInput
-            className={`bg-[#221D33] border rounded-2xl text-white px-5 py-4 text-base ${
+            className={`bg-[#221D33] border rounded-2xl text-white/70 px-5 py-4 text-base font-normal font-['Roboto'] ${
               isAgeFocused ? 'border-[#8A4FFF]' : 'border-[#3C3454]'
             }`}
             placeholder="Enter your age"
@@ -335,7 +335,7 @@ export default function ProfileCompletionScreen({ navigation }) {
           />
         </View>
 
-        <Text className="text-white text-base font-medium mb-3">Country</Text>
+        <Text className="text-white text-lg font-medium font-['Inter-Medium'] mb-3">Country</Text>
         <TouchableOpacity 
           className="relative mb-6"
           onPress={() => {
@@ -353,7 +353,7 @@ export default function ProfileCompletionScreen({ navigation }) {
               ) : (
                 <Ionicons name="globe-outline" size={20} color="#A19DB4" style={{ marginRight: 12 }} />
               )}
-              <Text className={data.country ? "text-white text-base flex-1" : "text-[#A19DB4] text-base flex-1"} numberOfLines={1}>
+              <Text className="text-white/70 text-base font-normal font-['Roboto'] flex-1" numberOfLines={1}>
                 {data.country || "Select country"}
               </Text>
             </View>
@@ -390,7 +390,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   resizeMode="cover"
                 />
               </TouchableOpacity>
-              <Text className={`text-xs mt-2 ${isSelected ? 'text-white font-medium' : 'text-[#A19DB4]'}`}>
+              <Text className={`text-[10px] mt-2 font-normal font-['Roboto'] ${isSelected ? 'text-white' : 'text-white/70'}`}>
                 {HAIR_LENGTH_LABELS[opt]}
               </Text>
             </View>
@@ -419,7 +419,7 @@ export default function ProfileCompletionScreen({ navigation }) {
               }`}
               onPress={() => updateData({ hairType: opt })}
             >
-              <Text className={`text-sm ${isSelected ? 'text-white font-semibold' : 'text-[#A19DB4]'}`}>
+              <Text className={`text-[10px] font-normal font-['Roboto'] ${isSelected ? 'text-white' : 'text-white/70'}`}>
                 {opt}
               </Text>
             </TouchableOpacity>
@@ -454,7 +454,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   style={{ width: 46, height: 46, borderRadius: 23 }}
                 />
               </TouchableOpacity>
-              <Text className={`text-xs mt-2 ${isSelected ? 'text-white font-medium' : 'text-[#A19DB4]'}`}>
+              <Text className={`text-[10px] mt-2 font-normal font-['Roboto'] ${isSelected ? 'text-white' : 'text-white/70'}`}>
                 {item.name}
               </Text>
             </View>
@@ -466,13 +466,13 @@ export default function ProfileCompletionScreen({ navigation }) {
 
   const renderStep2 = () => (
     <View className="mt-2">
-      <Text className="text-white text-base font-medium mt-4 mb-3">Hair Length</Text>
+      <Text className="text-white text-lg font-medium font-['Inter-Medium'] mt-4 mb-3">Hair Length</Text>
       {renderHairLengthSelect()}
 
-      <Text className="text-white text-base font-medium mt-6 mb-3">Hair Type</Text>
+      <Text className="text-white text-lg font-medium font-['Inter-Medium'] mt-6 mb-3">Hair Type</Text>
       {renderHairTypeSelect()}
 
-      <Text className="text-white text-base font-medium mt-6 mb-3">Hair Colour</Text>
+      <Text className="text-white text-lg font-medium font-['Inter-Medium'] mt-6 mb-3">Hair Colour</Text>
       {renderHairColorSelect()}
     </View>
   );
@@ -515,8 +515,8 @@ export default function ProfileCompletionScreen({ navigation }) {
               >
                 <ConcernIcon name={item.icon} color={isSelected ? '#8A4FFF' : '#A19DB4'} />
                 <Text 
-                  className={`text-sm font-medium ml-3 flex-1 ${
-                    isSelected ? 'text-[#FFFFFF]' : 'text-[#A19DB4]'
+                  className={`text-base font-medium font-['Roboto'] ml-3 flex-1 ${
+                    isSelected ? 'text-white' : 'text-white/70'
                   }`}
                   numberOfLines={1}
                 >
@@ -534,7 +534,7 @@ export default function ProfileCompletionScreen({ navigation }) {
             color="#FF4D4D" 
             style={{ marginRight: 8, marginTop: 1 }} 
           />
-          <Text className="text-[#A19DB4] text-xs leading-4 flex-1">
+          <Text className="text-white/70 text-[10px] font-normal font-['Poppins'] leading-4 flex-1">
             This helps us provide better recommendations tailored for you.
           </Text>
         </View>
@@ -590,7 +590,7 @@ export default function ProfileCompletionScreen({ navigation }) {
   const getStepTitles = () => {
     switch(currentStep) {
       case 1: return { title: 'Basic Information', subtitle: 'Tell us a bit about yourself.' };
-      case 2: return { title: 'Hair Profile', subtitle: 'Help us understand your hair type.' };
+      case 2: return { title: 'Hair Profile', subtitle: 'Help us understand your natural hair.' };
       case 3: return { title: 'Hair Concerns', subtitle: 'Select all that apply.' };
       case 4: return { title: 'Style Preferences', subtitle: 'What kind of styles do you prefer?' };
       case 5: return { title: 'Personalization', subtitle: 'A few more details to customize your experience.' };
@@ -694,8 +694,8 @@ export default function ProfileCompletionScreen({ navigation }) {
             </TouchableOpacity>
             
             <View className="items-center mb-8">
-              <Text className="text-white text-3xl font-bold mb-2">{title}</Text>
-              <Text className="text-[#A19DB4] text-sm">{subtitle}</Text>
+              <Text className="text-white text-3xl font-semibold font-['Inter-SemiBold'] mb-2">{title}</Text>
+              <Text className="text-white text-sm font-normal font-['Inter']">{subtitle}</Text>
             </View>
             
             {/* Progress Bar */}
@@ -755,7 +755,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   {isSubmitting ? (
                     <ActivityIndicator color="#FFF" size="small" />
                   ) : (
-                    <Text className="text-white text-base font-bold">
+                    <Text className="text-white text-base font-semibold font-['Inter-SemiBold']">
                       {currentStep === displayTotal ? 'Complete' : 'Continue'}
                     </Text>
                   )}

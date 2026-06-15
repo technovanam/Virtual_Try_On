@@ -26,6 +26,13 @@ module.exports = {
         bold: ['System'],
         ncl: ['NCLGasdrifo'],
         cocogoose: ['CocogoosePro-Regular'],
+        'Inter': ['Inter-Regular'],
+        'Inter-Medium': ['Inter-Medium'],
+        'Inter-SemiBold': ['Inter-SemiBold'],
+        'Roboto': ['Roboto-Regular'],
+        'Roboto-Medium': ['Roboto-Medium'],
+        'Radio_Canada': ['Inter-Medium'],
+        'Poppins': ['Roboto-Regular'],
       },
       fontSize: {
         display: ['28px', '34px'],

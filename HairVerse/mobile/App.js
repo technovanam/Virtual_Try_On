@@ -14,6 +14,11 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     'NCLGasdrifo': require('./assets/NCLGasdrifo.otf'),
     'CocogoosePro-Regular': require('./assets/CocogoosePro-Regular.ttf'),
+    'Inter-Regular': require('./assets/Inter-Regular.ttf'),
+    'Inter-Medium': require('./assets/Inter-Medium.ttf'),
+    'Inter-SemiBold': require('./assets/Inter-SemiBold.ttf'),
+    'Roboto-Regular': require('./assets/Roboto-Regular.ttf'),
+    'Roboto-Medium': require('./assets/Roboto-Medium.ttf'),
   });
 
   useEffect(() => {

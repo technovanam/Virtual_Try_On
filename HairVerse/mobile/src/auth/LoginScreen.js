@@ -64,29 +64,29 @@ export default function LoginScreen({ navigation }) {
         <View className="items-end px-6 pt-[25px]">
           <TouchableOpacity className="flex-row items-center border border-[rgba(241,241,241,0.7)] rounded-[40px] px-3 py-1.5 gap-1.5">
             <Ionicons name="globe-outline" size={12} color="#F0F0F0" />
-            <Text className="text-[#F0F0F0] text-[12px] font-normal tracking-[0.36px]">EN</Text>
+            <Text className="text-zinc-100 text-xs font-normal font-['Inter'] tracking-tight">EN</Text>
             <Ionicons name="chevron-down" size={12} color="#F0F0F0" />
           </TouchableOpacity>
         </View>
-
+ 
         {/* Welcome Text */}
         <View className="px-[30px] pt-[30px] z-10">
-          <Text className="text-white text-[32px] font-semibold mb-2">Welcome Back</Text>
-          <Text className="text-white text-[15px] font-normal">See yourself in a new style.</Text>
+          <Text className="text-white text-3xl font-semibold font-['Inter-SemiBold'] mb-2">Welcome Back</Text>
+          <Text className="text-white text-base font-normal font-['Inter']">See yourself in a new style.</Text>
         </View>
-
+ 
         {/* Card Overlay */}
         <LinearGradient
           colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.03)']}
           className="flex-1 rounded-t-[50px] rounded-b-none px-[30px] pt-[40px] pb-[20px]"
           style={{ marginTop: height * 0.1 }}
         >
-          <Text className="text-white text-[24px] font-semibold mb-[30px]">Login</Text>
-
+          <Text className="text-white text-2xl font-semibold font-['Inter-SemiBold'] mb-[30px]">Login</Text>
+ 
           <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
             <Ionicons name="mail-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
             <TextInput
-              className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+              className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
               placeholder="Enter Your Email"
               placeholderTextColor="rgba(255, 255, 255, 0.70)"
               value={email}
@@ -95,11 +95,11 @@ export default function LoginScreen({ navigation }) {
               keyboardType="email-address"
             />
           </View>
-
+ 
           <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
             <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
             <TextInput
-              className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+              className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
               placeholder="Password"
               placeholderTextColor="rgba(255, 255, 255, 0.70)"
               value={password}
@@ -117,18 +117,18 @@ export default function LoginScreen({ navigation }) {
               />
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity className="items-end mb-[30px]">
-            <Text className="text-[rgba(255,255,255,0.70)] text-[14px] font-semibold">Forget password?</Text>
+ 
+          <TouchableOpacity className="items-end mb-[30px]" onPress={() => {}}>
+            <Text className="text-white/70 text-sm font-semibold font-['Inter-SemiBold']">Forget password?</Text>
           </TouchableOpacity>
-
+ 
           {localError ? (
             <View className="flex-row items-center bg-[rgba(239,68,68,0.1)] rounded-lg p-2.5 mb-4 border border-[rgba(239,68,68,0.3)]">
               <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
               <Text className="flex-1 text-[#EF4444] text-[12px] font-medium">{localError}</Text>
             </View>
           ) : null}
-
+ 
           <TouchableOpacity
             className="rounded-[20px] overflow-hidden mb-[30px] elevation-10"
             style={{ shadowColor: '#8B5CF6', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 30 }}
@@ -145,17 +145,17 @@ export default function LoginScreen({ navigation }) {
               {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text className="text-white text-[16px] font-semibold">Continue</Text>
+                <Text className="text-white text-base font-semibold font-['Inter-SemiBold']">Continue</Text>
               )}
             </LinearGradient>
           </TouchableOpacity>
-
+ 
           <View className="flex-row items-center mb-[30px]">
             <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-            <Text className="text-[rgba(255,255,255,0.70)] px-4 text-[16px] font-medium">Or </Text>
+            <Text className="text-white/70 text-base font-medium font-['Radio_Canada'] px-4">Or</Text>
             <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
           </View>
-
+ 
           <View className="flex-row justify-center gap-5 mb-[30px]">
             <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
               <Image source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} style={{ width: 20, height: 20 }} />
@@ -164,11 +164,11 @@ export default function LoginScreen({ navigation }) {
               <Ionicons name="logo-apple" size={20} color="rgba(242, 242, 242, 0.90)" />
             </TouchableOpacity>
           </View>
-
+ 
           <View className="flex-row justify-center pb-5">
-            <Text className="text-[rgba(255,255,255,0.70)] text-[14px] tracking-[0.42px]">Don’t have an account? </Text>
+            <Text className="text-white/70 text-sm font-normal font-['Roboto'] tracking-wide">Don’t have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-              <Text className="text-[#8339FB] text-[14px] tracking-[0.42px]">Create Account</Text>
+              <Text className="text-violet-600 text-sm font-normal font-['Roboto'] tracking-wide">Create Account</Text>
             </TouchableOpacity>
           </View>
         </LinearGradient>

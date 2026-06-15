@@ -82,17 +82,17 @@ export default function SignupScreen({ navigation }) {
               </TouchableOpacity>
               <TouchableOpacity className="flex-row items-center border border-[rgba(241,241,241,0.7)] rounded-[40px] px-3 py-1.5 gap-1.5">
                 <Ionicons name="globe-outline" size={12} color="#F0F0F0" />
-                <Text className="text-[#F0F0F0] text-[12px] font-normal tracking-[0.36px]">EN</Text>
+                <Text className="text-zinc-100 text-xs font-normal font-['Inter'] tracking-tight">EN</Text>
                 <Ionicons name="chevron-down" size={12} color="#F0F0F0" />
               </TouchableOpacity>
             </View>
-
+ 
             {/* Title Text */}
             <View className="px-[30px] pt-[20px] z-10">
-              <Text className="text-white text-[32px] font-semibold mb-2">Create Account</Text>
-              <Text className="text-white text-[15px] font-normal">Find your perfect hairstyle.</Text>
+              <Text className="text-white text-3xl font-semibold font-['Inter-SemiBold'] mb-2">Create Account</Text>
+              <Text className="text-white text-base font-normal font-['Inter']">Discover hairstyles tailored to your face.</Text>
             </View>
-
+ 
             {/* Card Overlay */}
             <LinearGradient
               colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.03)']}
@@ -103,7 +103,7 @@ export default function SignupScreen({ navigation }) {
               <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
                 <Ionicons name="person-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
                 <TextInput
-                  className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
                   placeholder="Username"
                   placeholderTextColor="rgba(255, 255, 255, 0.70)"
                   value={username}
@@ -111,12 +111,12 @@ export default function SignupScreen({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-
+ 
               {/* Email Input */}
               <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
                 <Ionicons name="mail-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
                 <TextInput
-                  className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
                   placeholder="Enter Your Email"
                   placeholderTextColor="rgba(255, 255, 255, 0.70)"
                   value={email}
@@ -125,12 +125,12 @@ export default function SignupScreen({ navigation }) {
                   keyboardType="email-address"
                 />
               </View>
-
+ 
               {/* Password Input */}
               <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
                 <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
                 <TextInput
-                  className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
                   placeholder="Password"
                   placeholderTextColor="rgba(255, 255, 255, 0.70)"
                   value={password}
@@ -141,12 +141,12 @@ export default function SignupScreen({ navigation }) {
                   <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="rgba(255, 255, 255, 0.70)" />
                 </TouchableOpacity>
               </View>
-
+ 
               {/* Confirm Password Input */}
               <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
                 <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
                 <TextInput
-                  className="flex-1 bg-transparent text-[rgba(255,255,255,0.70)] text-[16px] font-normal outline-none"
+                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
                   placeholder="Confirm Password"
                   placeholderTextColor="rgba(255, 255, 255, 0.70)"
                   value={confirmPassword}
@@ -157,13 +157,13 @@ export default function SignupScreen({ navigation }) {
                   <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="rgba(255, 255, 255, 0.70)" />
                 </TouchableOpacity>
               </View>
-
+ 
               {/* Password Strength */}
               {password.length > 0 && (
                 <View className="mb-4">
                   <View className="flex-row justify-between mb-2 px-1">
-                    <Text className="text-[rgba(255,255,255,0.70)] text-[12px]">Password Strength</Text>
-                    <Text style={{ color: strength.color, fontSize: 12, fontWeight: '600' }}>{strength.label}</Text>
+                    <Text className="text-white/70 text-xs font-normal font-['Roboto']">Password Strength</Text>
+                    <Text style={{ color: strength.color }} className="text-xs font-normal font-['Roboto']">{strength.label}</Text>
                   </View>
                   <View className="flex-row gap-2">
                     {[1, 2, 3, 4].map((segment) => (
@@ -176,15 +176,15 @@ export default function SignupScreen({ navigation }) {
                   </View>
                 </View>
               )}
-
+ 
               {/* Terms Checkbox */}
               <TouchableOpacity className="flex-row items-center mb-[30px]" onPress={() => setAgree(!agree)}>
                 <View className={`w-5 h-5 rounded-md border items-center justify-center mr-3 ${agree ? 'bg-[#8B5CF6] border-[#8B5CF6]' : 'border-[rgba(255,255,255,0.70)]'}`}>
                   {agree && <Ionicons name="checkmark" size={14} color="#FFF" />}
                 </View>
-                <Text className="text-[rgba(255,255,255,0.70)] text-[14px]">I agree to <Text className="text-[#8B5CF6]">Terms & Conditions</Text></Text>
+                <Text className="text-white/70 text-sm font-normal font-['Roboto'] tracking-wide">I agree to <Text className="text-violet-700 text-sm font-normal font-['Roboto'] tracking-wide">Terms & Conditions</Text></Text>
               </TouchableOpacity>
-
+ 
               {/* Error Message */}
               {localError ? (
                 <View className="flex-row items-center bg-[rgba(239,68,68,0.1)] rounded-lg p-2.5 mb-4 border border-[rgba(239,68,68,0.3)]">
@@ -192,7 +192,7 @@ export default function SignupScreen({ navigation }) {
                   <Text className="flex-1 text-[#EF4444] text-[12px] font-medium">{localError}</Text>
                 </View>
               ) : null}
-
+ 
               {/* Create Account Button */}
               <TouchableOpacity
                 className={`rounded-[20px] overflow-hidden mb-[30px] elevation-10 ${(!agree || isLoading) ? 'opacity-50' : ''}`}
@@ -210,18 +210,18 @@ export default function SignupScreen({ navigation }) {
                   {isLoading ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <Text className="text-white text-[16px] font-semibold">Create Account</Text>
+                    <Text className="text-white text-base font-semibold font-['Inter-SemiBold']">Create Account</Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
-
+ 
               {/* Or Divider */}
               <View className="flex-row items-center mb-5">
                 <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-                <Text className="text-[rgba(255,255,255,0.70)] px-4 text-[16px] font-medium">Or </Text>
+                <Text className="text-white/70 text-base font-medium font-['Radio_Canada'] px-4">Or</Text>
                 <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
               </View>
-
+ 
               {/* Social Buttons */}
               <View className="flex-row justify-center gap-5">
                 <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
