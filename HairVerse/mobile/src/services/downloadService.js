@@ -34,21 +34,27 @@ export const downloadService = {
         return false;
       }
 
-      // Download file to temp directory
-      const fileName = `HairVerse_${resourceType}_${resourceId}_${Date.now()}.jpg`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-      
-      const downloadResumable = FileSystem.createDownloadResumable(
-        imageUrl,
-        fileUri,
-        {},
-        (downloadProgress) => {
-          const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
-          store.setProgress(progress);
-        }
-      );
+      let uri = imageUrl;
+      const isRemote = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
 
-      const { uri } = await downloadResumable.downloadAsync();
+      if (isRemote) {
+        // Download file to temp directory
+        const fileName = `HairVerse_${resourceType}_${resourceId}_${Date.now()}.jpg`;
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+        
+        const downloadResumable = FileSystem.createDownloadResumable(
+          imageUrl,
+          fileUri,
+          {},
+          (downloadProgress) => {
+            const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+            store.setProgress(progress);
+          }
+        );
+
+        const downloadResult = await downloadResumable.downloadAsync();
+        uri = downloadResult.uri;
+      }
       
       // Save to gallery
       const asset = await MediaLibrary.createAssetAsync(uri);
@@ -59,8 +65,10 @@ export const downloadService = {
         await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
       }
 
-      // Cleanup temp file
-      await FileSystem.deleteAsync(uri, { idempotent: true });
+      // Cleanup temp file if it was downloaded
+      if (isRemote) {
+        await FileSystem.deleteAsync(uri, { idempotent: true });
+      }
 
       // Track in backend
       await downloadService.trackDownload(resourceType, resourceId);

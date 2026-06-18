@@ -24,7 +24,10 @@ async def update_profile(request: ProfileUpdateRequest, user: dict = Depends(get
 
     update_data = {}
     for key, value in request.dict(exclude_unset=True).items():
-        update_data[f"profileCompletion.{key}"] = value
+        if key == "displayName":
+            update_data["displayName"] = value
+        else:
+            update_data[f"profileCompletion.{key}"] = value
 
     if not _db:
         return ProfileService.get_comprehensive_profile(uid)

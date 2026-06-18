@@ -2,6 +2,8 @@ import os
 import uuid
 import json
 from datetime import datetime
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
 from firebase_config import db
 from schemas.recommendations import Recommendation, RecommendationListResponse

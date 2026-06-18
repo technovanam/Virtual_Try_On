@@ -8,6 +8,7 @@ POST /auth/register-profile  — Create Firestore profile after Firebase Auth si
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from schemas.auth_schemas import (
     RegisterProfileRequest,
+    RegisterWithProfileRequest,
     ProfileCompletionRequest,
     ProfileUpdateRequest,
     UserResponse,
@@ -17,6 +18,8 @@ from schemas.auth_schemas import (
 from services.auth_service import (
     create_user_profile,
     get_user_profile,
+    check_email_exists,
+    create_completed_user_profile,
     AuthServiceError,
     UserAlreadyExists,
     InvalidCredentials,
@@ -170,5 +173,54 @@ async def complete_onboarding(user: dict = Depends(get_current_user)):
         return UserResponse(**user_profile)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to update onboarding status: {exc}")
+
+
+@router.get(
+    "/check-email",
+    responses={
+        200: {"description": "Return whether the email exists"},
+    },
+)
+async def check_email(email: str):
+    """
+    Check if an email is already registered in Firebase Authentication.
+    """
+    exists = check_email_exists(email.strip().lower())
+    return {"exists": exists}
+
+
+@router.post(
+    "/register-with-profile",
+    response_model=UserResponse,
+    responses={
+        201: {"model": UserResponse, "description": "Profile created and completed from Firebase ID token"},
+        401: {"description": "Invalid or expired Firebase ID token"},
+        409: {"description": "User profile already exists"},
+        503: {"description": "Service unavailable"},
+    },
+    status_code=status.HTTP_201_CREATED,
+)
+async def register_with_profile(request: RegisterWithProfileRequest, user: dict = Depends(get_current_user)):
+    """
+    Create a completed Firestore user profile for a newly-authenticated Firebase user.
+    """
+    uid = user["uid"]
+    email = user["email"]
+
+    # Extract all fields for profileCompletion except username
+    profile_data = request.dict(exclude={"username"}, exclude_none=True)
+
+    try:
+        user_profile = create_completed_user_profile(
+            uid=uid,
+            email=email,
+            username=request.username,
+            profile_data=profile_data,
+        )
+    except AuthServiceError as exc:
+        raise _handle_auth_error(exc)
+
+    return UserResponse(**user_profile)
+
 
 

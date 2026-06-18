@@ -1,28 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator, Dimensions, StyleSheet, Image } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator, Dimensions, StyleSheet, Image, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
-import { LinearGradient } from 'expo-linear-gradient';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [errors, setErrors] = useState({ email: '', password: '' });
   const { login, isLoading, error } = useAuthStore();
 
   useEffect(() => {
     if (error) {
-      setLocalError(error);
+      const lowerErr = error.toLowerCase();
+      if (lowerErr.includes('email') || lowerErr.includes('user-not-found')) {
+        setErrors(prev => ({ ...prev, email: error }));
+      } else if (lowerErr.includes('password') || lowerErr.includes('wrong-password')) {
+        setErrors(prev => ({ ...prev, password: error }));
+      } else if (lowerErr.includes('credential') || lowerErr.includes('incorrect')) {
+        setErrors({ email: 'Incorrect email or password', password: 'Incorrect email or password' });
+      } else {
+        setLocalError(error);
+      }
       useAuthStore.setState({ error: null });
     }
   }, [error]);
 
   const handleEmailChange = (text) => {
     setEmail(text);
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
     if (localError) {
       setLocalError(null);
       useAuthStore.setState({ error: null });
@@ -31,6 +43,9 @@ export default function LoginScreen({ navigation }) {
 
   const handlePasswordChange = (text) => {
     setPassword(text);
+    if (errors.password) {
+      setErrors(prev => ({ ...prev, password: '' }));
+    }
     if (localError) {
       setLocalError(null);
       useAuthStore.setState({ error: null });
@@ -38,151 +53,181 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+    const newErrors = { email: '', password: '' };
+    let hasError = false;
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+      hasError = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      hasError = true;
     }
 
-    const result = await login(email, password);
+    if (!password) {
+      newErrors.password = 'Password is required';
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+    if (hasError) return;
+
+    await login(email, password);
   };
 
   return (
-    <View className="flex-1 bg-[#05030D]">
-      <View style={StyleSheet.absoluteFillObject} backgroundColor="#05030D" />
-      {/* Approximating the glowing background blobs using soft gradients */}
-      <View style={[StyleSheet.absoluteFillObject, { opacity: 0.3 }]}>
-        <LinearGradient
-          colors={['rgba(139, 92, 246, 0.4)', 'rgba(79, 141, 255, 0.2)', 'transparent']}
-          start={{ x: 0.1, y: 0.1 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
-      </View>
-      <SafeAreaView className="flex-1" edges={['top']}>
-        
-        {/* Header - Language Pill */}
-        <View className="items-end px-6 pt-[25px]">
-          <TouchableOpacity className="flex-row items-center border border-[rgba(241,241,241,0.7)] rounded-[40px] px-3 py-1.5 gap-1.5">
-            <Ionicons name="globe-outline" size={12} color="#F0F0F0" />
-            <Text className="text-zinc-100 text-xs font-normal font-['Inter'] tracking-tight">EN</Text>
-            <Ionicons name="chevron-down" size={12} color="#F0F0F0" />
-          </TouchableOpacity>
-        </View>
- 
-        {/* Welcome Text */}
-        <View className="px-[30px] pt-[30px] z-10">
-          <Text className="text-white text-3xl font-semibold font-['Inter-SemiBold'] mb-2">Welcome Back</Text>
-          <Text className="text-white text-base font-normal font-['Inter']">See yourself in a new style.</Text>
-        </View>
- 
-        {/* Card Overlay */}
-        <LinearGradient
-          colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.03)']}
-          className="flex-1 rounded-t-[50px] rounded-b-none px-[30px] pt-[40px] pb-[20px]"
-          style={{ marginTop: height * 0.1 }}
-        >
-          <Text className="text-white text-2xl font-semibold font-['Inter-SemiBold'] mb-[30px]">Login</Text>
- 
-          <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-            <Ionicons name="mail-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-            <TextInput
-              className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-              placeholder="Enter Your Email"
-              placeholderTextColor="rgba(255, 255, 255, 0.70)"
-              value={email}
-              onChangeText={handleEmailChange}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
- 
-          <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-            <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-            <TextInput
-              className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-              placeholder="Password"
-              placeholderTextColor="rgba(255, 255, 255, 0.70)"
-              value={password}
-              onChangeText={handlePasswordChange}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              className="p-1"
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={20}
-                color="rgba(255, 255, 255, 0.70)"
-              />
-            </TouchableOpacity>
-          </View>
- 
-          <TouchableOpacity className="items-end mb-[30px]" onPress={() => {}}>
-            <Text className="text-white/70 text-sm font-semibold font-['Inter-SemiBold']">Forget password?</Text>
-          </TouchableOpacity>
- 
-          {localError ? (
-            <View className="flex-row items-center bg-[rgba(239,68,68,0.1)] rounded-lg p-2.5 mb-4 border border-[rgba(239,68,68,0.3)]">
-              <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
-              <Text className="flex-1 text-[#EF4444] text-[12px] font-medium">{localError}</Text>
-            </View>
-          ) : null}
- 
-          <TouchableOpacity
-            className="rounded-[20px] overflow-hidden mb-[30px] elevation-10"
-            style={{ shadowColor: '#8B5CF6', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 30 }}
-            onPress={handleLogin}
-            disabled={isLoading}
-            activeOpacity={0.8}
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : null}
+    >
+      <View className="flex-1 bg-white">
+        <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+          <ScrollView 
+            contentContainerClassName="flex-grow justify-center" 
+            bounces={false} 
+            showsVerticalScrollIndicator={false}
+            className="px-[30px]"
           >
-            <LinearGradient
-              colors={['#8B5CF6', '#6366F1', '#3B82F6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="h-[59px] justify-center items-center"
+            {/* Title - "Login" in deep purple */}
+            <Text className="text-[#6D28D9] text-[32px] font-Poppins-Bold text-center mb-[40px] tracking-wide">
+              Login
+            </Text>
+
+            {/* Form Fields Container */}
+            <View className="gap-4 mb-5">
+              {/* Email Input */}
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.email ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="mail-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Email"
+                    placeholderTextColor="#9CA3AF"
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+                {errors.email ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.email}</Text>
+                ) : null}
+              </View>
+
+              {/* Password Input */}
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.password ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Password"
+                    placeholderTextColor="#9CA3AF"
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity
+                    className="p-1"
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color="#9CA3AF"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {errors.password ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.password}</Text>
+                ) : null}
+              </View>
+            </View>
+
+            {/* Forgot Password in deep purple */}
+            <TouchableOpacity 
+              className="items-center mb-[25px]" 
+              onPress={() => navigation.navigate('ForgotPassword')}
+              activeOpacity={0.7}
+            >
+              <Text className="text-[#6D28D9] text-[13px] font-Poppins-Medium underline">
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
+
+            {/* Local Error message */}
+            {localError ? (
+              <View className="flex-row items-center bg-red-50 rounded-xl p-3 mb-4 border border-red-200">
+                <Ionicons name="alert-circle" size={18} color="#EF4444" style={{ marginRight: 8 }} />
+                <Text className="flex-1 text-[#EF4444] text-[13px] font-Poppins">{localError}</Text>
+              </View>
+            ) : null}
+
+            {/* Main Login Button (Deep Purple) */}
+            <TouchableOpacity
+              className="bg-[#6D28D9] rounded-full h-[54px] justify-center items-center mb-[30px] shadow-sm active:opacity-90"
+              onPress={handleLogin}
+              disabled={isLoading}
+              activeOpacity={0.85}
             >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text className="text-white text-base font-semibold font-['Inter-SemiBold']">Continue</Text>
+                <Text className="text-white text-[15px] font-Poppins-SemiBold">Login</Text>
               )}
-            </LinearGradient>
-          </TouchableOpacity>
- 
-          <View className="flex-row items-center mb-[30px]">
-            <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-            <Text className="text-white/70 text-base font-medium font-['Radio_Canada'] px-4">Or</Text>
-            <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-          </View>
- 
-          <View className="flex-row justify-center gap-5 mb-[30px]">
-            <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
-              <Image source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} style={{ width: 20, height: 20 }} />
             </TouchableOpacity>
-            <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
-              <Ionicons name="logo-apple" size={20} color="rgba(242, 242, 242, 0.90)" />
-            </TouchableOpacity>
-          </View>
- 
-          <View className="flex-row justify-center pb-5">
-            <Text className="text-white/70 text-sm font-normal font-['Roboto'] tracking-wide">Don’t have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-              <Text className="text-violet-600 text-sm font-normal font-['Roboto'] tracking-wide">Create Account</Text>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
 
-        {/* Floating Icons (Scissor & Comb image) */}
-        {/* Positioned after card to overlap it properly */}
-        <View className="absolute right-[15px] z-10 elevation-10" style={{ top: height * 0.18 }}>
-          <Image 
-            source={require('../../assets/barbershop.png')} 
-            className="w-[180px] h-[180px]"
-            resizeMode="contain"
-          />
-        </View>
-      </SafeAreaView>
-    </View>
+            {/* Divider "or" */}
+            <View className="flex-row items-center mb-[30px]">
+              <View className="flex-1 h-[1px] bg-[#E5E7EB]" />
+              <Text className="text-[#6B7280] text-[13px] font-Poppins px-4">or</Text>
+              <View className="flex-1 h-[1px] bg-[#E5E7EB]" />
+            </View>
+
+            {/* Third-Party Buttons Container */}
+            <View className="gap-3 mb-[40px]">
+              {/* Google Button */}
+              <TouchableOpacity 
+                className="flex-row items-center justify-center bg-[#F3F4F6] rounded-full h-[50px] px-6 shadow-sm"
+                activeOpacity={0.9}
+                onPress={() => {}}
+              >
+                <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                  <Image 
+                    source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} 
+                    style={{ width: 18, height: 18 }} 
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text className="text-[#1F2937] text-[14px] font-Poppins-Medium">
+                  Continue with Google
+                </Text>
+              </TouchableOpacity>
+
+              {/* Apple Button (Premium Black) */}
+              <TouchableOpacity 
+                className="flex-row items-center justify-center bg-[#000000] rounded-full h-[50px] px-6 shadow-sm"
+                activeOpacity={0.9}
+                onPress={() => {}}
+              >
+                <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                  <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
+                </View>
+                <Text className="text-white text-[14px] font-Poppins-Medium">
+                  Continue with Apple
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Footer */}
+            <View className="flex-row justify-center pb-5">
+              <Text className="text-[#4B5563] text-[14px] font-Poppins">Need an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                <Text className="text-[#6D28D9] text-[14px] font-Poppins-Bold">Sign up</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

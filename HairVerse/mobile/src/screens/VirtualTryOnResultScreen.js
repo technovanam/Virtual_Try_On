@@ -5,8 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { virtualTryonService } from '../services/virtualTryonService';
 import { savedService } from '../services/savedService';
 import { useCompareStore } from '../store/compareStore';
-import DownloadButton from '../components/DownloadButton';
-import ShareButton from '../components/ShareButton';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import { downloadService } from '../services/downloadService';
+import { shareService } from '../services/shareService';
+import { useShareStore } from '../store/shareStore';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +23,43 @@ export default function VirtualTryOnResultScreen() {
   const [error, setError] = useState(null);
   const [isComparing, setIsComparing] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
+  const viewShotRef = useRef();
+  const { isDownloading, isSharing, clearStatus, error: shareError, successMessage } = useShareStore();
+
+  useEffect(() => {
+    if (shareError) {
+      Alert.alert('Action Failed', shareError, [{ text: 'OK', onPress: clearStatus }]);
+    }
+    if (successMessage) {
+      Alert.alert('Success', successMessage, [{ text: 'OK', onPress: clearStatus }]);
+    }
+  }, [shareError, successMessage]);
+
+  const handleDownloadScreenshot = async () => {
+    if (!viewShotRef.current) return;
+    try {
+      const uri = await captureRef(viewShotRef, {
+        format: 'jpg',
+        quality: 0.9,
+      });
+      await downloadService.downloadImage(uri, 'tryon', tryOnId || 'unknown');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to capture screenshot: ' + err.message);
+    }
+  };
+
+  const handleShareScreenshot = async () => {
+    if (!viewShotRef.current) return;
+    try {
+      const uri = await captureRef(viewShotRef, {
+        format: 'jpg',
+        quality: 0.9,
+      });
+      await shareService.shareImage(uri, 'tryon', tryOnId || 'unknown');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to capture screenshot: ' + err.message);
+    }
+  };
 
   // Slider State
   const sliderPosition = useRef(new Animated.Value(width / 2)).current;
@@ -246,28 +285,30 @@ export default function VirtualTryOnResultScreen() {
 
       {/* Main Preview Area */}
       <View className="flex-[1.5] px-4 py-2">
-        <View className="flex-1 bg-gray-900 rounded-[30px] overflow-hidden relative border border-gray-800 shadow-2xl">
-          
-          {/* Base Image fallback */}
-          <Image 
-            source={{ uri: originalImageUrl || 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=600&h=600&fit=crop' }} 
-            className="absolute inset-0 w-full h-full opacity-40"
-            resizeMode="cover"
-          />
-
-          {/* Result Image */}
-          {status === 'completed' && resultImage && !isComparing && (
+        <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={{ flex: 1, borderRadius: 30, overflow: 'hidden' }}>
+          <View className="flex-1 bg-gray-900 relative border border-gray-800 shadow-2xl">
+            
+            {/* Base Image fallback */}
             <Image 
-              source={{ uri: resultImage }} 
-              className="absolute inset-0 w-full h-full"
+              source={{ uri: originalImageUrl || 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=600&h=600&fit=crop' }} 
+              className="absolute inset-0 w-full h-full opacity-40"
               resizeMode="cover"
             />
-          )}
 
-          {renderComparisonView()}
-          {renderStatusLayer()}
+            {/* Result Image */}
+            {status === 'completed' && resultImage && !isComparing && (
+              <Image 
+                source={{ uri: resultImage }} 
+                className="absolute inset-0 w-full h-full"
+                resizeMode="cover"
+              />
+            )}
 
-        </View>
+            {renderComparisonView()}
+            {renderStatusLayer()}
+
+          </View>
+        </ViewShot>
       </View>
 
       {/* Hairstyle Information & Tools */}
@@ -328,25 +369,30 @@ export default function VirtualTryOnResultScreen() {
               >
                 <Ionicons name="git-compare" size={20} color="#fff" />
               </TouchableOpacity>
-              <DownloadButton 
-                imageUrl={resultImage} 
-                resourceType="tryon" 
-                resourceId={tryOnId} 
-                className="flex-1 rounded-xl" 
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 0 }}
-                iconSize={20}
-                iconColor="#fff" 
-              />
-              <ShareButton 
-                imageUrl={resultImage} 
-                resourceType="tryon" 
-                resourceId={tryOnId} 
-                title="Check out my new hairstyle on HairVerse!"
-                className="flex-1 rounded-xl" 
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 0 }}
-                iconSize={20}
-                iconColor="#fff" 
-              />
+              
+              <TouchableOpacity
+                onPress={handleDownloadScreenshot}
+                disabled={isDownloading}
+                className="flex-1 py-4 rounded-xl bg-white/10 border-0 items-center justify-center flex-row"
+              >
+                {isDownloading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="download-outline" size={20} color="#fff" />
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleShareScreenshot}
+                disabled={isSharing}
+                className="flex-1 py-4 rounded-xl bg-white/10 border-0 items-center justify-center flex-row"
+              >
+                {isSharing ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="share-social-outline" size={20} color="#fff" />
+                )}
+              </TouchableOpacity>
             </>
           )}
         </View>

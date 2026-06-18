@@ -1,9 +1,11 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, SafeAreaView, Modal, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, Modal, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useSelfieStore } from '../store/selfieStore';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import OnboardingScreen from './OnboardingScreen';
 import DashboardHeader from '../components/DashboardHeader';
 import DashboardSearch from '../components/DashboardSearch';
@@ -43,39 +45,53 @@ export default function DashboardScreen() {
 
           {/* Action Blocks based on activeSelfie */}
           {!activeSelfie ? (
-            <View className="flex-row justify-between mb-6 gap-3">
+            <View style={styles.actionRow}>
               <TouchableOpacity 
-                className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#00d2ff] shadow-sm"
+                style={styles.primaryButtonWrapper}
                 onPress={() => navigation.navigate('Try-On')}
                 activeOpacity={0.8}
               >
-                <Text className="text-[#0f3460] text-[15px] font-bold">Upload Selfie</Text>
+                <LinearGradient
+                  colors={['#8B5CF6', '#6D28D9']}
+                  style={styles.primaryButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.primaryButtonText}>Upload Selfie</Text>
+                </LinearGradient>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#F1F5F9] border border-[#E2E8F0]"
+                style={styles.secondaryButton}
                 onPress={() => navigation.navigate('LiveCamera')}
                 activeOpacity={0.8}
               >
-                <Text className="text-[#0F172A] text-[15px] font-semibold">Live Camera</Text>
+                <Text style={styles.secondaryButtonText}>Live Camera</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <View className="mb-6">
-              <Text className="text-xl font-bold text-[#0F172A] mb-4">Choose Action</Text>
-              <View className="flex-row justify-between gap-3">
+            <View style={styles.chooseActionContainer}>
+              <Text style={styles.sectionTitle}>Choose Action</Text>
+              <View style={styles.actionRow}>
                 <TouchableOpacity 
-                  className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#0F172A] shadow-sm"
+                  style={styles.primaryButtonWrapper}
                   onPress={() => navigation.navigate('VirtualTryOn')}
                   activeOpacity={0.8}
                 >
-                  <Text className="text-white text-[15px] font-bold">Virtual Try-On</Text>
+                  <LinearGradient
+                    colors={['#8B5CF6', '#6D28D9']}
+                    style={styles.primaryButton}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.primaryButtonText}>Virtual Try-On</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity 
-                  className="flex-1 py-[14px] rounded-2xl items-center justify-center bg-[#F1F5F9] border border-[#E2E8F0]"
+                  style={styles.secondaryButton}
                   onPress={() => navigation.navigate('LiveCamera')}
                   activeOpacity={0.8}
                 >
-                  <Text className="text-[#0F172A] text-[15px] font-semibold">AI Analysis</Text>
+                  <Text style={styles.secondaryButtonText}>AI Analysis</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -95,26 +111,116 @@ export default function DashboardScreen() {
 
           {/* History Link Section */}
           <TouchableOpacity 
-            className="flex-row items-center justify-between bg-[#F8FAFC] rounded-2xl p-5 mb-6 border border-[#E2E8F0]"
+            style={styles.historyBanner}
             onPress={() => navigation.navigate('StyleHistoryScreen')}
             activeOpacity={0.8}
           >
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-[#EEF2FF] justify-center items-center">
-                <Ionicons name="time-outline" size={20} color="#6366F1" />
+            <View style={styles.historyLeft}>
+              <View style={styles.historyIconContainer}>
+                <Ionicons name="time-outline" size={20} color="#6D28D9" />
               </View>
-              <View>
-                <Text className="text-base font-bold text-[#0F172A]">History</Text>
-                <Text className="text-xs text-[#64748B]">View all past activities</Text>
+              <View style={styles.historyInfo}>
+                <Text style={styles.historyTitle}>History</Text>
+                <Text style={styles.historySubtitle}>View all past activities</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
           </TouchableOpacity>
 
-          <View className="min-h-[24px]" />
+          <View style={{ height: 24 }} />
           
         </ScrollView>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  primaryButtonWrapper: {
+    flex: 1,
+    marginRight: 6,
+  },
+  primaryButton: {
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#6D28D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  primaryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  secondaryButton: {
+    flex: 1,
+    marginLeft: 6,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  secondaryButtonText: {
+    color: '#475569',
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  chooseActionContainer: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginBottom: 12,
+  },
+  historyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  historyLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  historyIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F5F3FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  historyInfo: {
+    marginLeft: 12,
+  },
+  historyTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+  },
+  historySubtitle: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: '#64748B',
+    marginTop: 1,
+  },
+});

@@ -1,11 +1,7 @@
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
-
 import { Platform } from 'react-native';
-
-// Adjust based on your API URL config
-// The rest of the app might use a configured axios instance, but we'll use a standard setup
-const API_URL = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000');
+import { API_URL } from '../config/api';
 
 class CameraService {
   async uploadCapturedImage(uri) {

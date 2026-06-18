@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, ActivityIndicator, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, TextInput, Modal, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSavedStore } from '../store/savedStore';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,39 +9,39 @@ import { useProfileSetupStore } from '../store/useProfileSetupStore';
 const SavedItemCard = ({ item, onOpenMenu }) => {
   return (
     <TouchableOpacity 
-      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex-row items-center"
+      style={styles.card}
       onPress={() => onOpenMenu(item, 'open')}
       activeOpacity={0.7}
     >
       {item.imageUrl ? (
-        <Image source={{ uri: item.imageUrl }} className="w-20 h-20 rounded-xl mr-4 bg-gray-100" />
+        <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
       ) : (
-        <View className="w-20 h-20 rounded-xl bg-gray-100 justify-center items-center mr-4">
-          <Ionicons name="image-outline" size={24} color="#9CA3AF" />
+        <View style={styles.cardImagePlaceholder}>
+          <Ionicons name="image-outline" size={24} color="#94A3B8" />
         </View>
       )}
-      <View className="flex-1">
-        <View className="flex-row justify-between items-start mb-1">
-          <View className="bg-indigo-50 px-2 py-1 rounded-md">
-            <Text className="text-indigo-600 text-[10px] font-bold uppercase tracking-wider">{item.category}</Text>
+      <View style={styles.cardInfo}>
+        <View style={styles.cardHeaderRow}>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryBadgeText}>{item.category}</Text>
           </View>
-          <View className="flex-row items-center">
-             <Ionicons name="eye-outline" size={12} color="#9CA3AF" className="mr-1" />
-             <Text className="text-gray-400 text-xs">{item.viewCount}</Text>
+          <View style={styles.viewCountContainer}>
+             <Ionicons name="eye-outline" size={12} color="#94A3B8" style={{ marginRight: 3 }} />
+             <Text style={styles.viewCountText}>{item.viewCount}</Text>
           </View>
         </View>
-        <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={1}>{item.title}</Text>
-        <View className="flex-row items-center justify-between">
-           <Text className="text-xs text-gray-500">
+        <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+        <View style={styles.cardFooter}>
+           <Text style={styles.cardDate}>
              {new Date(item.createdAt).toLocaleDateString()}
            </Text>
            {item.matchScore > 0 && (
-              <Text className="text-xs font-bold text-emerald-600">{item.matchScore}% Match</Text>
+              <Text style={styles.matchScoreText}>{item.matchScore}% Match</Text>
            )}
         </View>
       </View>
-      <TouchableOpacity className="p-2 ml-2" onPress={() => onOpenMenu(item, 'menu')}>
-        <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
+      <TouchableOpacity style={styles.menuButton} onPress={() => onOpenMenu(item, 'menu')} activeOpacity={0.6}>
+        <Ionicons name="ellipsis-vertical" size={18} color="#94A3B8" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -111,7 +112,6 @@ export default function SavedCollectionsScreen() {
         deleteItem(selectedItem.savedId);
         break;
       case 'move':
-        // Quick mock logic: cycle category for demo purposes
         const newCat = selectedItem.category === 'Favorites' ? 'Archived' : 'Favorites';
         updateItemCategory(selectedItem.savedId, newCat);
         break;
@@ -122,105 +122,128 @@ export default function SavedCollectionsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-5 pt-4 pb-2 bg-white flex-row items-center border-b border-gray-100">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={22} color="#1E293B" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900 flex-1">Saved Collections</Text>
+        <Text style={styles.headerTitle}>Saved Collections</Text>
       </View>
 
       {/* Search and Sort Row */}
-      <View className="bg-white px-5 py-3 flex-row items-center space-x-3">
-        <View className="flex-1 bg-gray-100 rounded-xl flex-row items-center px-3 py-2">
-          <Ionicons name="search" size={18} color="#9CA3AF" />
+      <View style={styles.searchRow}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={18} color="#94A3B8" />
           <TextInput 
-            className="flex-1 ml-2 text-base text-gray-900"
+            style={styles.searchInput}
             placeholder="Search saved items..."
+            placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
         <TouchableOpacity 
-          className="bg-gray-100 p-2.5 rounded-xl flex-row items-center"
+          style={styles.filterButton}
           onPress={() => setSortBy(sortBy === 'newest' ? 'highest_match' : 'newest')}
+          activeOpacity={0.7}
         >
-          <Ionicons name="filter" size={18} color="#4F46E5" />
+          <Ionicons name="filter" size={18} color="#6D28D9" />
         </TouchableOpacity>
       </View>
 
       {/* Tabs */}
-      <View className="bg-white border-b border-gray-100 pb-2">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 py-2">
-          {tabs.map(tab => (
-            <TouchableOpacity 
-              key={tab.id}
-              className={`flex-row items-center px-4 py-2 rounded-full mr-3 border ${activeTab === tab.id ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-gray-200'}`}
-              onPress={() => setActiveTab(tab.id)}
-            >
-              <Ionicons name={tab.icon} size={16} color={activeTab === tab.id ? '#FFF' : '#6B7280'} className="mr-2" />
-              <Text className={`font-semibold ${activeTab === tab.id ? 'text-white' : 'text-gray-600'}`}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+      <View style={styles.tabsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <TouchableOpacity 
+                key={tab.id}
+                style={[
+                  styles.tabItem,
+                  isActive ? styles.tabItemActive : styles.tabItemInactive
+                ]}
+                onPress={() => setActiveTab(tab.id)}
+                activeOpacity={0.8}
+              >
+                <Ionicons 
+                  name={tab.icon} 
+                  size={14} 
+                  color={isActive ? '#6D28D9' : '#64748B'} 
+                  style={{ marginRight: 6 }} 
+                />
+                <Text style={[styles.tabText, isActive ? styles.tabTextActive : styles.tabTextInactive]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
       {/* Folders / Categories */}
       {uniqueCategories.length > 1 && (
-        <View className="bg-white border-b border-gray-100 pb-2">
-           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-5 py-2">
-              {uniqueCategories.map(cat => (
-                 <TouchableOpacity 
-                    key={cat}
-                    className={`mr-4 pb-1 border-b-2 ${activeCategory === cat ? 'border-indigo-600' : 'border-transparent'}`}
-                    onPress={() => setActiveCategory(cat)}
-                 >
-                    <Text className={`font-bold ${activeCategory === cat ? 'text-indigo-600' : 'text-gray-400'}`}>{cat}</Text>
-                 </TouchableOpacity>
-              ))}
+        <View style={styles.categoryBar}>
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
+              {uniqueCategories.map(cat => {
+                 const isActive = activeCategory === cat;
+                 return (
+                   <TouchableOpacity 
+                      key={cat}
+                      style={[styles.categoryTab, isActive ? styles.categoryTabActive : null]}
+                      onPress={() => setActiveCategory(cat)}
+                      activeOpacity={0.7}
+                   >
+                      <Text style={[styles.categoryText, isActive ? styles.categoryTextActive : styles.categoryTextInactive]}>
+                        {cat}
+                      </Text>
+                   </TouchableOpacity>
+                 );
+              })}
            </ScrollView>
         </View>
       )}
 
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pt-4 pb-28" showsVerticalScrollIndicator={false}>
+      {/* Content */}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
         {isLoading && (
-          <View className="py-10 items-center justify-center">
-            <ActivityIndicator size="large" color="#4F46E5" />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#6D28D9" />
           </View>
         )}
 
         {!isLoading && error && (
-          <View className="bg-red-50 p-6 rounded-2xl items-center justify-center border border-red-100 mb-6">
-            <Ionicons name="alert-circle-outline" size={32} color="#EF4444" className="mb-2" />
-            <Text className="text-red-500 font-medium text-center mb-4">{error}</Text>
-            <TouchableOpacity className="bg-red-500 px-6 py-2 rounded-lg" onPress={fetchSavedItems}>
-              <Text className="text-white font-bold">Retry</Text>
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={36} color="#EF4444" />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={fetchSavedItems} activeOpacity={0.8}>
+              <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {!isLoading && !error && filteredItems.length === 0 && (
-          <View className="bg-white p-10 rounded-3xl items-center justify-center border border-gray-100 shadow-sm mt-10">
-            <View className="w-20 h-20 bg-indigo-50 rounded-full items-center justify-center mb-4">
-              <Ionicons name="folder-open-outline" size={32} color="#4F46E5" />
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconBg}>
+              <Ionicons name="folder-open-outline" size={32} color="#6D28D9" />
             </View>
-            <Text className="text-xl font-bold text-gray-900 mb-2 text-center">No items found.</Text>
-            <Text className="text-gray-500 text-center mb-8">
+            <Text style={styles.emptyTitle}>No items found</Text>
+            <Text style={styles.emptySubtitle}>
               {searchQuery ? `We couldn't find anything matching "${searchQuery}".` : 'Explore the app and save items to build your collection.'}
             </Text>
             <TouchableOpacity 
-              className="bg-indigo-600 py-3.5 px-8 rounded-xl shadow-md w-full items-center"
+              style={styles.exploreButton}
               onPress={() => navigation.navigate('Recommendations')}
+              activeOpacity={0.8}
             >
-              <Text className="text-white font-bold text-base">Explore Hairstyles</Text>
+              <Text style={styles.exploreButtonText}>Explore Hairstyles</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {!isLoading && !error && filteredItems.length > 0 && (
-          <View className="pb-10">
+          <View style={{ paddingBottom: 20 }}>
             {filteredItems.map(item => (
               <SavedItemCard 
                 key={item.savedId} 
@@ -233,39 +256,379 @@ export default function SavedCollectionsScreen() {
       </ScrollView>
 
       {/* Action Bottom Sheet Modal */}
-      <Modal visible={menuVisible} transparent animationType="fade">
-         <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-3xl p-5 pb-10">
-               <View className="flex-row justify-between items-center mb-6">
-                  <Text className="text-xl font-bold text-gray-900">Options</Text>
-                  <TouchableOpacity onPress={() => setMenuVisible(false)}>
-                     <Ionicons name="close" size={24} color="#000" />
+      <Modal visible={menuVisible} transparent animationType="slide">
+         <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+               <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Options</Text>
+                  <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeButton} activeOpacity={0.6}>
+                     <Ionicons name="close" size={22} color="#1E293B" />
                   </TouchableOpacity>
                </View>
 
-               <TouchableOpacity className="flex-row items-center py-4 border-b border-gray-100" onPress={() => executeAction('open')}>
-                  <Ionicons name="eye-outline" size={22} color="#4B5563" className="mr-4" />
-                  <Text className="text-gray-700 text-base font-medium">Open Item</Text>
+               <TouchableOpacity style={styles.modalItem} onPress={() => executeAction('open')} activeOpacity={0.7}>
+                  <Ionicons name="eye-outline" size={20} color="#4B5563" style={{ marginRight: 14 }} />
+                  <Text style={styles.modalItemText}>Open Item</Text>
                </TouchableOpacity>
 
-               <TouchableOpacity className="flex-row items-center py-4 border-b border-gray-100" onPress={() => executeAction('try_again')}>
-                  <Ionicons name="color-wand-outline" size={22} color="#4B5563" className="mr-4" />
-                  <Text className="text-gray-700 text-base font-medium">Try Again</Text>
+               <TouchableOpacity style={styles.modalItem} onPress={() => executeAction('try_again')} activeOpacity={0.7}>
+                  <Ionicons name="color-wand-outline" size={20} color="#4B5563" style={{ marginRight: 14 }} />
+                  <Text style={styles.modalItemText}>Try Again</Text>
                </TouchableOpacity>
 
-               <TouchableOpacity className="flex-row items-center py-4 border-b border-gray-100" onPress={() => executeAction('move')}>
-                  <Ionicons name="folder-open-outline" size={22} color="#4B5563" className="mr-4" />
-                  <Text className="text-gray-700 text-base font-medium">Move to Folder</Text>
+               <TouchableOpacity style={styles.modalItem} onPress={() => executeAction('move')} activeOpacity={0.7}>
+                  <Ionicons name="folder-open-outline" size={20} color="#4B5563" style={{ marginRight: 14 }} />
+                  <Text style={styles.modalItemText}>Move to Folder</Text>
                </TouchableOpacity>
 
-               <TouchableOpacity className="flex-row items-center py-4" onPress={() => executeAction('delete')}>
-                  <Ionicons name="trash-outline" size={22} color="#EF4444" className="mr-4" />
-                  <Text className="text-red-500 text-base font-medium">Delete Item</Text>
+               <TouchableOpacity style={[styles.modalItem, { borderBottomWidth: 0 }]} onPress={() => executeAction('delete')} activeOpacity={0.7}>
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" style={{ marginRight: 14 }} />
+                  <Text style={[styles.modalItemText, { color: '#EF4444' }]}>Delete Item</Text>
                </TouchableOpacity>
             </View>
          </View>
       </Modal>
-
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  backButton: {
+    marginRight: 14,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    flex: 1,
+  },
+  searchRow: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 42,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#1E293B',
+    marginLeft: 8,
+    height: '100%',
+    padding: 0,
+  },
+  filterButton: {
+    backgroundColor: '#F8FAFC',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  tabsContainer: {
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+    paddingVertical: 10,
+  },
+  tabItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 1,
+  },
+  tabItemActive: {
+    backgroundColor: '#F5F3FF',
+    borderColor: '#EDE9FE',
+  },
+  tabItemInactive: {
+    backgroundColor: '#ffffff',
+    borderColor: '#E2E8F0',
+  },
+  tabText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  tabTextActive: {
+    color: '#6D28D9',
+  },
+  tabTextInactive: {
+    color: '#64748B',
+  },
+  categoryBar: {
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+    paddingVertical: 8,
+  },
+  categoryTab: {
+    marginRight: 16,
+    paddingBottom: 6,
+    borderBottomWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoryTabActive: {
+    borderColor: '#6D28D9',
+  },
+  categoryText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_700Bold',
+  },
+  categoryTextActive: {
+    color: '#6D28D9',
+  },
+  categoryTextInactive: {
+    color: '#94A3B8',
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 110,
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardImage: {
+    width: 76,
+    height: 76,
+    borderRadius: 14,
+    marginRight: 14,
+    backgroundColor: '#F8FAFC',
+  },
+  cardImagePlaceholder: {
+    width: 76,
+    height: 76,
+    borderRadius: 14,
+    marginRight: 14,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  categoryBadge: {
+    backgroundColor: '#F5F3FF',
+    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  categoryBadgeText: {
+    color: '#6D28D9',
+    fontSize: 9,
+    fontFamily: 'Poppins_700Bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  viewCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewCountText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: '#94A3B8',
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginBottom: 4,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardDate: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: '#64748B',
+  },
+  matchScoreText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_700Bold',
+    color: '#10B981',
+  },
+  menuButton: {
+    padding: 6,
+    marginLeft: 6,
+  },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    backgroundColor: '#FEF2F2',
+    padding: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontFamily: 'Poppins_500Medium',
+    textAlign: 'center',
+    marginVertical: 12,
+    fontSize: 14,
+  },
+  retryButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 13,
+  },
+  emptyContainer: {
+    backgroundColor: '#ffffff',
+    padding: 28,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginTop: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  emptyIconBg: {
+    width: 64,
+    height: 64,
+    backgroundColor: '#F5F3FF',
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  exploreButton: {
+    backgroundColor: '#6D28D9',
+    height: 46,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    shadowColor: '#6D28D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  exploreButtonText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderColor: '#F8FAFC',
+  },
+  modalItemText: {
+    fontSize: 15,
+    fontFamily: 'Poppins_500Medium',
+    color: '#334155',
+  },
+});

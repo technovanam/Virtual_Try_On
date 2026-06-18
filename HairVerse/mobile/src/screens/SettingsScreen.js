@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSettingsStore } from '../store/settingsStore';
@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
 
 const SectionHeader = ({ title }) => (
-  <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider mt-8 mb-3 px-2">{title}</Text>
+  <Text style={styles.sectionTitle}>{title}</Text>
 );
 
 const SettingRow = ({ icon, label, value, subLabel, onToggle, onPress, isLink, destructive }) => {
@@ -18,15 +18,16 @@ const SettingRow = ({ icon, label, value, subLabel, onToggle, onPress, isLink, d
   return (
     <Wrapper 
       onPress={isPressable ? onPress : undefined}
-      className={`flex-row items-center justify-between py-4 border-b border-gray-100 ${destructive ? 'bg-red-50/10' : ''}`}
+      style={styles.menuItem}
+      activeOpacity={isPressable ? 0.7 : 1}
     >
-      <View className="flex-row items-center flex-1 pr-4">
-        <View className={`w-9 h-9 rounded-full items-center justify-center mr-4 ${destructive ? 'bg-red-50' : 'bg-gray-100'}`}>
-          <Ionicons name={icon} size={20} color={destructive ? '#EF4444' : '#4B5563'} />
+      <View style={styles.menuItemLeft}>
+        <View style={[styles.menuIconBg, { backgroundColor: destructive ? '#FEE2E2' : '#F5F3FF' }]}>
+          <Ionicons name={icon} size={18} color={destructive ? '#EF4444' : '#6D28D9'} />
         </View>
-        <View className="flex-1">
-           <Text className={`text-base font-medium ${destructive ? 'text-red-600' : 'text-gray-900'}`}>{label}</Text>
-           {subLabel && <Text className="text-xs text-gray-500 mt-0.5">{subLabel}</Text>}
+        <View style={{ flex: 1, paddingRight: 8 }}>
+          <Text style={[styles.menuItemText, destructive && { color: '#EF4444' }]}>{label}</Text>
+          {subLabel && <Text style={styles.subLabel}>{subLabel}</Text>}
         </View>
       </View>
       
@@ -34,15 +35,15 @@ const SettingRow = ({ icon, label, value, subLabel, onToggle, onPress, isLink, d
         <Switch
           value={value}
           onValueChange={onToggle}
-          trackColor={{ false: '#E5E7EB', true: '#4F46E5' }}
+          trackColor={{ false: '#E5E7EB', true: '#6D28D9' }}
           thumbColor={'#FFFFFF'}
         />
       )}
       
       {isLink && !isSwitch && (
-        <View className="flex-row items-center">
-           {typeof value === 'string' && <Text className="text-gray-400 mr-2">{value}</Text>}
-           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {typeof value === 'string' && <Text style={styles.rowValue}>{value}</Text>}
+            <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
         </View>
       )}
     </Wrapper>
@@ -52,7 +53,7 @@ const SettingRow = ({ icon, label, value, subLabel, onToggle, onPress, isLink, d
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { settings, loading, error, isInitialized, fetchSettings, updateSetting, resetSettings } = useSettingsStore();
-  const { logout, user } = useAuthStore();
+  const { logout, user, sendPasswordReset } = useAuthStore();
   const [fakeCacheSize, setFakeCacheSize] = useState('142 MB');
 
   useEffect(() => {
@@ -75,23 +76,50 @@ export default function SettingsScreen() {
     setFakeCacheSize('0 MB');
   };
 
+  const handleChangePassword = () => {
+    if (!user?.email) {
+      Alert.alert("Error", "User email address not found.");
+      return;
+    }
+    Alert.alert(
+      "Change Password",
+      `Would you like to send a password reset link to your email: ${user.email}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send Reset Link",
+          onPress: async () => {
+            const res = await sendPasswordReset(user.email);
+            if (res.success) {
+              Alert.alert("Email Sent", "A password reset link has been successfully sent to your email address.");
+            } else {
+              Alert.alert("Failed", res.error || "Failed to send reset email.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   if (loading && !settings) {
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC] items-center justify-center">
-        <ActivityIndicator size="large" color="#4F46E5" />
-      </SafeAreaView>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6D28D9" />
+      </View>
     );
   }
 
   if (error && !settings) {
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC] items-center justify-center px-6">
-        <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-xl font-bold text-gray-900 mt-4 text-center">Failed to load settings</Text>
-        <Text className="text-gray-500 text-center mt-2 mb-8">{error}</Text>
-        <TouchableOpacity className="bg-indigo-600 px-8 py-3.5 rounded-xl" onPress={fetchSettings}>
-          <Text className="text-white font-bold text-base">Retry</Text>
-        </TouchableOpacity>
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <Text style={styles.errorTitle}>Failed to load settings</Text>
+          <Text style={styles.errorSubtitle}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchSettings}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -99,32 +127,39 @@ export default function SettingsScreen() {
   const s = settings || {};
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC]">
-      <View className="bg-white pt-2 pb-4 px-5 border-b border-gray-100 flex-row items-center justify-between z-10 shadow-sm">
-        <View className="flex-row items-center">
-           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4 w-10 h-10 items-center justify-center bg-gray-50 rounded-full">
-             <Ionicons name="arrow-back" size={20} color="#111827" />
-           </TouchableOpacity>
-           <Text className="text-2xl font-bold text-gray-900">Settings</Text>
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={20} color="#1F2937" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Settings</Text>
         </View>
-        <TouchableOpacity onPress={handleReset}>
-           <Text className="text-indigo-600 font-bold">Reset</Text>
+        <TouchableOpacity onPress={handleReset} activeOpacity={0.7}>
+          <Text style={styles.resetButtonText}>Reset</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }} showsVerticalScrollIndicator={false}>
-        
+      <ScrollView 
+        style={{ flex: 1 }} 
+        contentContainerStyle={styles.scrollContainer} 
+        showsVerticalScrollIndicator={false}
+      >
         {/* 1. Account Settings */}
         <SectionHeader title="Account Settings" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
-          <SettingRow icon="person-outline" label="Edit Profile" subLabel="Update username and avatar" isLink onPress={() => navigation.navigate('EditProfile')} />
+        <View style={styles.menuContainer}>
+          <SettingRow icon="person-outline" label="Edit Profile" subLabel="Update name, gender, and hair details" isLink onPress={() => navigation.navigate('EditProfile')} />
           <SettingRow icon="mail-outline" label="Email Address" value={user?.email} isLink onPress={() => {}} />
-          <SettingRow icon="key-outline" label="Change Password" isLink onPress={() => {}} />
+          <SettingRow icon="key-outline" label="Change Password" isLink onPress={handleChangePassword} />
         </View>
 
         {/* 2. Personalization */}
         <SectionHeader title="Personalization" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="cut-outline" label="Hairstyle Categories" subLabel="Manage your favorite styles" isLink onPress={() => {}} />
           <SettingRow icon="color-palette-outline" label="Preferred Colors" isLink onPress={() => {}} />
           <SettingRow icon="resize-outline" label="Preferred Hair Length" value="Medium" isLink onPress={() => {}} />
@@ -132,14 +167,14 @@ export default function SettingsScreen() {
 
         {/* 3. AI Recommendation Settings */}
         <SectionHeader title="AI Recommendations" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="sparkles-outline" label="Personalized Suggestions" value={s.personalizedRecommendations} onToggle={(val) => updateSetting('personalizedRecommendations', val)} />
           <SettingRow icon="star-outline" label="Celebrity Lookalikes" value={s.celebritySuggestions} onToggle={(val) => updateSetting('celebritySuggestions', val)} />
         </View>
 
         {/* 4. Notification Settings */}
         <SectionHeader title="Notifications" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="notifications-outline" label="Allow All Notifications" value={s.notificationsEnabled} onToggle={(val) => updateSetting('notificationsEnabled', val)} />
           {s.notificationsEnabled && (
              <>
@@ -152,14 +187,14 @@ export default function SettingsScreen() {
 
         {/* 5. Language & Appearance */}
         <SectionHeader title="Language & Appearance" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="language-outline" label="Language" value={s.language} isLink onPress={() => {}} />
           <SettingRow icon="moon-outline" label="Theme" value={s.theme} isLink onPress={() => {}} />
         </View>
 
         {/* 6. Privacy & Security */}
         <SectionHeader title="Privacy & Security" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="finger-print-outline" label="Biometric Login" value={s.biometricEnabled} onToggle={(val) => updateSetting('biometricEnabled', val)} />
           <SettingRow icon="trash-bin-outline" label="Auto-Delete Selfies" subLabel="Remove after 24 hours" value={s.autoDeleteSelfies} onToggle={(val) => updateSetting('autoDeleteSelfies', val)} />
           <SettingRow icon="shield-checkmark-outline" label="Analytics Consent" value={s.analyticsConsent} onToggle={(val) => updateSetting('analyticsConsent', val)} />
@@ -167,25 +202,170 @@ export default function SettingsScreen() {
 
         {/* 7. Storage Management */}
         <SectionHeader title="Storage Management" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100">
+        <View style={styles.menuContainer}>
           <SettingRow icon="server-outline" label="Local Cache Size" value={fakeCacheSize} />
           <SettingRow icon="refresh-outline" label="Clear Local Cache" isLink onPress={handleClearCache} />
         </View>
 
         {/* 8. Accessibility */}
         <SectionHeader title="Accessibility" />
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100 mb-6">
+        <View style={[styles.menuContainer, { marginBottom: 24 }]}>
            <SettingRow icon="text-outline" label="Larger Text" value={s.accessibilityOptions?.largerText} onToggle={(val) => updateSetting('accessibilityOptions', { ...s.accessibilityOptions, largerText: val })} />
            <SettingRow icon="contrast-outline" label="High Contrast" value={s.accessibilityOptions?.highContrast} onToggle={(val) => updateSetting('accessibilityOptions', { ...s.accessibilityOptions, highContrast: val })} />
            <SettingRow icon="play-skip-forward-outline" label="Reduced Motion" value={s.accessibilityOptions?.reducedMotion} onToggle={(val) => updateSetting('accessibilityOptions', { ...s.accessibilityOptions, reducedMotion: val })} />
         </View>
 
         {/* Actions */}
-        <View className="bg-white rounded-2xl px-4 py-1 shadow-sm border border-gray-100 mb-10">
+        <View style={styles.menuContainer}>
           <SettingRow icon="log-out-outline" label="Sign Out" destructive onPress={logout} />
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  header: {
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#0F172A',
+    marginLeft: 14,
+  },
+  resetButtonText: {
+    color: '#6D28D9',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+  },
+  scrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 80,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: 'Poppins_700Bold',
+    color: '#94A3B8',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 26,
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  menuContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    overflow: 'hidden',
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.02,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderColor: '#F8FAFC',
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  menuIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  menuItemText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#1E293B',
+  },
+  subLabel: {
+    fontSize: 11,
+    fontFamily: 'Poppins_400Regular',
+    color: '#64748B',
+    marginTop: 2,
+  },
+  rowValue: {
+    color: '#94A3B8',
+    fontFamily: 'Poppins_500Medium',
+    fontSize: 13,
+    marginRight: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 100,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: '#6D28D9',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+  },
+});

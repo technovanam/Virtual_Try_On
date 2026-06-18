@@ -6,13 +6,14 @@ import {
   useWindowDimensions,
   Animated,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { onboardingSlides } from '../config/onboardingSlides';
 import { useAuthStore } from '../store/authStore';
 
 export default function OnboardingScreen() {
   const { width, height } = useWindowDimensions();
-  const { completeOnboarding } = useAuthStore();
+  const { completeOnboarding, isLoading } = useAuthStore();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -27,6 +28,7 @@ export default function OnboardingScreen() {
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const handleNext = async () => {
+    if (isLoading) return;
     try {
       if (currentIndex < onboardingSlides.length - 1) {
         slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
@@ -39,6 +41,7 @@ export default function OnboardingScreen() {
   };
 
   const handleSkip = async () => {
+    if (isLoading) return;
     try {
       await completeOnboarding();
     } catch (e) {
@@ -128,10 +131,20 @@ export default function OnboardingScreen() {
               })}
             </View>
 
-            <TouchableOpacity className="bg-black py-3 px-6 rounded-full shadow-sm" style={{ elevation: 2 }} onPress={handleNext} activeOpacity={0.7}>
-              <Text className="text-white text-[15px] font-bold">
-                {currentIndex === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
-              </Text>
+            <TouchableOpacity 
+              className="bg-black py-3 px-6 rounded-full shadow-sm" 
+              style={{ elevation: 2 }} 
+              onPress={handleNext} 
+              disabled={isLoading}
+              activeOpacity={0.7}
+            >
+              {isLoading && currentIndex === onboardingSlides.length - 1 ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-white text-[15px] font-bold">
+                  {currentIndex === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

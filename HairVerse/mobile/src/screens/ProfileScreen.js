@@ -1,36 +1,19 @@
 import React, { useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet, Platform, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProfileStore } from '../store/profileStore';
 import { useAuthStore } from '../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
-
-const StatCard = ({ value, label }) => (
-  <View className="bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-sm mr-3 items-center min-w-[90px]">
-    <Text className="text-xl font-black text-indigo-600 mb-1">{value}</Text>
-    <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider text-center">{label}</Text>
-  </View>
-);
-
-const QuickAccessCard = ({ icon, label, color, onPress }) => (
-  <TouchableOpacity 
-    className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-1 mr-3 mb-3 items-center justify-center min-h-[100px]"
-    onPress={onPress}
-  >
-    <View className={`w-12 h-12 rounded-full items-center justify-center mb-2`} style={{ backgroundColor: `${color}15` }}>
-      <Ionicons name={icon} size={24} color={color} />
-    </View>
-    <Text className="text-gray-900 font-bold text-xs text-center">{label}</Text>
-  </TouchableOpacity>
-);
 
 export default function ProfileScreen() {
   const { profileData, stats, aiStyleProfile, hairInsightsSummary, completionPercentage, isLoading, error, fetchProfile } = useProfileStore();
   const { logout } = useAuthStore();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     fetchProfile();
@@ -38,22 +21,22 @@ export default function ProfileScreen() {
 
   if (isLoading && !profileData) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F8FAFC] items-center justify-center">
-        <ActivityIndicator size="large" color="#4F46E5" />
-      </SafeAreaView>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6D28D9" />
+      </View>
     );
   }
 
   if (error && !profileData) {
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC] items-center justify-center px-6">
+      <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-xl font-bold text-gray-900 mt-4 text-center">Failed to load profile</Text>
-        <Text className="text-gray-500 text-center mt-2 mb-8">{error}</Text>
-        <TouchableOpacity className="bg-indigo-600 px-8 py-3.5 rounded-xl" onPress={fetchProfile}>
-          <Text className="text-white font-bold text-base">Retry</Text>
+        <Text style={styles.errorTitle}>Failed to load profile</Text>
+        <Text style={styles.errorSubtitle}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchProfile}>
+          <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -63,139 +46,637 @@ export default function ProfileScreen() {
   const initial = username.charAt(0).toUpperCase();
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC]">
-      <View className="bg-white px-5 pt-2 pb-4 flex-row items-center justify-between border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">Profile</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')} className="w-10 h-10 items-center justify-center rounded-full bg-gray-50">
-          <Ionicons name="settings-outline" size={20} color="#000" />
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 120 }} 
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Top Cover Background */}
+        <LinearGradient
+          colors={['#7C3AED', '#4F46E5']}
+          style={[styles.headerCover, { paddingTop: insets.top + 10 }]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.topBar}>
+            <Text style={styles.topBarTitle}>Profile</Text>
+            <TouchableOpacity 
+              style={styles.settingsButton} 
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Ionicons name="settings-outline" size={20} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
-        
-        {/* Profile Card Header */}
-        <View className="bg-white p-6 border-b border-gray-100 items-center">
-          <View className="relative">
-            <View className="w-24 h-24 rounded-full bg-indigo-100 items-center justify-center mb-4 border-4 border-white shadow-sm">
-              <Text className="text-4xl font-bold text-indigo-600">{initial}</Text>
-            </View>
-            <View className="absolute bottom-4 right-0 bg-yellow-400 w-8 h-8 rounded-full items-center justify-center border-2 border-white">
-              <Ionicons name="star" size={14} color="#FFF" />
+        {/* Profile Details Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarContainer}>
+            <LinearGradient
+              colors={['#C084FC', '#6D28D9']}
+              style={styles.avatarRing}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.avatarInner}>
+                <Text style={styles.avatarInitial}>{initial}</Text>
+              </View>
+            </LinearGradient>
+            <View style={styles.badgeContainer}>
+              <Ionicons name="star" size={12} color="#ffffff" />
             </View>
           </View>
           
-          <Text className="text-2xl font-black text-gray-900 mb-1">{username}</Text>
-          <Text className="text-sm text-gray-500 mb-3">{profileData.email}</Text>
+          <Text style={styles.username}>{username}</Text>
+          <Text style={styles.email}>{profileData.email}</Text>
           
-          <View className="bg-gray-100 px-3 py-1 rounded-full mb-5">
-             <Text className="text-gray-600 text-xs font-bold uppercase tracking-wider">{profileData.userBadge}</Text>
+          <View style={styles.badgeWrapper}>
+            <Text style={styles.badgeText}>{profileData.userBadge || 'Style Explorer'}</Text>
           </View>
 
-          <View className="w-full max-w-[250px] bg-gray-100 rounded-full h-2 mb-2">
-            <View className="bg-indigo-600 h-2 rounded-full" style={{ width: `${completionPercentage}%` }} />
+          {/* Progress Section */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${completionPercentage}%` }]} />
+            </View>
+            <Text style={styles.progressLabel}>{completionPercentage}% Profile Completed</Text>
           </View>
-          <Text className="text-xs font-bold text-gray-400">{completionPercentage}% Profile Completed</Text>
         </View>
 
-        {/* Dynamic Profile Stats */}
-        <View className="mt-6">
-           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 px-5">Your Activity</Text>
-           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
-             <StatCard value={stats?.hairstylesTried || 0} label="Try-Ons" />
-             <StatCard value={stats?.savedStyles || 0} label="Saved" />
-             <StatCard value={stats?.comparisonsCreated || 0} label="Compared" />
-             <StatCard value={stats?.recommendationsUsed || 0} label="Matches" />
-           </ScrollView>
+        {/* Stats Row */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats?.hairstylesTried || 0}</Text>
+            <Text style={styles.statLabel}>Try-Ons</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats?.savedStyles || 0}</Text>
+            <Text style={styles.statLabel}>Saved</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats?.comparisonsCreated || 0}</Text>
+            <Text style={styles.statLabel}>Compared</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats?.recommendationsUsed || 0}</Text>
+            <Text style={styles.statLabel}>Matches</Text>
+          </View>
         </View>
 
-        {/* Quick Access */}
-        <View className="mt-8 px-5">
-           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Quick Access</Text>
-           <View className="flex-row flex-wrap">
-              <QuickAccessCard icon="bookmark" label="Saved" color="#4F46E5" onPress={() => navigation.navigate('Saved')} />
-              <QuickAccessCard icon="time" label="History" color="#10B981" onPress={() => navigation.navigate('StyleHistoryScreen')} />
-              <QuickAccessCard icon="bulb" label="Insights" color="#F59E0B" onPress={() => navigation.navigate('AIInsights')} />
-           </View>
+        {/* AI Style Profile / DNA Card */}
+        <View style={styles.sectionHeader}>
+          <Ionicons name="sparkles" size={15} color="#6D28D9" />
+          <Text style={styles.sectionTitle}>AI Hair DNA</Text>
         </View>
 
-        {/* AI Style Profile */}
-        <View className="mt-8 px-5">
-           <View className="flex-row items-center mb-3">
-              <Ionicons name="sparkles" size={16} color="#4F46E5" className="mr-2" />
-              <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider">AI Style Profile</Text>
-           </View>
-           <View className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex-row flex-wrap justify-between">
-              <View className="w-[48%] mb-4">
-                 <Text className="text-gray-400 text-xs mb-1 font-medium">Favorite Color</Text>
-                 <Text className="text-gray-900 font-bold">{aiStyleProfile?.favoriteHairColors?.[0] || 'Unknown'}</Text>
+        <LinearGradient
+          colors={['#1E1B4B', '#312E81']}
+          style={styles.dnaCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.dnaGrid}>
+            {/* Left Column: Health Score Circular Indicator */}
+            <View style={styles.dnaLeftColumn}>
+              <View style={styles.healthScoreCircle}>
+                <Text style={styles.healthScoreValue}>{hairInsightsSummary?.healthScore || '--'}</Text>
+                <Text style={styles.healthScoreMax}>/ 100</Text>
               </View>
-              <View className="w-[48%] mb-4">
-                 <Text className="text-gray-400 text-xs mb-1 font-medium">Top Category</Text>
-                 <Text className="text-gray-900 font-bold">{aiStyleProfile?.favoriteCategories?.[0] || 'Unknown'}</Text>
+              <Text style={styles.healthScoreLabel}>Hair Health Score</Text>
+            </View>
+
+            {/* Right Column: AI Insights Details */}
+            <View style={styles.dnaRightColumn}>
+              <View style={styles.traitItem}>
+                <Text style={styles.traitLabel}>Favorite Color</Text>
+                <Text style={styles.traitValue} numberOfLines={1}>
+                  {aiStyleProfile?.favoriteHairColors?.[0] || 'Unknown'}
+                </Text>
               </View>
-              <View className="w-[48%]">
-                 <Text className="text-gray-400 text-xs mb-1 font-medium">Maintenance</Text>
-                 <Text className="text-gray-900 font-bold">{aiStyleProfile?.preferredMaintenanceLevel || 'Unknown'}</Text>
+              <View style={styles.traitItem}>
+                <Text style={styles.traitLabel}>Top Category</Text>
+                <Text style={styles.traitValue} numberOfLines={1}>
+                  {aiStyleProfile?.favoriteCategories?.[0] || 'Unknown'}
+                </Text>
               </View>
-              <View className="w-[48%]">
-                 <Text className="text-gray-400 text-xs mb-1 font-medium">Best Match</Text>
-                 <Text className="text-gray-900 font-bold" numberOfLines={1}>{aiStyleProfile?.topRecommendationCategory || 'Unknown'}</Text>
+              <View style={styles.traitItem}>
+                <Text style={styles.traitLabel}>Maintenance</Text>
+                <Text style={styles.traitValue} numberOfLines={1}>
+                  {aiStyleProfile?.preferredMaintenanceLevel || 'Unknown'}
+                </Text>
               </View>
-           </View>
+            </View>
+          </View>
+          
+          <View style={styles.dnaDivider} />
+          
+          <TouchableOpacity 
+            style={styles.dnaFooter} 
+            onPress={() => navigation.navigate('AIInsights')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.dnaFooterText} numberOfLines={1}>
+              {hairInsightsSummary?.growthSuggestions?.[0] || 'View detailed diagnostics & hair health analysis'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color="#A5B4FC" />
+          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* Quick Access Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitleOnly}>Quick Access</Text>
         </View>
 
-        {/* Hair Insights Summary */}
-        <View className="mt-8 px-5">
-           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Latest Health Insight</Text>
-           <TouchableOpacity 
-              className="bg-indigo-600 rounded-2xl p-5 shadow-sm flex-row items-center justify-between"
-              onPress={() => navigation.navigate('AIInsights')}
-              activeOpacity={0.8}
-           >
-              <View className="flex-1 mr-4">
-                 <Text className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Health Score</Text>
-                 <View className="flex-row items-baseline mb-2">
-                    <Text className="text-3xl font-black text-white mr-1">{hairInsightsSummary?.healthScore || '--'}</Text>
-                    <Text className="text-indigo-200 font-medium">/ 100</Text>
-                 </View>
-                 <Text className="text-white text-sm" numberOfLines={1}>
-                    {hairInsightsSummary?.growthSuggestions?.[0] || 'Tap to view your detailed hair analysis.'}
-                 </Text>
-              </View>
-              <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
-                 <Ionicons name="arrow-forward" size={24} color="#FFF" />
-              </View>
-           </TouchableOpacity>
+        <View style={styles.quickAccessRow}>
+          <TouchableOpacity 
+            style={styles.quickAccessCard}
+            onPress={() => navigation.navigate('Saved')}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.quickAccessIconBg, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="bookmark" size={20} color="#4F46E5" />
+            </View>
+            <Text style={styles.quickAccessLabel}>Saved</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.quickAccessCard}
+            onPress={() => navigation.navigate('StyleHistoryScreen')}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.quickAccessIconBg, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="time" size={20} color="#10B981" />
+            </View>
+            <Text style={styles.quickAccessLabel}>History</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.quickAccessCard}
+            onPress={() => navigation.navigate('AIInsights')}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.quickAccessIconBg, { backgroundColor: '#FFFBEB' }]}>
+              <Ionicons name="bulb" size={20} color="#F59E0B" />
+            </View>
+            <Text style={styles.quickAccessLabel}>Insights</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Preferences & Actions */}
-        <View className="mt-8 px-5 mb-6">
-           <Text className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Preferences</Text>
-           <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-50" onPress={() => navigation.navigate('EditProfile')}>
-                 <View className="flex-row items-center">
-                    <Ionicons name="person-outline" size={20} color="#4B5563" className="mr-3" />
-                    <Text className="text-gray-900 font-medium">Edit Profile Details</Text>
-                 </View>
-                 <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-gray-50" onPress={() => navigation.navigate('Settings')}>
-                 <View className="flex-row items-center">
-                    <Ionicons name="notifications-outline" size={20} color="#4B5563" className="mr-3" />
-                    <Text className="text-gray-900 font-medium">Notification Settings</Text>
-                 </View>
-                 <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center justify-between p-4" onPress={logout}>
-                 <View className="flex-row items-center">
-                    <Ionicons name="log-out-outline" size={20} color="#EF4444" className="mr-3" />
-                    <Text className="text-red-500 font-medium">Logout</Text>
-                 </View>
-              </TouchableOpacity>
-           </View>
+        {/* Settings Preferences Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitleOnly}>Preferences</Text>
         </View>
 
+        <View style={styles.menuContainer}>
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => navigation.navigate('EditProfile')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIconBg, { backgroundColor: '#F3F4F6' }]}>
+                <Ionicons name="person-outline" size={16} color="#4B5563" />
+              </View>
+              <Text style={styles.menuItemText}>Edit Profile Details</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIconBg, { backgroundColor: '#F3F4F6' }]}>
+                <Ionicons name="notifications-outline" size={16} color="#4B5563" />
+              </View>
+              <Text style={styles.menuItemText}>Notification Settings</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.menuItem, { borderBottomWidth: 0 }]} 
+            onPress={logout}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={[styles.menuIconBg, { backgroundColor: '#FEE2E2' }]}>
+                <Ionicons name="log-out-outline" size={16} color="#EF4444" />
+              </View>
+              <Text style={[styles.menuItemText, { color: '#EF4444' }]}>Logout</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: '#6D28D9',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: '#6D28D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+  },
+  headerCover: {
+    height: 160,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  topBarTitle: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
+    color: '#ffffff',
+  },
+  settingsButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileCard: {
+    backgroundColor: '#ffffff',
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: -50, // Overlaps the header cover
+    // Premium card shadow
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  avatarRing: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    padding: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 42,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  avatarInitial: {
+    fontSize: 34,
+    fontFamily: 'Poppins_700Bold',
+    color: '#6D28D9',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#FBBF24',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  username: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  email: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#64748B',
+    marginBottom: 10,
+  },
+  badgeWrapper: {
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#475569',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  progressSection: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  progressBarBg: {
+    width: '80%',
+    height: 6,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 3,
+    marginBottom: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#6D28D9',
+    borderRadius: 3,
+  },
+  progressLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_500Medium',
+    color: '#94A3B8',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#ffffff',
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    // Subtle shadow
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#6D28D9',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 9,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  statDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E2E8F0',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: 'Poppins_700Bold',
+    color: '#0F172A',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginLeft: 6,
+  },
+  sectionTitleOnly: {
+    fontSize: 11,
+    fontFamily: 'Poppins_700Bold',
+    color: '#0F172A',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  dnaCard: {
+    marginHorizontal: 20,
+    borderRadius: 22,
+    padding: 20,
+    shadowColor: '#1E1B4B',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 6,
+  },
+  dnaGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dnaLeftColumn: {
+    alignItems: 'center',
+    flex: 1.2,
+  },
+  healthScoreCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    borderColor: '#818CF8',
+    backgroundColor: '#1E1B4B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#818CF8',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+  },
+  healthScoreValue: {
+    fontSize: 26,
+    fontFamily: 'Poppins_700Bold',
+    color: '#ffffff',
+  },
+  healthScoreMax: {
+    fontSize: 10,
+    fontFamily: 'Poppins_500Medium',
+    color: '#818CF8',
+    marginTop: -2,
+  },
+  healthScoreLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#A5B4FC',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  dnaRightColumn: {
+    flex: 1.8,
+    paddingLeft: 16,
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  traitItem: {
+    marginBottom: 8,
+  },
+  traitLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
+    color: '#818CF8',
+    marginBottom: 1,
+  },
+  traitValue: {
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#ffffff',
+  },
+  dnaDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: 14,
+  },
+  dnaFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dnaFooterText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: '#E0E7FF',
+    flex: 1,
+    marginRight: 10,
+  },
+  quickAccessRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+  },
+  quickAccessCard: {
+    backgroundColor: '#ffffff',
+    flex: 1,
+    marginHorizontal: 4,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  quickAccessIconBg: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  quickAccessLabel: {
+    fontSize: 11,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#334155',
+  },
+  menuContainer: {
+    backgroundColor: '#ffffff',
+    marginHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderColor: '#F8FAFC',
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIconBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  menuItemText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_500Medium',
+    color: '#1E293B',
+  },
+});
+

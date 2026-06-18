@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,7 +53,6 @@ export default function StyleHistoryScreen() {
         navigation.navigate('CelebrityMatch');
         break;
       default:
-        // Handle other routes or fallback
         break;
     }
   };
@@ -61,9 +60,10 @@ export default function StyleHistoryScreen() {
   const renderFilter = ({ item }) => (
     <TouchableOpacity
       onPress={() => setFilterType(item.id)}
-      className={`px-4 py-2 rounded-full mr-2 ${filterType === item.id ? 'bg-primary' : 'bg-surface border border-borderLight'}`}
+      className={`px-4 py-2 rounded-full mr-2 border ${filterType === item.id ? 'bg-purple-600 border-purple-600' : 'bg-white border-gray-200'}`}
+      activeOpacity={0.7}
     >
-      <Text className={`font-medium ${filterType === item.id ? 'text-white' : 'text-textSecondary'}`}>
+      <Text className={`font-Poppins-SemiBold ${filterType === item.id ? 'text-white' : 'text-gray-600'}`}>
         {item.label}
       </Text>
     </TouchableOpacity>
@@ -87,24 +87,24 @@ export default function StyleHistoryScreen() {
     
     return (
       <TouchableOpacity 
-        activeOpacity={0.7}
+        activeOpacity={0.8}
         onPress={() => handleOpenActivity(item)}
         className="flex-row px-4 mb-2"
       >
         {/* Timeline Line & Icon */}
         <View className="items-center mr-4 w-8">
-          <View className="w-8 h-8 rounded-full bg-surface border border-borderLight items-center justify-center z-10 bg-white">
-            <Ionicons name={getIconForType(item.eventType)} size={16} color="#0F172A" />
+          <View className="w-8 h-8 rounded-full bg-purple-50 border border-purple-100 items-center justify-center z-10">
+            <Ionicons name={getIconForType(item.eventType)} size={16} color="#6D28D9" />
           </View>
-          {!isLast && <View className="w-0.5 flex-1 bg-borderLight -mt-2" />}
+          {!isLast && <View className="w-0.5 flex-1 bg-gray-200 -mt-2" />}
         </View>
 
         {/* Card Content */}
-        <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-borderLight mb-4">
+        <View className="flex-1 bg-white rounded-3xl p-5 border border-gray-100 mb-4 shadow-sm">
           <View className="flex-row justify-between items-start mb-2">
             <View className="flex-1">
-              <Text className="text-textPrimary font-bold text-base">{item.title}</Text>
-              <Text className="text-textSecondary text-xs mt-1">
+              <Text className="text-gray-900 font-Poppins-Bold text-base">{item.title}</Text>
+              <Text className="text-gray-400 text-xs mt-1 font-Poppins">
                 {new Date(item.createdAt).toLocaleString()}
               </Text>
             </View>
@@ -113,12 +113,12 @@ export default function StyleHistoryScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text className="text-textSecondary text-sm mb-3">{item.description}</Text>
+          <Text className="text-gray-600 text-sm mb-3 font-Poppins">{item.description}</Text>
 
           {item.imageUrl && (
             <Image 
               source={{ uri: item.imageUrl }} 
-              className="w-full h-40 rounded-xl bg-surface"
+              className="w-full h-40 rounded-2xl bg-gray-50 border border-gray-100"
               resizeMode="cover"
             />
           )}
@@ -130,8 +130,8 @@ export default function StyleHistoryScreen() {
   if (loading && events.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0F172A" />
-        <Text className="mt-4 text-textSecondary font-medium">Loading your history...</Text>
+        <ActivityIndicator size="large" color="#6D28D9" />
+        <Text className="mt-4 text-gray-500 font-Poppins-Medium">Loading your history...</Text>
       </SafeAreaView>
     );
   }
@@ -139,18 +139,20 @@ export default function StyleHistoryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-borderLight">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
-          <Ionicons name="arrow-back" size={24} color="#0F172A" />
-        </TouchableOpacity>
-        <Text className="text-lg font-bold text-textPrimary">Style History</Text>
-        <TouchableOpacity className="p-2 -mr-2">
-          <Ionicons name="search-outline" size={24} color="#0F172A" />
+      <View className="flex-row items-center justify-between px-5 py-4 bg-white border-b border-gray-100">
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4 w-10 h-10 items-center justify-center bg-gray-50 rounded-full shadow-sm">
+            <Ionicons name="arrow-back" size={20} color="#1F2937" />
+          </TouchableOpacity>
+          <Text className="text-2xl font-bold text-gray-900 font-Poppins-Bold">Style History</Text>
+        </View>
+        <TouchableOpacity className="w-10 h-10 items-center justify-center bg-gray-50 rounded-full shadow-sm">
+          <Ionicons name="search-outline" size={18} color="#1F2937" />
         </TouchableOpacity>
       </View>
 
       {/* Filters */}
-      <View className="bg-white border-b border-borderLight py-3">
+      <View className="bg-white border-b border-gray-100 py-3">
         <FlatList 
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -172,17 +174,19 @@ export default function StyleHistoryScreen() {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           !loading && (
-            <View className="flex-1 justify-center items-center px-6 py-20">
-              <Ionicons name="time-outline" size={64} color="#CBD5E1" />
-              <Text className="text-textPrimary font-bold text-xl mt-4">No activity yet</Text>
-              <Text className="text-textSecondary text-center mt-2 mb-8">
+            <View className="flex-1 justify-center items-center px-6 py-20 bg-white mx-4 rounded-3xl border border-gray-100 shadow-sm mt-10">
+              <View className="w-16 h-16 bg-gray-50 rounded-full items-center justify-center mb-4">
+                <Ionicons name="time-outline" size={32} color="#94A3B8" />
+              </View>
+              <Text className="text-gray-900 font-Poppins-Bold text-lg">No activity yet</Text>
+              <Text className="text-gray-500 text-center mt-2 mb-6 font-Poppins text-sm">
                 Your styling history will appear here once you start exploring.
               </Text>
               <TouchableOpacity 
-                className="bg-primary px-6 py-3 rounded-full"
+                className="bg-purple-600 px-6 py-3.5 rounded-full shadow-sm"
                 onPress={() => navigation.navigate('LiveCamera')}
               >
-                <Text className="text-white font-bold text-base">Start Your First Analysis</Text>
+                <Text className="text-white font-Poppins-Bold text-sm">Start Your First Analysis</Text>
               </TouchableOpacity>
             </View>
           )
@@ -190,7 +194,7 @@ export default function StyleHistoryScreen() {
         ListFooterComponent={
           loadingMore ? (
             <View className="py-4 items-center">
-              <ActivityIndicator size="small" color="#0F172A" />
+              <ActivityIndicator size="small" color="#6D28D9" />
             </View>
           ) : null
         }

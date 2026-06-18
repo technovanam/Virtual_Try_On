@@ -1,44 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSearchStore } from '../store/searchStore';
 import SearchResultCard from '../components/SearchResultCard';
-import Svg, { Path, Circle, Polyline, Clock } from 'react-native-svg';
-
-const BackIcon = ({ color, size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Polyline points="15 18 9 12 15 6" />
-  </Svg>
-);
-
-const SearchIcon = ({ color, size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="11" cy="11" r="8" />
-    <Path d="m21 21-4.3-4.3" />
-  </Svg>
-);
-
-const ClockIcon = ({ color, size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="12" cy="12" r="10" />
-    <Polyline points="12 6 12 12 16 14" />
-  </Svg>
-);
-
-const TrendingIcon = ({ color, size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-    <Polyline points="17 6 23 6 23 12" />
-  </Svg>
-);
+import { Ionicons } from '@expo/vector-icons';
 
 const SkeletonCard = () => (
-  <View className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-4 flex-row items-center">
-    <View className="w-20 h-20 rounded-xl bg-gray-200 mr-4" />
-    <View className="flex-1">
-      <View className="h-3 bg-gray-200 rounded w-1/4 mb-2" />
-      <View className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
-      <View className="h-4 bg-gray-200 rounded w-1/2" />
+  <View style={styles.skeletonCard}>
+    <View style={styles.skeletonImage} />
+    <View style={styles.skeletonTextContainer}>
+      <View style={[styles.skeletonLine, { width: '30%', marginBottom: 8 }]} />
+      <View style={[styles.skeletonLine, { width: '80%', height: 16, marginBottom: 8 }]} />
+      <View style={[styles.skeletonLine, { width: '50%' }]} />
     </View>
   </View>
 );
@@ -77,35 +51,40 @@ export default function SearchScreen() {
   const renderInitialState = () => {
     if (isInitialLoading) {
       return (
-        <View className="mt-10 items-center justify-center">
-          <ActivityIndicator size="large" color="#1a1a1a" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#6D28D9" />
         </View>
       );
     }
 
     return (
-      <View className="pb-10">
+      <View style={styles.initialContainer}>
         {/* Recent Searches */}
         {recentSearches.length > 0 && (
-          <View className="mb-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-gray-900">Recent Searches</Text>
-              <TouchableOpacity onPress={clearRecentSearches}>
-                <Text className="text-sm font-semibold text-gray-500">Clear All</Text>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Searches</Text>
+              <TouchableOpacity onPress={clearRecentSearches} activeOpacity={0.6}>
+                <Text style={styles.clearAllText}>Clear All</Text>
               </TouchableOpacity>
             </View>
-            <View>
+            <View style={styles.recentList}>
               {recentSearches.map((search, idx) => (
-                <View key={idx} className="flex-row items-center justify-between py-3 border-b border-gray-100">
+                <View key={idx} style={styles.recentItem}>
                   <TouchableOpacity 
-                    className="flex-1 flex-row items-center"
+                    style={styles.recentItemLeft}
                     onPress={() => setSearchInput(search)}
+                    activeOpacity={0.7}
                   >
-                    <ClockIcon size={18} color="#8e8e93" />
-                    <Text className="text-base text-gray-700 ml-3">{search}</Text>
+                    <Ionicons name="time-outline" size={18} color="#94A3B8" />
+                    <Text style={styles.recentItemText}>{search}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => removeRecentSearch(search)} className="p-2">
-                    <Text className="text-gray-400 font-bold">X</Text>
+                  <TouchableOpacity 
+                    onPress={() => removeRecentSearch(search)} 
+                    style={styles.removeItemButton}
+                    activeOpacity={0.6}
+                  >
+                    <Ionicons name="close" size={16} color="#94A3B8" />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -115,19 +94,20 @@ export default function SearchScreen() {
 
         {/* Trending Searches */}
         {trendingSearches.length > 0 && (
-          <View className="mb-8">
-            <View className="flex-row items-center mb-4">
-              <TrendingIcon size={20} color="#ff3b30" />
-              <Text className="text-lg font-bold text-gray-900 ml-2">Trending Now</Text>
+          <View style={styles.section}>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="trending-up" size={18} color="#6D28D9" />
+              <Text style={[styles.sectionTitle, { marginLeft: 6 }]}>Trending Now</Text>
             </View>
-            <View className="flex-row flex-wrap">
+            <View style={styles.trendingList}>
               {trendingSearches.map((trend, idx) => (
                 <TouchableOpacity 
                   key={idx} 
-                  className="bg-red-50 border border-red-100 py-2.5 px-4 rounded-full mr-3 mb-3"
+                  style={styles.trendBadge}
                   onPress={() => setSearchInput(trend)}
+                  activeOpacity={0.8}
                 >
-                  <Text className="text-red-600 font-medium">{trend}</Text>
+                  <Text style={styles.trendBadgeText}>{trend}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -136,16 +116,17 @@ export default function SearchScreen() {
 
         {/* Categories */}
         {categories.length > 0 && (
-          <View>
-            <Text className="text-lg font-bold text-gray-900 mb-4">Explore Categories</Text>
-            <View className="flex-row flex-wrap">
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Explore Categories</Text>
+            <View style={styles.trendingList}>
               {categories.map((cat, idx) => (
                 <TouchableOpacity 
                   key={idx} 
-                  className="bg-white border border-gray-200 py-2.5 px-5 rounded-full mr-3 mb-3 shadow-sm"
+                  style={styles.categoryBadge}
                   onPress={() => handleCategoryPress(cat)}
+                  activeOpacity={0.8}
                 >
-                  <Text className="text-gray-700 font-semibold">{cat}</Text>
+                  <Text style={styles.categoryBadgeText}>{cat}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -158,48 +139,49 @@ export default function SearchScreen() {
   const renderFooter = () => {
     if (!hasMore) return null;
     return (
-      <View className="py-4 mt-2">
-        {isLoading && <ActivityIndicator size="small" color="#1a1a1a" />}
+      <View style={styles.footerLoader}>
+        {isLoading && <ActivityIndicator size="small" color="#6D28D9" />}
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <SafeAreaView style={styles.container}>
       {/* Header / Search Bar */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+      <View style={styles.header}>
         <TouchableOpacity 
-          className="mr-3 w-10 h-10 justify-center items-center rounded-full bg-gray-50"
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
-          <BackIcon size={24} color="#1a1a1a" />
+          <Ionicons name="chevron-back" size={22} color="#1E293B" />
         </TouchableOpacity>
         
-        <View className="flex-1 flex-row items-center bg-[#f4f5f7] rounded-2xl px-4 h-[50px]">
-          <SearchIcon size={20} color="#8e8e93" />
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color="#94A3B8" />
           <TextInput
-            className="flex-1 text-base text-[#1a1a1a] ml-2 h-full"
+            style={styles.searchInput}
             placeholder="Search hairstyles, categories..."
-            placeholderTextColor="#8e8e93"
+            placeholderTextColor="#94A3B8"
             value={searchInput}
             onChangeText={setSearchInput}
             autoFocus
           />
           {searchInput.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchInput('')} className="p-1">
-              <View className="bg-gray-300 rounded-full w-5 h-5 justify-center items-center">
-                <Text className="text-white text-xs font-bold">X</Text>
+            <TouchableOpacity onPress={() => setSearchInput('')} style={styles.clearButton} activeOpacity={0.6}>
+              <View style={styles.clearIconBg}>
+                <Ionicons name="close" size={12} color="#ffffff" />
               </View>
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      <View className="flex-1 bg-[#FAFAFA]">
+      <View style={styles.body}>
         {/* Initial State (No search input yet) */}
         {!searchInput.trim() && !isLoading && results.length === 0 ? (
           <ScrollView 
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 }}
+            contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
             {renderInitialState()}
@@ -209,13 +191,13 @@ export default function SearchScreen() {
           <FlatList
             data={results}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 110 }}
+            contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={() => (
               <>
                 {/* Loading State for initial search */}
                 {isLoading && results.length === 0 && (
-                  <View className="mt-2">
+                  <View style={{ marginTop: 4 }}>
                     <SkeletonCard />
                     <SkeletonCard />
                     <SkeletonCard />
@@ -225,27 +207,29 @@ export default function SearchScreen() {
 
                 {/* Error State */}
                 {!isLoading && error && (
-                  <View className="bg-red-50 p-6 rounded-2xl items-center justify-center border border-red-100 mt-10">
-                    <Text className="text-red-500 font-medium text-center mb-4 text-base">
+                  <View style={styles.errorContainer}>
+                    <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+                    <Text style={styles.errorText}>
                       {error}
                     </Text>
                     <TouchableOpacity 
-                      className="bg-red-500 py-3 px-8 rounded-xl shadow-sm"
+                      style={styles.retryButton}
                       onPress={() => performSearch(searchInput)}
+                      activeOpacity={0.8}
                     >
-                      <Text className="text-white font-bold text-base">Retry Search</Text>
+                      <Text style={styles.retryButtonText}>Retry Search</Text>
                     </TouchableOpacity>
                   </View>
                 )}
 
                 {/* Empty State */}
                 {!isLoading && !error && results.length === 0 && (
-                  <View className="items-center justify-center mt-20">
-                    <View className="w-24 h-24 bg-gray-100 rounded-full justify-center items-center mb-6">
-                      <SearchIcon size={40} color="#cbd5e1" />
+                  <View style={styles.emptyContainer}>
+                    <View style={styles.emptyIconBg}>
+                      <Ionicons name="search" size={32} color="#CBD5E1" />
                     </View>
-                    <Text className="text-xl font-bold text-gray-900 mb-2">No results found</Text>
-                    <Text className="text-gray-500 text-center px-10">
+                    <Text style={styles.emptyTitle}>No results found</Text>
+                    <Text style={styles.emptySubtitle}>
                       We couldn't find anything matching your search. Try adjusting your keywords.
                     </Text>
                   </View>
@@ -253,7 +237,7 @@ export default function SearchScreen() {
 
                 {/* Success Header */}
                 {!isLoading && !error && results.length > 0 && (
-                  <Text className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 ml-1">
+                  <Text style={styles.resultsHeader}>
                     {total} Results found
                   </Text>
                 )}
@@ -278,3 +262,265 @@ export default function SearchScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#1E293B',
+    marginLeft: 8,
+    height: '100%',
+    padding: 0,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  clearIconBg: {
+    backgroundColor: '#CBD5E1',
+    borderRadius: 10,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  body: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 110,
+  },
+  loadingContainer: {
+    marginTop: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  initialContainer: {
+    paddingBottom: 20,
+  },
+  section: {
+    marginBottom: 28,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+  },
+  clearAllText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#94A3B8',
+  },
+  recentList: {
+    marginTop: 4,
+  },
+  recentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  recentItemLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  recentItemText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#475569',
+    marginLeft: 10,
+  },
+  removeItemButton: {
+    padding: 6,
+  },
+  trendingList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  trendBadge: {
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  trendBadgeText: {
+    color: '#6D28D9',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 12,
+  },
+  categoryBadge: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    marginRight: 10,
+    marginBottom: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  categoryBadgeText: {
+    color: '#475569',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 12,
+  },
+  skeletonCard: {
+    backgroundColor: '#ffffff',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  skeletonImage: {
+    width: 76,
+    height: 76,
+    borderRadius: 12,
+    backgroundColor: '#E2E8F0',
+    marginRight: 16,
+  },
+  skeletonTextContainer: {
+    flex: 1,
+  },
+  skeletonLine: {
+    height: 12,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 4,
+  },
+  errorContainer: {
+    backgroundColor: '#FEF2F2',
+    padding: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    marginTop: 40,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontFamily: 'Poppins_500Medium',
+    textAlign: 'center',
+    marginVertical: 12,
+    fontSize: 14,
+  },
+  retryButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 80,
+  },
+  emptyIconBg: {
+    width: 72,
+    height: 72,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#1E293B',
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: '#64748B',
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    lineHeight: 18,
+  },
+  resultsHeader: {
+    fontSize: 10,
+    fontFamily: 'Poppins_700Bold',
+    color: '#94A3B8',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginLeft: 4,
+  },
+  footerLoader: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+});

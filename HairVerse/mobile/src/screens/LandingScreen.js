@@ -42,7 +42,7 @@ const Particle = ({ particle }) => {
           width: particle.size,
           height: particle.size,
           borderRadius: particle.size / 2,
-          backgroundColor: '#FFF',
+          backgroundColor: '#C4B5FD',
         },
         style,
       ]}
@@ -55,7 +55,7 @@ const PARTICLES = Array.from({ length: 15 }).map((_, i) => ({
   x: Math.random() * width,
   y: Math.random() * height,
   size: Math.random() * 3 + 1,
-  opacity: Math.random() * 0.2 + 0.1,
+  opacity: Math.random() * 0.3 + 0.1,
   duration: Math.random() * 8000 + 10000,
 }));
 
@@ -80,10 +80,10 @@ export default function LandingScreen({ onComplete }) {
       -1, true
     );
 
-    // Auto-navigate after a few seconds
+    // Auto-navigate after 3 seconds
     const timer = setTimeout(() => {
       onComplete();
-    }, 4000); // 4 seconds loading simulation
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -93,10 +93,11 @@ export default function LandingScreen({ onComplete }) {
   const dot3Style = useAnimatedStyle(() => ({ opacity: dot3.value * 0.5 + 0.5, transform: [{ scale: dot3.value * 0.2 + 0.8 }] }));
 
   return (
-    <View className="flex-1 bg-[#11052C] items-center justify-center">
+    <View className="flex-1 bg-white items-center justify-center">
       {/* Background Gradient */}
       <LinearGradient
-        colors={['#170A30', '#2E125E', '#170A30']}
+        colors={['#FFFFFF', '#FAF5FF', '#F5F3FF', '#FFFFFF']}
+        locations={[0, 0.4, 0.8, 1]}
         style={StyleSheet.absoluteFillObject}
       />
       
@@ -116,22 +117,21 @@ export default function LandingScreen({ onComplete }) {
 
         {/* Brand Name */}
         <View className="flex-row items-baseline mb-2">
-          <Text className="text-[64px] text-white font-bold font-ncl">Hair</Text>
-          <Text className="text-[64px] text-[#8B5CF6] font-bold font-ncl">Verse</Text>
+          <Text className="text-[64px] text-[#1F2937] font-ncl">Hair</Text>
+          <Text className="text-[64px] text-[#6D28D9] font-ncl">Verse</Text>
         </View>
 
         {/* Tagline */}
-        <Text className="text-[14px] text-white font-semibold tracking-[0.5px] font-cocogoose">Try Before You Cut</Text>
+        <Text className="text-[14px] text-[#4B5563] tracking-[0.5px] font-cocogoose">Try Before You Cut</Text>
       </View>
 
-      {/* Loading Indicator at Bottom */}
-      <View className="absolute bottom-[60px] items-center">
-        <View className="flex-row mb-3">
-          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot1Style} />
-          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot2Style} />
-          <Animated.View className="w-2 h-2 rounded-full bg-[#8B5CF6] mx-1" style={dot3Style} />
+      {/* Loading Indicator at Bottom (Dots Only, no text) */}
+      <View className="absolute bottom-[80px] items-center">
+        <View className="flex-row">
+          <Animated.View className="w-[14px] h-[14px] rounded-full bg-[#6D28D9] mx-1.5" style={dot1Style} />
+          <Animated.View className="w-[14px] h-[14px] rounded-full bg-[#6D28D9] mx-1.5" style={dot2Style} />
+          <Animated.View className="w-[14px] h-[14px] rounded-full bg-[#6D28D9] mx-1.5" style={dot3Style} />
         </View>
-        <Text className="text-[#A78BFA] text-[13px] tracking-[0.5px]">Loading AI models...</Text>
       </View>
     </View>
   );

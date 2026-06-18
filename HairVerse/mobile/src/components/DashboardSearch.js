@@ -16,13 +16,15 @@ export default function DashboardSearch() {
   return (
     <View className="px-5 mb-4 bg-white">
       <TouchableOpacity 
-        className="flex-row items-center bg-[#f4f5f7] rounded-2xl px-4 h-[52px]"
+        className="flex-row items-center bg-[#F8FAFC] rounded-2xl px-4 h-[50px] border border-[#F1F5F9]"
         activeOpacity={0.8}
         onPress={() => navigation.navigate('Search')}
       >
-        <SearchIcon size={20} color="#8e8e93" />
-        <View className="flex-1 ml-2.5">
-          <Text className="text-base text-[#8e8e93]">Search hairstyles...</Text>
+        <SearchIcon size={18} color="#94A3B8" />
+        <View className="flex-1 ml-3">
+          <Text className="text-sm text-[#94A3B8]" style={{ fontFamily: 'Poppins_500Medium' }}>
+            Search hairstyles, categories...
+          </Text>
         </View>
       </TouchableOpacity>
     </View>

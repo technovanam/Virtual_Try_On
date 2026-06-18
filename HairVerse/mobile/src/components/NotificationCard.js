@@ -18,7 +18,7 @@ export default function NotificationCard({ notification, onPress, onDelete }) {
 
   return (
     <TouchableOpacity 
-      className={`bg-white rounded-2xl p-4 mb-3 border ${isUnread ? 'border-indigo-200 shadow-sm' : 'border-gray-100'} flex-row`}
+      className={`bg-white rounded-2xl p-4 mb-3 border ${isUnread ? 'border-purple-200 shadow-sm' : 'border-gray-100'} flex-row`}
       onPress={() => onPress(notification)}
       activeOpacity={0.7}
     >
@@ -26,7 +26,7 @@ export default function NotificationCard({ notification, onPress, onDelete }) {
       <View className="w-12 h-12 rounded-full items-center justify-center mr-4 mt-1" style={{ backgroundColor: config.bg }}>
         <Ionicons name={config.icon} size={24} color={config.color} />
         {isUnread && (
-          <View className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-600 border-2 border-white rounded-full" />
+          <View className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-purple-600 border-2 border-white rounded-full" />
         )}
       </View>
 

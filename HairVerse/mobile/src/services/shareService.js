@@ -26,11 +26,16 @@ export const shareService = {
     store.setSharing(true);
 
     try {
-      // To share an image from a URL via expo-sharing, it must be downloaded first
-      const fileName = `HairVerse_Share_${resourceId}_${Date.now()}.jpg`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-      
-      const { uri } = await FileSystem.downloadAsync(imageUrl, fileUri);
+      let uri = imageUrl;
+      const isRemote = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+
+      if (isRemote) {
+        // To share an image from a URL via expo-sharing, it must be downloaded first
+        const fileName = `HairVerse_Share_${resourceId}_${Date.now()}.jpg`;
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+        const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+        uri = downloadResult.uri;
+      }
 
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
@@ -44,8 +49,10 @@ export const shareService = {
         mimeType: 'image/jpeg',
       });
 
-      // Cleanup
-      await FileSystem.deleteAsync(uri, { idempotent: true });
+      // Cleanup temp file if it was downloaded
+      if (isRemote) {
+        await FileSystem.deleteAsync(uri, { idempotent: true });
+      }
 
       // Track Share
       await shareService.trackShare(resourceType, resourceId, platform);

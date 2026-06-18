@@ -1,11 +1,13 @@
 import React from 'react';
 import { Text, View, ActivityIndicator } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 
 import LoginScreen from '../auth/LoginScreen';
 import SignupScreen from '../auth/SignupScreen';
+import TermsScreen from '../auth/TermsScreen';
+import ForgotPasswordScreen from '../auth/ForgotPasswordScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import ProfileCompletionScreen from '../screens/ProfileCompletionScreen';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
@@ -25,10 +27,14 @@ function AuthNavigator() {
       screenOptions={{
         headerShown: false,
         cardStyle: { flex: 1, backgroundColor: '#FAFAFA' },
+        ...TransitionPresets.SlideFromRightIOS,
       }}
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Signup" component={SignupScreen} />
+      <AuthStack.Screen name="Terms" component={TermsScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
     </AuthStack.Navigator>
   );
 }

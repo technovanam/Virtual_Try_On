@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator, Image, Dimensions } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator, Image, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCompareStore } from '../store/compareStore';
 import { Ionicons } from '@expo/vector-icons';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import { downloadService } from '../services/downloadService';
+import { shareService } from '../services/shareService';
 
 const { width } = Dimensions.get('window');
 
@@ -10,6 +13,33 @@ const ComparisonScreen = () => {
   const navigation = useNavigation();
   const { currentComparison, status, error, fetchComparisons, createComparison } = useCompareStore();
   const [activeTab, setActiveTab] = useState('scores'); // 'scores' or 'pros'
+  const viewShotRef = useRef();
+
+  const handleSaveComparison = async () => {
+    if (!viewShotRef.current) return;
+    try {
+      const uri = await captureRef(viewShotRef, {
+        format: 'jpg',
+        quality: 0.9,
+      });
+      await downloadService.downloadImage(uri, 'comparison', currentComparison?.id || 'unknown');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to capture screenshot: ' + err.message);
+    }
+  };
+
+  const handleExportComparison = async () => {
+    if (!viewShotRef.current) return;
+    try {
+      const uri = await captureRef(viewShotRef, {
+        format: 'jpg',
+        quality: 0.9,
+      });
+      await shareService.shareImage(uri, 'comparison', currentComparison?.id || 'unknown');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to capture screenshot: ' + err.message);
+    }
+  };
 
   // If there's no current comparison, we can show an empty state or let them browse
   useEffect(() => {
@@ -198,17 +228,19 @@ const ComparisonScreen = () => {
     return (
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         
-        {/* Header Area */}
-        <View className="mb-2">
-          <Text className="text-2xl font-bold text-gray-900">Compare Styles</Text>
-          <Text className="text-gray-500 text-sm">Mode: <Text className="font-bold text-indigo-600 capitalize">{currentComparison.comparisonType.replace('_', ' ')}</Text></Text>
-        </View>
+        <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={{ backgroundColor: '#F8FAFC', paddingBottom: 10 }}>
+          {/* Header Area */}
+          <View className="mb-2">
+            <Text className="text-2xl font-bold text-gray-900">Compare Styles</Text>
+            <Text className="text-gray-500 text-sm">Mode: <Text className="font-bold text-indigo-600 capitalize">{currentComparison.comparisonType.replace('_', ' ')}</Text></Text>
+          </View>
 
-        {/* Visual Comparison Area */}
-        {renderComparisonArea()}
+          {/* Visual Comparison Area */}
+          {renderComparisonArea()}
 
-        {/* AI Recommendation Panel */}
-        {renderAIPanel()}
+          {/* AI Recommendation Panel */}
+          {renderAIPanel()}
+        </ViewShot>
 
         {/* Action Buttons */}
         <View className="space-y-3">
@@ -217,11 +249,17 @@ const ComparisonScreen = () => {
             <Text className="text-white font-bold text-base">Select Winner</Text>
           </TouchableOpacity>
           <View className="flex-row space-x-3">
-            <TouchableOpacity className="flex-1 bg-white py-4 rounded-xl border border-gray-200 flex-row items-center justify-center shadow-sm">
+            <TouchableOpacity 
+              onPress={handleSaveComparison}
+              className="flex-1 bg-white py-4 rounded-xl border border-gray-200 flex-row items-center justify-center shadow-sm"
+            >
               <Ionicons name="bookmark-outline" size={20} color="#000" className="mr-2" />
               <Text className="text-gray-900 font-bold">Save</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 bg-white py-4 rounded-xl border border-gray-200 flex-row items-center justify-center shadow-sm">
+            <TouchableOpacity 
+              onPress={handleExportComparison}
+              className="flex-1 bg-white py-4 rounded-xl border border-gray-200 flex-row items-center justify-center shadow-sm"
+            >
               <Ionicons name="share-outline" size={20} color="#000" className="mr-2" />
               <Text className="text-gray-900 font-bold">Export</Text>
             </TouchableOpacity>

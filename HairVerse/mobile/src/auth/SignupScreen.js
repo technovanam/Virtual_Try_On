@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ActivityIndicator, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-
-const { height } = Dimensions.get('window');
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -16,33 +13,109 @@ export default function SignupScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [agree, setAgree] = useState(false);
   const [localError, setLocalError] = useState('');
-  const { register, isLoading, error } = useAuthStore();
+  const [errors, setErrors] = useState({ username: '', email: '', password: '', confirmPassword: '', agree: '' });
+  const { checkEmailExists, isLoading } = useAuthStore();
+
+  const handleUsernameChange = (text) => {
+    setUsername(text);
+    if (errors.username) {
+      setErrors(prev => ({ ...prev, username: '' }));
+    }
+    if (localError) setLocalError('');
+  };
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
+    if (localError) setLocalError('');
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    if (errors.password) {
+      setErrors(prev => ({ ...prev, password: '' }));
+    }
+    if (localError) setLocalError('');
+  };
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    if (errors.confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: '' }));
+    }
+    if (localError) setLocalError('');
+  };
+
+  const handleToggleAgree = () => {
+    const nextVal = !agree;
+    setAgree(nextVal);
+    if (errors.agree && nextVal) {
+      setErrors(prev => ({ ...prev, agree: '' }));
+    }
+    if (localError) setLocalError('');
+  };
 
   const handleSignup = async () => {
     setLocalError('');
-    if (!email || !password || !username) {
-      setLocalError('Please fill in all fields');
-      return;
+    const newErrors = { username: '', email: '', password: '', confirmPassword: '', agree: '' };
+    let hasError = false;
+
+    if (!username.trim()) {
+      newErrors.username = 'Username is required';
+      hasError = true;
     }
 
-    if (password.length < 6) {
-      setLocalError('Password must be at least 6 characters.');
-      return;
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+      hasError = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      hasError = true;
     }
-    
-    if (password !== confirmPassword) {
-      setLocalError('Passwords do not match.');
-      return;
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+      hasError = true;
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+      hasError = true;
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Confirm password is required';
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+      hasError = true;
     }
 
     if (!agree) {
-      setLocalError('Please agree to Terms & Conditions.');
-      return;
+      newErrors.agree = 'You must agree to the Terms & Conditions';
+      hasError = true;
     }
 
-    const result = await register(email, password, username);
-    if (!result.success) {
-      setLocalError(result.error || 'This email has been already registered.');
+    setErrors(newErrors);
+    if (hasError) return;
+
+    useAuthStore.setState({ isLoading: true });
+    try {
+      const emailTaken = await checkEmailExists(email);
+      useAuthStore.setState({ isLoading: false });
+
+      if (emailTaken) {
+        setErrors(prev => ({ ...prev, email: 'This email has been already registered.' }));
+        return;
+      }
+
+      // Defer account creation by navigating to ProfileCompletion screen with credentials
+      navigation.navigate('ProfileCompletion', {
+        signUpData: { email: email.trim().toLowerCase(), password, username }
+      });
+    } catch (err) {
+      useAuthStore.setState({ isLoading: false });
+      setLocalError(err.message || 'Failed to verify email availability. Please try again.');
     }
   };
 
@@ -62,186 +135,221 @@ export default function SignupScreen({ navigation }) {
       style={{ flex: 1 }} 
       behavior={Platform.OS === 'ios' ? 'padding' : null}
     >
-      <View className="flex-1 bg-[#05030D]">
-        <View style={StyleSheet.absoluteFillObject} backgroundColor="#05030D" />
-        {/* Glowing background blobs */}
-        <View style={[StyleSheet.absoluteFillObject, { opacity: 0.3 }]}>
-          <LinearGradient
-            colors={['rgba(139, 92, 246, 0.4)', 'rgba(79, 141, 255, 0.2)', 'transparent']}
-            start={{ x: 0.1, y: 0.1 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
-        </View>
-        <SafeAreaView className="flex-1" edges={['top']}>
-          <ScrollView contentContainerClassName="flex-grow" bounces={false} showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <View className="flex-row justify-between items-center px-6 pt-[25px]">
-              <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
-                <Ionicons name="chevron-back" size={24} color="#FFF" />
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-row items-center border border-[rgba(241,241,241,0.7)] rounded-[40px] px-3 py-1.5 gap-1.5">
-                <Ionicons name="globe-outline" size={12} color="#F0F0F0" />
-                <Text className="text-zinc-100 text-xs font-normal font-['Inter'] tracking-tight">EN</Text>
-                <Ionicons name="chevron-down" size={12} color="#F0F0F0" />
-              </TouchableOpacity>
+      <View className="flex-1 bg-white">
+        <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+          <ScrollView 
+            contentContainerClassName="flex-grow justify-center" 
+            bounces={false} 
+            showsVerticalScrollIndicator={false}
+            className="px-[30px]"
+          >
+            {/* Centered Title */}
+            <View className="w-full pt-[20px] mb-[30px]">
+              <Text className="text-[#6D28D9] text-[32px] font-Poppins-Bold text-center tracking-wide">
+                Sign Up
+              </Text>
             </View>
- 
-            {/* Title Text */}
-            <View className="px-[30px] pt-[20px] z-10">
-              <Text className="text-white text-3xl font-semibold font-['Inter-SemiBold'] mb-2">Create Account</Text>
-              <Text className="text-white text-base font-normal font-['Inter']">Discover hairstyles tailored to your face.</Text>
-            </View>
- 
-            {/* Card Overlay */}
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.03)']}
-              className="flex-1 rounded-t-[50px] rounded-b-none px-[30px] pt-[50px] pb-0"
-              style={{ marginTop: height * 0.05 }}
-            >
+
+            {/* Form Fields Container */}
+            <View className="gap-4 mb-4">
               {/* Username Input */}
-              <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-                <Ionicons name="person-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-                <TextInput
-                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-                  placeholder="Username"
-                  placeholderTextColor="rgba(255, 255, 255, 0.70)"
-                  value={username}
-                  onChangeText={setUsername}
-                  autoCapitalize="none"
-                />
-              </View>
- 
-              {/* Email Input */}
-              <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-                <Ionicons name="mail-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-                <TextInput
-                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-                  placeholder="Enter Your Email"
-                  placeholderTextColor="rgba(255, 255, 255, 0.70)"
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-              </View>
- 
-              {/* Password Input */}
-              <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-                <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-                <TextInput
-                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-                  placeholder="Password"
-                  placeholderTextColor="rgba(255, 255, 255, 0.70)"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity className="p-1" onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="rgba(255, 255, 255, 0.70)" />
-                </TouchableOpacity>
-              </View>
- 
-              {/* Confirm Password Input */}
-              <View className="flex-row items-center bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] mb-4 px-4 h-[56px]">
-                <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.70)" className="mr-3" />
-                <TextInput
-                  className="flex-1 bg-transparent text-white/70 text-base font-normal font-['Roboto'] outline-none"
-                  placeholder="Confirm Password"
-                  placeholderTextColor="rgba(255, 255, 255, 0.70)"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showConfirmPassword}
-                />
-                <TouchableOpacity className="p-1" onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="rgba(255, 255, 255, 0.70)" />
-                </TouchableOpacity>
-              </View>
- 
-              {/* Password Strength */}
-              {password.length > 0 && (
-                <View className="mb-4">
-                  <View className="flex-row justify-between mb-2 px-1">
-                    <Text className="text-white/70 text-xs font-normal font-['Roboto']">Password Strength</Text>
-                    <Text style={{ color: strength.color }} className="text-xs font-normal font-['Roboto']">{strength.label}</Text>
-                  </View>
-                  <View className="flex-row gap-2">
-                    {[1, 2, 3, 4].map((segment) => (
-                      <View 
-                        key={segment} 
-                        className="flex-1 h-[3px] rounded-full" 
-                        style={{ backgroundColor: segment <= strength.segments ? '#8B5CF6' : 'rgba(255,255,255,0.1)' }}
-                      />
-                    ))}
-                  </View>
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.username ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="person-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Username"
+                    placeholderTextColor="#9CA3AF"
+                    value={username}
+                    onChangeText={handleUsernameChange}
+                    autoCapitalize="none"
+                  />
                 </View>
-              )}
- 
-              {/* Terms Checkbox */}
-              <TouchableOpacity className="flex-row items-center mb-[30px]" onPress={() => setAgree(!agree)}>
-                <View className={`w-5 h-5 rounded-md border items-center justify-center mr-3 ${agree ? 'bg-[#8B5CF6] border-[#8B5CF6]' : 'border-[rgba(255,255,255,0.70)]'}`}>
-                  {agree && <Ionicons name="checkmark" size={14} color="#FFF" />}
-                </View>
-                <Text className="text-white/70 text-sm font-normal font-['Roboto'] tracking-wide">I agree to <Text className="text-violet-700 text-sm font-normal font-['Roboto'] tracking-wide">Terms & Conditions</Text></Text>
-              </TouchableOpacity>
- 
-              {/* Error Message */}
-              {localError ? (
-                <View className="flex-row items-center bg-[rgba(239,68,68,0.1)] rounded-lg p-2.5 mb-4 border border-[rgba(239,68,68,0.3)]">
-                  <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
-                  <Text className="flex-1 text-[#EF4444] text-[12px] font-medium">{localError}</Text>
-                </View>
-              ) : null}
- 
-              {/* Create Account Button */}
-              <TouchableOpacity
-                className={`rounded-[20px] overflow-hidden mb-[30px] elevation-10 ${(!agree || isLoading) ? 'opacity-50' : ''}`}
-                style={{ shadowColor: '#8B5CF6', shadowOffset: { width: 0, height: 8 }, shadowOpacity: (!agree || isLoading) ? 0 : 0.35, shadowRadius: 30 }}
-                onPress={handleSignup}
-                disabled={!agree || isLoading}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={['#8B5CF6', '#6366F1', '#3B82F6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="h-[59px] justify-center items-center"
-                >
-                  {isLoading ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : (
-                    <Text className="text-white text-base font-semibold font-['Inter-SemiBold']">Create Account</Text>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
- 
-              {/* Or Divider */}
-              <View className="flex-row items-center mb-5">
-                <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-                <Text className="text-white/70 text-base font-medium font-['Radio_Canada'] px-4">Or</Text>
-                <View className="flex-1 h-[1px] bg-[rgba(221,221,221,0.50)]" />
-              </View>
- 
-              {/* Social Buttons */}
-              <View className="flex-row justify-center gap-5">
-                <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
-                  <Image source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} style={{ width: 20, height: 20 }} />
-                </TouchableOpacity>
-                <TouchableOpacity className="w-[44px] h-[44px] rounded-full border border-[rgba(255,255,255,0.70)] justify-center items-center">
-                  <Ionicons name="logo-apple" size={20} color="rgba(242, 242, 242, 0.90)" />
-                </TouchableOpacity>
+                {errors.username ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.username}</Text>
+                ) : null}
               </View>
 
-            </LinearGradient>
+              {/* Email Input */}
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.email ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="mail-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Email"
+                    placeholderTextColor="#9CA3AF"
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+                {errors.email ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.email}</Text>
+                ) : null}
+              </View>
+
+              {/* Password Input */}
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.password ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Password"
+                    placeholderTextColor="#9CA3AF"
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity className="p-1" onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+                {errors.password ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.password}</Text>
+                ) : null}
+              </View>
+
+              {/* Confirm Password Input */}
+              <View>
+                <View className={`flex-row items-center bg-white border rounded-full px-5 h-[54px] shadow-sm ${errors.confirmPassword ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#6B7280" style={{ marginRight: 12 }} />
+                  <TextInput
+                    className="flex-1 bg-transparent text-[#1F2937] text-[14px] font-Poppins outline-none"
+                    placeholder="Confirm Password"
+                    placeholderTextColor="#9CA3AF"
+                    value={confirmPassword}
+                    onChangeText={handleConfirmPasswordChange}
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                  <TouchableOpacity className="p-1" onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+                {errors.confirmPassword ? (
+                  <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.confirmPassword}</Text>
+                ) : null}
+              </View>
+            </View>
+
+            {/* Password Strength Indicator */}
+            {password.length > 0 && (
+              <View className="mb-4 px-1">
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-[#4B5563] text-xs font-Poppins">Password Strength</Text>
+                  <Text style={{ color: strength.color }} className="text-xs font-Poppins-Medium">{strength.label}</Text>
+                </View>
+                <View className="flex-row gap-2">
+                  {[1, 2, 3, 4].map((segment) => (
+                    <View 
+                      key={segment} 
+                      className="flex-1 h-[3px] rounded-full" 
+                      style={{ backgroundColor: segment <= strength.segments ? '#6D28D9' : '#E5E7EB' }}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Terms Checkbox */}
+            <View className="mb-[20px]">
+              <View className="flex-row flex-wrap items-center px-1">
+                <TouchableOpacity 
+                  className="flex-row items-center" 
+                  onPress={handleToggleAgree}
+                  activeOpacity={0.7}
+                >
+                  <View className={`w-5 h-5 rounded-md border items-center justify-center mr-3 ${agree ? 'bg-[#6D28D9] border-[#6D28D9]' : errors.agree ? 'border-red-500' : 'border-[#E5E7EB]'}`}>
+                    {agree && <Ionicons name="checkmark" size={14} color="#FFF" />}
+                  </View>
+                  <Text className="text-[#4B5563] text-sm font-Poppins">
+                    I agree to{' '}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('Terms')}
+                  activeOpacity={0.7}
+                >
+                  <Text className="text-[#6D28D9] text-sm font-Poppins-Bold">Terms & Conditions</Text>
+                </TouchableOpacity>
+              </View>
+              {errors.agree ? (
+                <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.agree}</Text>
+              ) : null}
+            </View>
+
+            {/* Error Message */}
+            {localError ? (
+              <View className="flex-row items-center bg-red-50 rounded-xl p-3 mb-4 border border-red-200">
+                <Ionicons name="alert-circle" size={18} color="#EF4444" style={{ marginRight: 8 }} />
+                <Text className="flex-1 text-[#EF4444] text-[13px] font-Poppins">{localError}</Text>
+              </View>
+            ) : null}
+
+            {/* Create Account Button */}
+            <TouchableOpacity
+              className={`rounded-full h-[54px] justify-center items-center mb-[25px] shadow-sm bg-[#6D28D9] ${isLoading ? 'opacity-50' : ''}`}
+              onPress={handleSignup}
+              disabled={isLoading}
+              activeOpacity={0.85}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text className="text-white text-[15px] font-Poppins-SemiBold">Create Account</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Divider "or" */}
+            <View className="flex-row items-center mb-[25px]">
+              <View className="flex-1 h-[1px] bg-[#E5E7EB]" />
+              <Text className="text-[#6B7280] text-[13px] font-Poppins px-4">or</Text>
+              <View className="flex-1 h-[1px] bg-[#E5E7EB]" />
+            </View>
+
+            {/* Social Buttons Container */}
+            <View className="gap-3 mb-[30px]">
+              {/* Google Button */}
+              <TouchableOpacity 
+                className="flex-row items-center justify-center bg-[#F3F4F6] rounded-full h-[50px] px-6 shadow-sm"
+                activeOpacity={0.9}
+                onPress={() => {}}
+              >
+                <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                  <Image 
+                    source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }} 
+                    style={{ width: 18, height: 18 }} 
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text className="text-[#1F2937] text-[14px] font-Poppins-Medium">
+                  Continue with Google
+                </Text>
+              </TouchableOpacity>
+
+              {/* Apple Button */}
+              <TouchableOpacity 
+                className="flex-row items-center justify-center bg-[#000000] rounded-full h-[50px] px-6 shadow-sm"
+                activeOpacity={0.9}
+                onPress={() => {}}
+              >
+                <View style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginRight: 8 }}>
+                  <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
+                </View>
+                <Text className="text-white text-[14px] font-Poppins-Medium">
+                  Continue with Apple
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Footer */}
+            <View className="flex-row justify-center pb-5">
+              <Text className="text-[#4B5563] text-[14px] font-Poppins">Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text className="text-[#6D28D9] text-[14px] font-Poppins-Bold">Login</Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
-          {/* Floating Image */}
-          <View className="absolute right-2 z-10 elevation-10" style={{ top: height * 0.12 }} pointerEvents="none">
-            <Image 
-              source={require('../../assets/barbershop.png')} 
-              className="w-[70px] h-[70px]"
-              resizeMode="contain"
-            />
-          </View>
         </SafeAreaView>
       </View>
     </KeyboardAvoidingView>

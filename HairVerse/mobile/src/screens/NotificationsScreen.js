@@ -47,13 +47,13 @@ export default function NotificationsScreen() {
     <SafeAreaView className="flex-1 bg-[#F8FAFC]">
       {/* Header */}
       <View className="flex-row items-center px-5 pt-4 pb-2 bg-white border-b border-gray-100 z-10">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4 w-10 h-10 items-center justify-center bg-gray-50 rounded-full">
-          <Ionicons name="arrow-back" size={20} color="#111827" />
+        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4 w-10 h-10 items-center justify-center bg-gray-50 rounded-full shadow-sm">
+          <Ionicons name="arrow-back" size={20} color="#1F2937" />
         </TouchableOpacity>
-        <Text className="text-2xl font-bold text-gray-900 flex-1">Updates</Text>
+        <Text className="text-2xl font-bold text-gray-900 flex-1 font-Poppins-Bold">Updates</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} className="w-10 h-10 items-center justify-center">
-           <Ionicons name="settings-outline" size={24} color="#111827" />
-        </TouchableOpacity>
+           <Ionicons name="settings-outline" size={22} color="#1F2937" />
+         </TouchableOpacity>
       </View>
 
       {/* Search and Sort Row */}
@@ -61,7 +61,7 @@ export default function NotificationsScreen() {
         <View className="flex-1 bg-gray-100 rounded-xl flex-row items-center px-3 py-2">
           <Ionicons name="search" size={18} color="#9CA3AF" />
           <TextInput 
-            className="flex-1 ml-2 text-base text-gray-900"
+            className="flex-1 ml-2 text-base text-gray-900 font-Poppins"
             placeholder="Search alerts..."
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -71,18 +71,18 @@ export default function NotificationsScreen() {
           className="bg-gray-100 p-2.5 rounded-xl flex-row items-center"
           onPress={() => setFilter(filter === 'all' ? 'unread' : 'all')}
         >
-          <Ionicons name="funnel" size={18} color={filter === 'unread' ? '#4F46E5' : '#9CA3AF'} />
+          <Ionicons name="funnel" size={18} color={filter === 'unread' ? '#6D28D9' : '#9CA3AF'} />
         </TouchableOpacity>
       </View>
 
       {/* Action Bar (Mark all read) */}
       <View className="bg-white px-5 py-2 flex-row justify-between items-center border-b border-gray-100">
-         <Text className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+         <Text className="text-xs font-bold text-gray-400 uppercase tracking-wider font-Poppins-Bold">
            {unreadCount > 0 ? `${unreadCount} Unread` : 'All caught up'}
          </Text>
          {unreadCount > 0 && (
            <TouchableOpacity onPress={markAllAsRead}>
-             <Text className="text-indigo-600 font-bold text-sm">Mark all read</Text>
+             <Text className="text-purple-600 font-bold text-sm font-Poppins-Bold">Mark all read</Text>
            </TouchableOpacity>
          )}
       </View>
@@ -93,10 +93,10 @@ export default function NotificationsScreen() {
           {tabs.map(tab => (
             <TouchableOpacity 
               key={tab.id}
-              className={`px-4 py-2 rounded-full mr-3 border ${activeCategory === tab.id ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-gray-200'}`}
+              className={`px-4 py-2 rounded-full mr-3 border ${activeCategory === tab.id ? 'bg-purple-600 border-purple-600' : 'bg-white border-gray-200'}`}
               onPress={() => setActiveCategory(tab.id)}
             >
-              <Text className={`font-semibold ${activeCategory === tab.id ? 'text-white' : 'text-gray-600'}`}>
+              <Text className={`font-Poppins-SemiBold ${activeCategory === tab.id ? 'text-white' : 'text-gray-600'}`}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
@@ -107,7 +107,7 @@ export default function NotificationsScreen() {
       <ScrollView className="flex-1 px-4 pt-4" showsVerticalScrollIndicator={false}>
         {isLoading && (
           <View className="flex-1 justify-center items-center py-10">
-            <ActivityIndicator size="large" color="#4F46E5" />
+            <ActivityIndicator size="large" color="#6D28D9" />
           </View>
         )}
 
