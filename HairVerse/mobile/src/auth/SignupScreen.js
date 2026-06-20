@@ -14,7 +14,7 @@ export default function SignupScreen({ navigation }) {
   const [agree, setAgree] = useState(false);
   const [localError, setLocalError] = useState('');
   const [errors, setErrors] = useState({ username: '', email: '', password: '', confirmPassword: '', agree: '' });
-  const { checkEmailExists, isLoading } = useAuthStore();
+  const { checkEmailExists, register, isLoading } = useAuthStore();
 
   const handleUsernameChange = (text) => {
     setUsername(text);
@@ -109,10 +109,11 @@ export default function SignupScreen({ navigation }) {
         return;
       }
 
-      // Defer account creation by navigating to ProfileCompletion screen with credentials
-      navigation.navigate('ProfileCompletion', {
-        signUpData: { email: email.trim().toLowerCase(), password, username }
-      });
+      // Create account immediately since ProfileCompletion is removed
+      const result = await register(email.trim().toLowerCase(), password, username);
+      if (!result.success) {
+        setLocalError(result.error || 'Failed to register account.');
+      }
     } catch (err) {
       useAuthStore.setState({ isLoading: false });
       setLocalError(err.message || 'Failed to verify email availability. Please try again.');
@@ -265,13 +266,7 @@ export default function SignupScreen({ navigation }) {
                   <Text className="text-[#4B5563] text-sm font-Poppins">
                     I agree to{' '}
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('Terms')}
-                  activeOpacity={0.7}
-                >
-                  <Text className="text-[#6D28D9] text-sm font-Poppins-Bold">Terms & Conditions</Text>
-                </TouchableOpacity>
+                <Text className="text-[#6D28D9] text-sm font-Poppins-Bold">Terms & Conditions</Text>
               </View>
               {errors.agree ? (
                 <Text className="text-red-500 text-[11px] font-Poppins mt-1.5 ml-4">{errors.agree}</Text>

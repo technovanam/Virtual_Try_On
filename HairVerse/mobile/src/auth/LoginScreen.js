@@ -143,16 +143,7 @@ export default function LoginScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Forgot Password in deep purple */}
-            <TouchableOpacity 
-              className="items-center mb-[25px]" 
-              onPress={() => navigation.navigate('ForgotPassword')}
-              activeOpacity={0.7}
-            >
-              <Text className="text-[#6D28D9] text-[13px] font-Poppins-Medium underline">
-                Forgot Password?
-              </Text>
-            </TouchableOpacity>
+
 
             {/* Local Error message */}
             {localError ? (

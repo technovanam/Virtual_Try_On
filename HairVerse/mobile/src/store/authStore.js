@@ -2,13 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { auth } from '../config/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
-import { useProfileSetupStore } from './useProfileSetupStore';
-import { useSavedStore } from './savedStore';
-import { useHistoryStore } from './historyStore';
-import { useNotificationsStore } from './notificationsStore';
-import { useTryonStore } from './tryonStore';
-import { useSelfieStore } from './selfieStore';
-import { useRecommendationStore } from './recommendationStore';
+
 
 import { BACKEND_BASE_URL } from '../config/api';
 
@@ -43,9 +37,7 @@ export const useAuthStore = create((set) => ({
             throw new Error('profile_unavailable');
           }
 
-          if (data.profileCompletion) {
-            useProfileSetupStore.getState().updateData(data.profileCompletion);
-          }
+
 
           set({
             user: {
@@ -120,9 +112,7 @@ export const useAuthStore = create((set) => ({
         throw new Error('profile_unavailable');
       }
 
-      if (data.profileCompletion) {
-        useProfileSetupStore.getState().updateData(data.profileCompletion);
-      }
+
 
       // 4. Update store with user profile from backend
       set({
@@ -262,25 +252,14 @@ export const useAuthStore = create((set) => ({
     }
 
     // Reset all stores to prevent data leakage and start fresh
-    useProfileSetupStore.getState().reset();
-    
-    try {
-      useSavedStore.setState({ items: [], isLoading: false, error: null, searchQuery: '', activeTab: 'favorites', activeCategory: 'All' });
-      useHistoryStore.setState({ historyItems: [], total: 0, isLoading: false, error: null, status: 'idle' });
-      useNotificationsStore.setState({ notifications: [], unreadCount: 0, isLoading: false, error: null, searchQuery: '', activeCategory: 'all', filter: 'all', sortBy: 'newest' });
-      useTryonStore.getState().clearStore?.();
-      useSelfieStore.getState().clearStore?.();
-      useRecommendationStore.getState().reset?.();
-    } catch (e) {
-      console.warn('Failed to reset some user stores on logout:', e);
-    }
+
 
     set({ user: null, isAuthenticated: false });
   },
 
   register: async (email, password, username) => {
     set({ isLoading: true, error: null });
-    useProfileSetupStore.getState().reset();
+
 
     try {
       // 1. Create Firebase Auth user via Client SDK
@@ -403,7 +382,7 @@ export const useAuthStore = create((set) => ({
 
   registerWithProfile: async (email, password, username, preferences) => {
     set({ isLoading: true, error: null });
-    useProfileSetupStore.getState().reset();
+
 
     try {
       // 1. Create Firebase Auth user via Client SDK
@@ -596,9 +575,7 @@ export const useAuthStore = create((set) => ({
       });
       
       const data = response.data;
-      if (data.profileCompletion) {
-        useProfileSetupStore.getState().updateData(data.profileCompletion);
-      }
+
       
       set({ isLoading: false });
       return { success: true };
